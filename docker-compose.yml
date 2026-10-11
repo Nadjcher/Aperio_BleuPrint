@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: projectmaster-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: projectmaster
+      POSTGRES_PASSWORD: projectmaster
+      POSTGRES_DB: projectmaster
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U projectmaster"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
