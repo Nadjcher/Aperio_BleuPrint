@@ -10,6 +10,7 @@ import { projectsRouter } from "./routes/projects.js";
 import { signalsRouter } from "./routes/signals.js";
 import { anomaliesRouter } from "./routes/anomalies.js";
 import { decisionsRouter } from "./routes/decisions.js";
+import { reportsRouter } from "./routes/reports.js";
 import { gdprRouter } from "./routes/gdpr.js";
 
 export function createApp(): Express {
@@ -30,6 +31,7 @@ export function createApp(): Express {
   api.use(signalsRouter);
   api.use(anomaliesRouter);
   api.use(decisionsRouter);
+  api.use(reportsRouter);
   api.use(gdprRouter);
   app.use("/api/v1", api);
 

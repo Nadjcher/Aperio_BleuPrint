@@ -15,6 +15,7 @@
     "migration:revert": "typeorm-ts-node-esm migration:revert -d src/db/data-source.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
     "@projectmaster/shared": "*",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

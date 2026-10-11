@@ -45,7 +45,8 @@ signalsRouter.post(
       "commit",
       30,
     );
-    const detection = anomalyService.detect(metrics);
+    // Détection robuste (médiane + MAD) : plus précise sur des historiques bruités.
+    const detection = anomalyService.detectRobust(metrics);
     let anomaly = null;
     if (detection?.isAnomaly) {
       anomaly = await anomalyService.record(project.id, detection);

@@ -57,6 +57,48 @@ export function detect(metrics: SignalMetric[]): DetectionResult | null {
   };
 }
 
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid];
+}
+
+/**
+ * Détection robuste (affinage Phase 3) : score z modifié basé sur la médiane
+ * et le MAD (median absolute deviation). Résiste aux valeurs aberrantes dans
+ * la baseline, là où la moyenne/écart-type se laissent tirer par un seul pic.
+ */
+export function detectRobust(metrics: SignalMetric[]): DetectionResult | null {
+  if (metrics.length < 4) return null;
+  const values = metrics.map((m) => m.value);
+  const observed = values[values.length - 1];
+  const baseline = values.slice(0, -1);
+
+  const med = median(baseline);
+  const mad = median(baseline.map((v) => Math.abs(v - med)));
+
+  // 0.6745 ramène le MAD à l'échelle d'un écart-type pour une loi normale.
+  let zScore: number;
+  if (mad === 0) {
+    zScore = observed === med ? 0 : Math.sign(observed - med) * CRIT_Z;
+  } else {
+    zScore = (0.6745 * (observed - med)) / mad;
+  }
+  const severity = severityForZ(zScore);
+
+  return {
+    metric: metrics[0].name,
+    observed,
+    expected: med,
+    stdDev: mad,
+    zScore,
+    isAnomaly: severity !== "info",
+    severity,
+  };
+}
+
 function toDTO(a: Anomaly): AnomalyDTO {
   return {
     id: a.id,

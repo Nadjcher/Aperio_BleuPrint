@@ -26,6 +26,10 @@ const schema = z.object({
   GITHUB_TOKEN: z.string().default(""),
   GITHUB_API_URL: z.string().url().default("https://api.github.com"),
 
+  // Enrichissement par LLM (optionnel). Sans clé, les agents restent heuristiques.
+  ANTHROPIC_API_KEY: z.string().default(""),
+  ANTHROPIC_MODEL: z.string().default("claude-opus-5-5"),
+
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900_000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
 });

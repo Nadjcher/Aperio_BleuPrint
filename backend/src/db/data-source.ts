@@ -9,6 +9,7 @@ import { Anomaly } from "../entities/Anomaly.js";
 import { Decision } from "../entities/Decision.js";
 import { DecisionFeedback } from "../entities/DecisionFeedback.js";
 import { AuditLog } from "../entities/AuditLog.js";
+import { Report } from "../entities/Report.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -26,6 +27,7 @@ export const AppDataSource = new DataSource({
     Decision,
     DecisionFeedback,
     AuditLog,
+    Report,
   ],
   migrations: ["src/migrations/*.ts"],
 });

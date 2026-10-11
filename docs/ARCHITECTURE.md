@@ -75,4 +75,18 @@ Toutes les routes sont préfixées `/api/v1`.
 | GET | `/projects/:id/signals` · `/anomalies` · `/decisions` | viewer |
 | PATCH | `/anomalies/:id` | manager |
 | POST | `/decisions/:id/feedback` | manager |
+| GET | `/projects/:id/reports` | viewer |
+| POST | `/projects/:id/reports` | manager |
 | GET | `/gdpr/export` · DELETE `/gdpr/me` | authentifié |
+
+## Phase 3 — étage intelligence
+
+- **LLM (optionnel)** : `backend/src/llm/` — client Claude (`claude-opus-5-5` par
+  défaut, configurable via `ANTHROPIC_MODEL`). Sans `ANTHROPIC_API_KEY`, tout
+  retombe sur les heuristiques ; l'app reste fonctionnelle.
+- **Document synthesis** : `reportService.generate` produit une synthèse
+  périodique (hebdo/mensuel), rédigée par le LLM ou par un gabarit heuristique.
+- **Agents enrichis** : Analyst et Planner appellent le LLM quand il est
+  disponible, avec repli heuristique transparent.
+- **Détection robuste** : `anomalyService.detectRobust` (médiane + MAD) résiste
+  aux valeurs aberrantes de la baseline, utilisée par le pipeline de sync.

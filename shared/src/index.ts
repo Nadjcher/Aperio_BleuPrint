@@ -8,3 +8,4 @@ export * from "./anomalies.js";
 export * from "./agents.js";
 export * from "./auth.js";
 export * from "./api.js";
+export * from "./reports.js";

@@ -4,6 +4,8 @@ import type {
   Anomaly,
   Decision,
   Project,
+  Report,
+  ReportPeriod,
 } from "@projectmaster/shared";
 import { api, RequestError } from "../api/client";
 
@@ -24,19 +26,23 @@ export function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [syncing, setSyncing] = useState(false);
+  const [reporting, setReporting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
-    const [p, a, d] = await Promise.all([
+    const [p, a, d, r] = await Promise.all([
       api.get<Project>(`/projects/${id}`),
       api.get<{ items: Anomaly[] }>(`/projects/${id}/anomalies`),
       api.get<{ items: Decision[] }>(`/projects/${id}/decisions`),
+      api.get<{ items: Report[] }>(`/projects/${id}/reports`),
     ]);
     setProject(p);
     setAnomalies(a.items);
     setDecisions(d.items);
+    setReports(r.items);
   }, [id]);
 
   useEffect(() => {
@@ -64,6 +70,19 @@ export function ProjectDetailPage() {
   const giveFeedback = async (decisionId: string, accepted: boolean) => {
     await api.post(`/decisions/${decisionId}/feedback`, { accepted });
     await load();
+  };
+
+  const generateReport = async (period: ReportPeriod) => {
+    if (!id) return;
+    setReporting(true);
+    try {
+      await api.post<Report>(`/projects/${id}/reports`, { period });
+      await load();
+    } catch (err) {
+      setMessage(err instanceof RequestError ? err.message : "Erreur de rapport");
+    } finally {
+      setReporting(false);
+    }
   };
 
   if (!project) return <p className="text-slate-500">Chargement…</p>;
@@ -152,6 +171,50 @@ export function ProjectDetailPage() {
                     </button>
                   </div>
                 )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Rapports de synthèse</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => generateReport("weekly")}
+              disabled={reporting}
+              className="rounded-md border px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50"
+            >
+              Hebdomadaire
+            </button>
+            <button
+              onClick={() => generateReport("monthly")}
+              disabled={reporting}
+              className="rounded-md border px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50"
+            >
+              Mensuel
+            </button>
+          </div>
+        </div>
+        {reports.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            Aucun rapport — générez-en un ci-dessus.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {reports.map((r) => (
+              <li key={r.id} className="rounded-lg border bg-white p-4">
+                <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
+                  <span>
+                    {r.period} · {r.periodStart.slice(0, 10)} →{" "}
+                    {r.periodEnd.slice(0, 10)}
+                  </span>
+                  <span>{r.generatedBy === "llm" ? "généré par IA" : "heuristique"}</span>
+                </div>
+                <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700">
+                  {r.summary}
+                </pre>
               </li>
             ))}
           </ul>

@@ -19,17 +19,17 @@ Déployer les 4 agents et la boucle d'apprentissage.
 
 - [x] Monitor · Analyst · Planner · Reporter (heuristiques v1)
 - [x] Learning loop : feedback humain → pondération de la confiance
-- [ ] Enrichissement des agents par LLM (Claude API)
+- [x] Enrichissement des agents par LLM (Claude API, avec repli heuristique)
 - [ ] File d'exécution asynchrone des agents
 
 ## Phase 3 — Synthèse & planification (semaines 9–12)
 
 Passer des alertes à la valeur métier.
 
-- [ ] Document synthesis : résumés automatiques de l'état projet
-- [ ] Planning assisté : replanification suggérée sur dérapage
-- [ ] Reporting hebdo/mensuel généré
-- [ ] Affinage de la précision vers 90 %+ (modèle appris)
+- [x] Document synthesis : résumés automatiques de l'état projet (LLM + repli)
+- [x] Planning assisté : plan correctif enrichi par le Planner
+- [x] Reporting hebdo/mensuel généré (`/projects/:id/reports`)
+- [x] Affinage de la détection : score z robuste (médiane + MAD)
 
 ## Phase 4 — Production-ready (semaines 13–24)
 
