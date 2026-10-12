@@ -19,7 +19,7 @@ Déployer les 4 agents et la boucle d'apprentissage.
 
 - [x] Monitor · Analyst · Planner · Reporter (heuristiques v1)
 - [x] Learning loop : feedback humain → pondération de la confiance
-- [x] Enrichissement des agents par LLM (Claude API, avec repli heuristique)
+- [x] Enrichissement des agents par LLM (multi-provider : Claude ou Llama gratuit, repli heuristique)
 - [ ] File d'exécution asynchrone des agents
 
 ## Phase 3 — Synthèse & planification (semaines 9–12)
@@ -35,7 +35,9 @@ Passer des alertes à la valeur métier.
 
 Fiabilité et passage à l'échelle.
 
-- [ ] Migrations de production (remplacement de `synchronize`)
+- [x] Migrations de production (remplacement de `synchronize`, jouées au boot)
+- [x] LLM gratuit type Llama (Ollama / Groq, API compatible OpenAI)
+- [x] Déploiement Docker (backend + frontend nginx + Postgres) — voir `DEPLOY.md`
 - [ ] Durcissement sécurité & conformité RGPD (voir `SECURITY.md`)
 - [ ] Observabilité, monitoring, alerting opérationnel
 - [ ] Montée en charge : 50+ projets

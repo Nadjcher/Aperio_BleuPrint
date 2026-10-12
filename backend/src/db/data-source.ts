@@ -15,8 +15,9 @@ export const AppDataSource = new DataSource({
   type: "postgres",
   url: env.DATABASE_URL,
   // En dev : synchronisation automatique du schéma pour démarrer vite.
-  // En prod : migrations uniquement (synchronize désactivé).
+  // En prod : migrations uniquement (synchronize désactivé, migrations jouées au boot).
   synchronize: !isProd,
+  migrationsRun: isProd,
   logging: false,
   entities: [
     User,
@@ -29,5 +30,6 @@ export const AppDataSource = new DataSource({
     AuditLog,
     Report,
   ],
-  migrations: ["src/migrations/*.ts"],
+  // En prod on charge les migrations compilées (dist), sinon les sources (CLI dev).
+  migrations: [isProd ? "dist/migrations/*.js" : "src/migrations/*.ts"],
 });

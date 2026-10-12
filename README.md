@@ -5,7 +5,12 @@ d'afficher l'état des projets, il détecte les signaux faibles en continu et d�
 des agents autonomes qui diagnostiquent, planifient et rendent compte.
 
 Voir le blueprint produit complet (plan, architecture, sécurité & RGPD) dans
-[`docs/`](./docs).
+[`docs/`](./docs). Déploiement en production : [`docs/DEPLOY.md`](./docs/DEPLOY.md).
+
+**LLM gratuit (optionnel)** — les agents et les synthèses peuvent être enrichis
+par un LLM compatible OpenAI : **Ollama** (local, gratuit) ou **Groq** (hébergé,
+gratuit, Llama 3.3). Sans configuration, fonctionnement heuristique. Détails
+dans `backend/.env.example`.
 
 ## Architecture (4 couches)
 
