@@ -25,7 +25,7 @@ export function Layout() {
                 <span className="h-2.5 w-2.5 rounded-sm bg-white/90" />
               </span>
               <span className="pm-gradient-text text-lg font-extrabold tracking-tight">
-                BluePrint
+                Aperio
               </span>
             </div>
             <nav className="flex gap-1">

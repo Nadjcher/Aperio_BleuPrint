@@ -34,7 +34,7 @@ export function LoginPage() {
               <span className="h-3 w-3 rounded-sm bg-white/90" />
             </span>
             <span className="pm-gradient-text text-2xl font-extrabold tracking-tight">
-              BluePrint
+              Aperio
             </span>
           </div>
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">

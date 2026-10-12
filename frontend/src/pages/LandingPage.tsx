@@ -23,7 +23,7 @@ const previewCards: Card[] = [
 
 const steps: Card[] = [
   { icon: "branch", title: "Connectez votre dépôt", desc: "Reliez GitHub en un clic — aucune configuration lourde." },
-  { icon: "search", title: "BluePrint analyse", desc: "Les signaux sont collectés et les anomalies détectées en continu." },
+  { icon: "search", title: "Aperio analyse", desc: "Les signaux sont collectés et les anomalies détectées en continu." },
   { icon: "rocket", title: "Les agents agissent", desc: "Diagnostic, plan d'action et rapport, prêts à valider." },
 ];
 
@@ -81,7 +81,7 @@ export function LandingPage() {
             <span className="relative flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-brand-500 to-accent-600 shadow-glow">
               <span className="h-2.5 w-2.5 rounded-[3px] bg-white/90" />
             </span>
-            <span className="pm-gradient-text text-lg font-extrabold tracking-tight">BluePrint</span>
+            <span className="pm-gradient-text text-lg font-extrabold tracking-tight">Aperio</span>
           </div>
           <nav className="hidden items-center gap-1 md:flex">
             <a href="#how" className="pm-nav-link">Fonctionnement</a>
@@ -103,7 +103,7 @@ export function LandingPage() {
             <span className="pm-gradient-text">pilotés par l'IA.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-slate-400">
-            BluePrint détecte les signaux faibles en continu et déploie des
+            Aperio détecte les signaux faibles en continu et déploie des
             agents autonomes qui diagnostiquent, planifient et rendent compte —
             avant que le retard n'arrive.
           </p>
@@ -131,7 +131,7 @@ export function LandingPage() {
               <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-gradient-to-br from-brand-500 to-accent-600">
                 <span className="h-1.5 w-1.5 rounded-[2px] bg-white/90" />
               </span>
-              <span className="text-sm font-semibold text-slate-200">BluePrint</span>
+              <span className="text-sm font-semibold text-slate-200">Aperio</span>
             </div>
             <span className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
               live
@@ -228,7 +228,7 @@ export function LandingPage() {
       </section>
 
       <footer className="border-t border-blue-400/10 py-8 text-center font-mono text-xs uppercase tracking-widest text-slate-600">
-        BluePrint · gestion de projet prédictive &amp; agentique
+        Aperio · gestion de projet prédictive &amp; agentique
       </footer>
     </div>
   );
