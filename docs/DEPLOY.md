@@ -35,6 +35,17 @@ git pull
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 ```
 
+### Images pré-construites (CI)
+
+Le workflow [`images.yml`](../.github/workflows/images.yml) construit et publie
+les images sur GHCR à chaque push sur `main` (et sur les tags `v*`) :
+
+- `ghcr.io/<owner>/aperio-backend:latest`
+- `ghcr.io/<owner>/aperio-frontend:latest`
+
+Sur le serveur, on peut alors déployer sans rebuild local en pointant le compose
+sur ces images (`image:` au lieu de `build:`), ou `docker pull` + redémarrage.
+
 ---
 
 ## Option 2 — Plateformes managées (tiers gratuits)
