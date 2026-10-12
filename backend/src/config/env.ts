@@ -26,7 +26,20 @@ const schema = z.object({
   GITHUB_TOKEN: z.string().default(""),
   GITHUB_API_URL: z.string().url().default("https://api.github.com"),
 
-  // Enrichissement par LLM (optionnel). Sans clé, les agents restent heuristiques.
+  // Enrichissement par LLM (optionnel). Sans provider configuré, les agents
+  // restent heuristiques et l'app fonctionne normalement.
+  // - "auto"      : openai si LLM_BASE_URL, sinon anthropic si clé, sinon none
+  // - "openai"    : tout endpoint compatible OpenAI (Ollama, Groq, OpenRouter…)
+  // - "anthropic" : API Claude
+  LLM_PROVIDER: z.enum(["auto", "openai", "anthropic", "none"]).default("auto"),
+
+  // Provider compatible OpenAI (Llama & co.)
+  // Ollama local : http://localhost:11434/v1   | Groq : https://api.groq.com/openai/v1
+  LLM_BASE_URL: z.string().default(""),
+  LLM_API_KEY: z.string().default(""),
+  LLM_MODEL: z.string().default("llama-3.3-70b-versatile"),
+
+  // Provider Anthropic (optionnel)
   ANTHROPIC_API_KEY: z.string().default(""),
   ANTHROPIC_MODEL: z.string().default("claude-opus-5-5"),
 

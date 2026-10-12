@@ -1,6 +1,6 @@
 import type { AgentContext } from "@projectmaster/shared";
 import type { Agent, DraftDecision } from "./types.js";
-import { complete, extractJson, isLLMEnabled } from "../llm/claude.js";
+import { complete, extractJson, isLLMEnabled } from "../llm/index.js";
 import { analystPrompt } from "../llm/prompts.js";
 
 interface LlmDiagnosis {

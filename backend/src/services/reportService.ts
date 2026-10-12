@@ -7,7 +7,7 @@ import { AppDataSource } from "../db/data-source.js";
 import { Report } from "../entities/Report.js";
 import { Signal } from "../entities/Signal.js";
 import * as anomalyService from "./anomalyService.js";
-import { complete, isLLMEnabled } from "../llm/claude.js";
+import { complete, isLLMEnabled } from "../llm/index.js";
 import { reportPrompt } from "../llm/prompts.js";
 
 const reports = () => AppDataSource.getRepository(Report);

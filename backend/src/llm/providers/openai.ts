@@ -1,0 +1,54 @@
+import { env } from "../../config/env.js";
+import { logger } from "../../utils/logger.js";
+import type { CompleteOptions } from "../index.js";
+
+/**
+ * Provider compatible OpenAI (Chat Completions). Couvre :
+ *   - Ollama  (local, gratuit)  : LLM_BASE_URL=http://localhost:11434/v1
+ *   - Groq    (gratuit, rapide) : LLM_BASE_URL=https://api.groq.com/openai/v1
+ *   - OpenRouter, Together, etc.
+ *
+ * Modèle par défaut : Llama 3.3 70B (LLM_MODEL). Clé optionnelle (Ollama n'en
+ * demande pas).
+ */
+
+interface ChatResponse {
+  choices?: { message?: { content?: string } }[];
+  error?: { message?: string };
+}
+
+export async function completeOpenAICompatible(
+  opts: CompleteOptions,
+): Promise<string | null> {
+  const base = env.LLM_BASE_URL.replace(/\/+$/, "");
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (env.LLM_API_KEY) headers.Authorization = `Bearer ${env.LLM_API_KEY}`;
+
+  const res = await fetch(`${base}/chat/completions`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      model: env.LLM_MODEL,
+      messages: [
+        { role: "system", content: opts.system },
+        { role: "user", content: opts.user },
+      ],
+      max_tokens: opts.maxTokens ?? 2048,
+      temperature: 0.3,
+      stream: false,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as ChatResponse | null;
+    logger.warn(
+      { status: res.status, message: body?.error?.message },
+      "Appel LLM (OpenAI-compatible) en échec",
+    );
+    return null;
+  }
+
+  const data = (await res.json()) as ChatResponse;
+  const text = data.choices?.[0]?.message?.content?.trim();
+  return text && text.length > 0 ? text : null;
+}
