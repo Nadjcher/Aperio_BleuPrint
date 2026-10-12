@@ -1,4 +1,4 @@
-# ProjectMaster
+# BluePrint
 
 Outil de gestion de projet **prédictif** et **agentique** : il ne se contente pas
 d'afficher l'état des projets, il détecte les signaux faibles en continu et déploie
