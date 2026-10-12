@@ -135,7 +135,10 @@ export function ProjectDetailPage() {
         ) : (
           <ul className="space-y-3">
             {anomalies.map((a) => (
-              <li key={a.id} className="pm-card p-5">
+              <li
+                key={a.id}
+                className={`pm-card p-5 ${a.severity === "critical" ? "pm-ticks relative" : ""}`}
+              >
                 <div className="flex items-center gap-2.5">
                   <span className={`h-2 w-2 rounded-full ${severityDot[a.severity]}`} />
                   <span className={`pm-chip ${severityChip[a.severity]}`}>
@@ -258,9 +261,10 @@ export function ProjectDetailPage() {
 function SectionTitle({ title, count }: { title: string; count: number }) {
   return (
     <h2 className="flex items-center gap-2.5 text-lg font-semibold text-white">
+      <span className="h-3.5 w-px bg-brand-400/70" />
       {title}
-      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-xs text-slate-400">
-        {count}
+      <span className="rounded-md border border-blue-400/20 bg-white/5 px-2 py-0.5 font-mono text-xs text-slate-400">
+        {String(count).padStart(2, "0")}
       </span>
     </h2>
   );

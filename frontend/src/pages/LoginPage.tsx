@@ -37,13 +37,13 @@ export function LoginPage() {
               BluePrint
             </span>
           </div>
-          <p className="text-sm text-slate-400">
-            Gestion de projet prédictive &amp; agentique
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
+            Plateforme IA autonome
           </p>
         </div>
 
-        <div className="pm-card p-7">
-          <div className="mb-6 flex rounded-xl border border-white/10 bg-white/[0.03] p-1 text-sm">
+        <div className="pm-card pm-ticks relative p-7">
+          <div className="mb-6 flex rounded-lg border border-blue-400/15 bg-white/[0.03] p-1 text-sm">
             <button
               onClick={() => setMode("login")}
               className={`flex-1 rounded-lg py-2 font-medium transition ${

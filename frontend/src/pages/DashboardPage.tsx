@@ -17,11 +17,12 @@ export function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-white">
+        <span className="pm-eyebrow mb-3">Vue d'ensemble</span>
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-white">
           Tableau de bord
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Vue d'ensemble de vos projets suivis et des agents autonomes.
+          Vos projets suivis et les agents autonomes.
         </p>
       </div>
 
@@ -65,14 +66,14 @@ function Stat({
       ? "from-brand-500 to-brand-400"
       : "from-accent-500 to-accent-600";
   return (
-    <div className="pm-card relative overflow-hidden p-6">
+    <div className="pm-card pm-ticks relative overflow-hidden p-6">
       <div
         className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${bar} opacity-70`}
       />
-      <div className="font-mono text-4xl font-semibold tracking-tight text-white">
+      <div className="pm-gradient-text font-mono text-4xl font-bold tracking-tight">
         {value.toString().padStart(2, "0")}
       </div>
-      <div className="mt-2 text-xs font-medium uppercase tracking-wider text-slate-400">
+      <div className="mt-2 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
         {label}
       </div>
     </div>
