@@ -16,21 +16,34 @@ export function DashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Tableau de bord</h1>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-white">
+          Tableau de bord
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Vue d'ensemble de vos projets suivis et des agents autonomes.
+        </p>
+      </div>
+
       {loading ? (
         <p className="text-slate-500">Chargement…</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
-          <Stat label="Projets suivis" value={projects.length} />
+          <Stat label="Projets suivis" value={projects.length} accent="brand" />
           <Stat
             label="Avec dépôt lié"
             value={projects.filter((p) => p.repo).length}
+            accent="brand"
           />
-          <Stat label="Agents actifs" value={4} />
+          <Stat label="Agents actifs" value={4} accent="accent" />
         </div>
       )}
+
       <div className="mt-8">
-        <Link to="/projects" className="text-brand hover:underline">
+        <Link
+          to="/projects"
+          className="text-sm font-medium text-brand hover:text-brand-400"
+        >
           Voir tous les projets →
         </Link>
       </div>
@@ -38,11 +51,30 @@ export function DashboardPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent: "brand" | "accent";
+}) {
+  const bar =
+    accent === "brand"
+      ? "from-brand-500 to-brand-400"
+      : "from-accent-500 to-accent-600";
   return (
-    <div className="rounded-lg border bg-white p-5">
-      <div className="text-3xl font-bold text-brand">{value}</div>
-      <div className="mt-1 text-sm text-slate-500">{label}</div>
+    <div className="pm-card relative overflow-hidden p-6">
+      <div
+        className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${bar} opacity-70`}
+      />
+      <div className="font-mono text-4xl font-semibold tracking-tight text-white">
+        {value.toString().padStart(2, "0")}
+      </div>
+      <div className="mt-2 text-xs font-medium uppercase tracking-wider text-slate-400">
+        {label}
+      </div>
     </div>
   );
 }

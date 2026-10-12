@@ -34,56 +34,70 @@ export function ProjectsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Projets</h1>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Projets</h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Reliez un dépôt pour collecter les signaux et lancer les agents.
+        </p>
+      </div>
 
       <form
         onSubmit={onCreate}
-        className="mb-8 flex flex-wrap items-end gap-3 rounded-lg border bg-white p-4"
+        className="pm-card mb-8 flex flex-wrap items-end gap-4 p-5"
       >
-        <label className="flex flex-col text-sm">
-          <span className="mb-1 text-slate-500">Nom</span>
+        <label className="flex min-w-[12rem] flex-1 flex-col">
+          <span className="pm-label">Nom du projet</span>
           <input
-            className="rounded-md border px-3 py-2"
+            className="pm-input"
+            placeholder="Mon projet"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
         </label>
-        <label className="flex flex-col text-sm">
-          <span className="mb-1 text-slate-500">Dépôt (owner/repo)</span>
+        <label className="flex min-w-[12rem] flex-1 flex-col">
+          <span className="pm-label">Dépôt (owner/repo)</span>
           <input
-            className="rounded-md border px-3 py-2"
+            className="pm-input font-mono"
             placeholder="facebook/react"
             value={repo}
             onChange={(e) => setRepo(e.target.value)}
           />
         </label>
-        <button className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark">
-          Créer
-        </button>
-        {error && <p className="w-full text-sm text-red-600">{error}</p>}
+        <button className="pm-btn-primary">+ Créer</button>
+        {error && <p className="w-full text-sm text-red-300">{error}</p>}
       </form>
 
-      <ul className="divide-y rounded-lg border bg-white">
-        {projects.length === 0 && (
-          <li className="p-4 text-sm text-slate-500">Aucun projet pour l'instant.</li>
-        )}
-        {projects.map((p) => (
-          <li key={p.id} className="flex items-center justify-between p-4">
-            <div>
+      {projects.length === 0 ? (
+        <div className="pm-card p-10 text-center text-sm text-slate-500">
+          Aucun projet pour l'instant — créez le premier ci-dessus.
+        </div>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {projects.map((p) => (
+            <li key={p.id}>
               <Link
                 to={`/projects/${p.id}`}
-                className="font-medium text-brand hover:underline"
+                className="pm-card group flex items-center justify-between p-5 transition hover:border-brand/40 hover:shadow-glow"
               >
-                {p.name}
+                <div>
+                  <div className="font-semibold text-slate-100 group-hover:text-white">
+                    {p.name}
+                  </div>
+                  {p.repo && (
+                    <div className="mt-1 font-mono text-xs text-slate-500">
+                      {p.repo}
+                    </div>
+                  )}
+                </div>
+                <span className="text-slate-600 transition group-hover:translate-x-0.5 group-hover:text-brand">
+                  →
+                </span>
               </Link>
-              {p.repo && (
-                <span className="ml-2 text-sm text-slate-500">{p.repo}</span>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

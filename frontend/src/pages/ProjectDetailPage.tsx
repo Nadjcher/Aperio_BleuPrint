@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import type {
   Anomaly,
+  AgentKind,
   Decision,
   Project,
   Report,
@@ -15,10 +16,23 @@ interface SyncResult {
   decisions: Decision[];
 }
 
-const severityColor: Record<Anomaly["severity"], string> = {
-  info: "bg-slate-100 text-slate-700",
-  warning: "bg-amber-100 text-amber-800",
-  critical: "bg-red-100 text-red-800",
+const severityChip: Record<Anomaly["severity"], string> = {
+  info: "border-slate-500/30 bg-slate-500/10 text-slate-300",
+  warning: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+  critical: "border-red-500/40 bg-red-500/10 text-red-300",
+};
+
+const severityDot: Record<Anomaly["severity"], string> = {
+  info: "bg-slate-400",
+  warning: "bg-amber-400 shadow-[0_0_10px_2px_rgba(251,191,36,0.6)]",
+  critical: "bg-red-400 shadow-[0_0_10px_2px_rgba(248,113,113,0.7)]",
+};
+
+const agentChip: Record<AgentKind, string> = {
+  monitor: "border-red-500/30 bg-red-500/10 text-red-300",
+  analyst: "border-brand/30 bg-brand/10 text-brand-400",
+  planner: "border-accent/30 bg-accent/10 text-accent-500",
+  reporter: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
 };
 
 export function ProjectDetailPage() {
@@ -61,7 +75,9 @@ export function ProjectDetailPage() {
       );
       await load();
     } catch (err) {
-      setMessage(err instanceof RequestError ? err.message : "Erreur de synchronisation");
+      setMessage(
+        err instanceof RequestError ? err.message : "Erreur de synchronisation",
+      );
     } finally {
       setSyncing(false);
     }
@@ -89,85 +105,94 @@ export function ProjectDetailPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{project.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            {project.name}
+          </h1>
           {project.repo && (
-            <p className="text-sm text-slate-500">{project.repo}</p>
+            <p className="mt-1 font-mono text-sm text-slate-500">{project.repo}</p>
           )}
         </div>
         <button
           onClick={onSync}
           disabled={syncing || !project.repo}
-          className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark disabled:opacity-50"
+          className="pm-btn-primary"
         >
-          {syncing ? "Synchronisation…" : "Synchroniser & analyser"}
+          {syncing ? "Synchronisation…" : "⚡ Synchroniser & analyser"}
         </button>
       </div>
+
       {message && (
-        <p className="mb-6 rounded-md bg-slate-100 px-3 py-2 text-sm">{message}</p>
+        <p className="mb-6 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-slate-300">
+          {message}
+        </p>
       )}
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-lg font-semibold">Anomalies ouvertes</h2>
+      <Section title="Anomalies ouvertes" count={anomalies.length}>
         {anomalies.length === 0 ? (
-          <p className="text-sm text-slate-500">Aucune anomalie ouverte.</p>
+          <Empty>Aucune anomalie ouverte — le projet est nominal.</Empty>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {anomalies.map((a) => (
-              <li key={a.id} className="rounded-lg border bg-white p-4">
-                <span
-                  className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${severityColor[a.severity]}`}
-                >
-                  {a.severity}
-                </span>
-                <p className="mt-2 text-sm">{a.explanation}</p>
+              <li key={a.id} className="pm-card p-5">
+                <div className="flex items-center gap-2.5">
+                  <span className={`h-2 w-2 rounded-full ${severityDot[a.severity]}`} />
+                  <span className={`pm-chip ${severityChip[a.severity]}`}>
+                    {a.severity}
+                  </span>
+                  <span className="font-mono text-xs text-slate-500">
+                    {a.metric} · z={a.zScore.toFixed(1)}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-slate-300">{a.explanation}</p>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Section>
 
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Décisions des agents</h2>
+      <Section title="Décisions des agents" count={decisions.length}>
         {decisions.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            Aucune décision — lancez une synchronisation.
-          </p>
+          <Empty>Aucune décision — lancez une synchronisation.</Empty>
         ) : (
           <ul className="space-y-3">
             {decisions.map((d) => (
-              <li key={d.id} className="rounded-lg border bg-white p-4">
+              <li key={d.id} className="pm-card p-5">
                 <div className="flex items-center justify-between">
-                  <span className="rounded bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
-                    {d.agent}
-                  </span>
-                  <span className="text-xs text-slate-400">
+                  <span className={`pm-chip ${agentChip[d.agent]}`}>{d.agent}</span>
+                  <span className="font-mono text-xs text-slate-500">
                     confiance {(d.confidence * 100).toFixed(0)}% · {d.status}
                   </span>
                 </div>
-                <h3 className="mt-2 font-medium">{d.title}</h3>
-                <p className="mt-1 text-sm text-slate-600">{d.rationale}</p>
+                <h3 className="mt-3 font-semibold text-slate-100">{d.title}</h3>
+                <p className="mt-1 text-sm text-slate-400">{d.rationale}</p>
                 {d.actions.length > 0 && (
-                  <ul className="mt-2 list-inside list-disc text-sm text-slate-600">
+                  <ul className="mt-3 space-y-1.5">
                     {d.actions.map((action, i) => (
-                      <li key={i}>{action}</li>
+                      <li
+                        key={i}
+                        className="flex gap-2 text-sm text-slate-300"
+                      >
+                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand" />
+                        {action}
+                      </li>
                     ))}
                   </ul>
                 )}
                 {d.status === "proposed" && (
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => giveFeedback(d.id, true)}
-                      className="rounded-md border border-green-600 px-3 py-1 text-sm text-green-700 hover:bg-green-50"
+                      className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/20"
                     >
-                      Valider
+                      ✓ Valider
                     </button>
                     <button
                       onClick={() => giveFeedback(d.id, false)}
-                      className="rounded-md border border-red-600 px-3 py-1 text-sm text-red-700 hover:bg-red-50"
+                      className="rounded-lg border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-sm font-medium text-red-300 transition hover:bg-red-500/20"
                     >
-                      Rejeter
+                      ✕ Rejeter
                     </button>
                   </div>
                 )}
@@ -175,44 +200,50 @@ export function ProjectDetailPage() {
             ))}
           </ul>
         )}
-      </section>
+      </Section>
 
-      <section className="mt-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Rapports de synthèse</h2>
+      <section className="mt-10">
+        <div className="mb-4 flex items-center justify-between">
+          <SectionTitle title="Rapports de synthèse" count={reports.length} />
           <div className="flex gap-2">
             <button
               onClick={() => generateReport("weekly")}
               disabled={reporting}
-              className="rounded-md border px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50"
+              className="pm-btn-ghost"
             >
               Hebdomadaire
             </button>
             <button
               onClick={() => generateReport("monthly")}
               disabled={reporting}
-              className="rounded-md border px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50"
+              className="pm-btn-ghost"
             >
               Mensuel
             </button>
           </div>
         </div>
         {reports.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            Aucun rapport — générez-en un ci-dessus.
-          </p>
+          <Empty>Aucun rapport — générez-en un ci-dessus.</Empty>
         ) : (
           <ul className="space-y-3">
             {reports.map((r) => (
-              <li key={r.id} className="rounded-lg border bg-white p-4">
-                <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
+              <li key={r.id} className="pm-card p-5">
+                <div className="mb-3 flex items-center justify-between font-mono text-xs text-slate-500">
                   <span>
                     {r.period} · {r.periodStart.slice(0, 10)} →{" "}
                     {r.periodEnd.slice(0, 10)}
                   </span>
-                  <span>{r.generatedBy === "llm" ? "généré par IA" : "heuristique"}</span>
+                  <span
+                    className={`pm-chip ${
+                      r.generatedBy === "llm"
+                        ? "border-accent/30 bg-accent/10 text-accent-500"
+                        : "border-slate-500/30 bg-slate-500/10 text-slate-400"
+                    }`}
+                  >
+                    {r.generatedBy === "llm" ? "généré par IA" : "heuristique"}
+                  </span>
                 </div>
-                <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700">
+                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-300">
                   {r.summary}
                 </pre>
               </li>
@@ -221,5 +252,41 @@ export function ProjectDetailPage() {
         )}
       </section>
     </div>
+  );
+}
+
+function SectionTitle({ title, count }: { title: string; count: number }) {
+  return (
+    <h2 className="flex items-center gap-2.5 text-lg font-semibold text-white">
+      {title}
+      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-xs text-slate-400">
+        {count}
+      </span>
+    </h2>
+  );
+}
+
+function Section({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count: number;
+  children: ReactNode;
+}) {
+  return (
+    <section className="mb-10">
+      <div className="mb-4">
+        <SectionTitle title={title} count={count} />
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Empty({ children }: { children: ReactNode }) {
+  return (
+    <div className="pm-card p-8 text-center text-sm text-slate-500">{children}</div>
   );
 }
