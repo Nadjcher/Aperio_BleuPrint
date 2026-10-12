@@ -1,26 +1,41 @@
 import { Link } from "react-router-dom";
 import { tokenStore } from "../api/client";
+import { Icon, type IconName } from "../components/Icon";
 
 const authed = Boolean(tokenStore.access);
 const primaryTo = authed ? "/dashboard" : "/login";
 const primaryLabel = authed ? "Ouvrir l'app" : "Commencer gratuitement";
 
-/** Cartes « aperçu produit » dans le hero (ce que BluePrint fait). */
-const previewCards = [
-  { icon: "⚡", title: "Détecte", desc: "Signaux & anomalies en continu", tint: "from-brand-500 to-brand-400" },
-  { icon: "🤖", title: "Agit", desc: "4 agents autonomes", tint: "from-accent-500 to-accent-600" },
-  { icon: "📝", title: "Synthétise", desc: "Rapports IA prêts à partager", tint: "from-fuchsia-500 to-accent-600" },
-  { icon: "🔒", title: "Protège", desc: "Sécurisé & RGPD", tint: "from-emerald-500 to-brand-400" },
+interface Card {
+  icon: IconName;
+  title: string;
+  desc: string;
+  tint: string;
+}
+
+/** Cartes « aperçu produit » dans le hero. */
+const previewCards: Card[] = [
+  { icon: "bolt", title: "Détecte", desc: "Signaux & anomalies, en continu", tint: "from-brand-500 to-brand-400" },
+  { icon: "bot", title: "Agit", desc: "4 agents qui décident", tint: "from-accent-500 to-accent-600" },
+  { icon: "report", title: "Synthétise", desc: "Rapports IA en 1 clic", tint: "from-fuchsia-500 to-accent-600" },
+  { icon: "shield", title: "Protège", desc: "Chiffré · RGPD natif", tint: "from-emerald-500 to-brand-400" },
+];
+
+/** Section « Comment ça marche ». */
+const steps: Card[] = [
+  { icon: "branch", title: "Connectez votre dépôt", desc: "Reliez GitHub en un clic — aucune configuration lourde.", tint: "from-brand-500 to-brand-400" },
+  { icon: "search", title: "BluePrint analyse", desc: "Les signaux sont collectés et les anomalies détectées en continu.", tint: "from-cyan-500 to-accent-500" },
+  { icon: "rocket", title: "Les agents agissent", desc: "Diagnostic, plan d'action et rapport, prêts à valider.", tint: "from-accent-500 to-accent-600" },
 ];
 
 /** Grille complète des fonctionnalités. */
-const features = [
-  { icon: "⚡", title: "Signaux en temps réel", desc: "Collecte continue de l'activité (commits, PRs, issues) via vos connecteurs.", tint: "from-brand-500 to-brand-400" },
-  { icon: "📈", title: "Détection d'anomalies", desc: "Repère les dérapages avant qu'ils ne coûtent, par analyse statistique robuste.", tint: "from-cyan-500 to-brand-400" },
-  { icon: "🤖", title: "4 agents autonomes", desc: "Monitor, Analyst, Planner, Reporter surveillent, diagnostiquent et agissent.", tint: "from-accent-500 to-accent-600" },
-  { icon: "📝", title: "Synthèses par IA", desc: "Rapports hebdo et mensuels générés automatiquement, prêts à partager.", tint: "from-fuchsia-500 to-accent-600" },
-  { icon: "🔒", title: "Sécurisé & RGPD", desc: "JWT, chiffrement au repos, export et effacement des données natifs.", tint: "from-emerald-500 to-brand-400" },
-  { icon: "✓", title: "Simple à utiliser", desc: "Reliez un dépôt, cliquez sur Synchroniser : l'analyse et les agents font le reste.", tint: "from-brand-400 to-accent-500" },
+const features: Card[] = [
+  { icon: "bolt", title: "Signaux en temps réel", desc: "Commits, PRs et issues collectés en continu via vos connecteurs.", tint: "from-brand-500 to-brand-400" },
+  { icon: "trending", title: "Détection d'anomalies", desc: "Un score statistique robuste repère les dérapages avant qu'ils ne coûtent.", tint: "from-cyan-500 to-brand-400" },
+  { icon: "bot", title: "4 agents autonomes", desc: "Monitor, Analyst, Planner et Reporter surveillent, diagnostiquent et agissent.", tint: "from-accent-500 to-accent-600" },
+  { icon: "report", title: "Synthèses par IA", desc: "Rapports hebdo et mensuels générés et prêts à partager.", tint: "from-fuchsia-500 to-accent-600" },
+  { icon: "shield", title: "Sécurisé & RGPD", desc: "JWT, chiffrement au repos, export et effacement des données natifs.", tint: "from-emerald-500 to-brand-400" },
+  { icon: "check", title: "Simple à utiliser", desc: "Reliez un dépôt, cliquez sur Synchroniser : le reste est automatique.", tint: "from-brand-400 to-accent-500" },
 ];
 
 const stats = [
@@ -29,6 +44,16 @@ const stats = [
   { value: "< 5s", label: "par décision" },
   { value: "€0–15", label: "par mois" },
 ];
+
+function IconBox({ icon, tint, size = "md" }: { icon: IconName; tint: string; size?: "sm" | "md" }) {
+  const box = size === "sm" ? "h-9 w-9" : "h-11 w-11";
+  const ic = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  return (
+    <div className={`flex ${box} items-center justify-center rounded-xl bg-gradient-to-br ${tint} text-white shadow-glow`}>
+      <Icon name={icon} className={ic} />
+    </div>
+  );
+}
 
 export function LandingPage() {
   return (
@@ -52,6 +77,7 @@ export function LandingPage() {
             </span>
           </div>
           <nav className="hidden items-center gap-1 md:flex">
+            <a href="#how" className="pm-nav-link">Comment ça marche</a>
             <a href="#features" className="pm-nav-link">Fonctionnalités</a>
             <a href="#securite" className="pm-nav-link">Sécurité</a>
           </nav>
@@ -62,7 +88,7 @@ export function LandingPage() {
       </header>
 
       {/* Hero deux colonnes */}
-      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-16 lg:grid-cols-2 lg:pt-24">
+      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-16 lg:grid-cols-2 lg:pt-24">
         <div>
           <span className="pm-chip mb-6 border-accent/30 bg-accent/10 text-accent-500">
             ✦ Propulsé par l'IA
@@ -80,8 +106,8 @@ export function LandingPage() {
             <Link to={primaryTo} className="pm-btn-primary px-6 py-3 text-base">
               {primaryLabel} →
             </Link>
-            <a href="#features" className="pm-btn-ghost px-6 py-3 text-base">
-              Découvrir les fonctionnalités
+            <a href="#how" className="pm-btn-ghost px-6 py-3 text-base">
+              Comment ça marche
             </a>
           </div>
           <div className="mt-8 flex items-center gap-6 text-sm text-slate-500">
@@ -100,9 +126,7 @@ export function LandingPage() {
               <span className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-brand-500 to-accent-600">
                 <span className="h-1.5 w-1.5 rounded-sm bg-white/90" />
               </span>
-              <span className="text-sm font-semibold text-slate-200">
-                BluePrint
-              </span>
+              <span className="text-sm font-semibold text-slate-200">BluePrint</span>
             </div>
             <div className="flex gap-1.5">
               <span className="h-2 w-2 rounded-full bg-white/20" />
@@ -112,18 +136,9 @@ export function LandingPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {previewCards.map((c) => (
-              <div
-                key={c.title}
-                className="rounded-xl border border-white/10 bg-white/[0.03] p-4"
-              >
-                <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${c.tint} text-base shadow-glow`}
-                >
-                  {c.icon}
-                </div>
-                <div className="mt-3 text-sm font-semibold text-white">
-                  {c.title}
-                </div>
+              <div key={c.title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <IconBox icon={c.icon} tint={c.tint} size="sm" />
+                <div className="mt-3 text-sm font-semibold text-white">{c.title}</div>
                 <div className="mt-0.5 text-xs text-slate-400">{c.desc}</div>
               </div>
             ))}
@@ -131,15 +146,41 @@ export function LandingPage() {
           <div className="mt-3 grid grid-cols-4 gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-center">
             {stats.map((s) => (
               <div key={s.label}>
-                <div className="pm-gradient-text font-mono text-base font-bold">
-                  {s.value}
-                </div>
+                <div className="pm-gradient-text font-mono text-base font-bold">{s.value}</div>
                 <div className="mt-0.5 text-[10px] uppercase tracking-wide text-slate-500">
                   {s.label}
                 </div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Comment ça marche */}
+      <section id="how" className="mx-auto max-w-6xl px-5 py-16">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Comment ça marche, <span className="pm-gradient-text">en 3 étapes.</span>
+          </h2>
+          <p className="mt-3 text-slate-400">
+            De la connexion au rapport, sans friction.
+          </p>
+        </div>
+        <div className="relative grid gap-4 md:grid-cols-3">
+          {/* ligne de liaison (desktop) */}
+          <div className="pointer-events-none absolute left-0 right-0 top-16 hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent md:block" />
+          {steps.map((s, i) => (
+            <div key={s.title} className="pm-card relative p-6">
+              <div className="flex items-center justify-between">
+                <IconBox icon={s.icon} tint={s.tint} />
+                <span className="font-mono text-4xl font-bold text-white/10">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <h3 className="mt-4 font-semibold text-white">{s.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{s.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -160,15 +201,9 @@ export function LandingPage() {
               key={f.title}
               className="pm-card group p-6 transition hover:border-white/20 hover:shadow-glow"
             >
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${f.tint} text-lg shadow-glow`}
-              >
-                {f.icon}
-              </div>
+              <IconBox icon={f.icon} tint={f.tint} />
               <h3 className="mt-4 font-semibold text-white">{f.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
-                {f.desc}
-              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -186,10 +221,7 @@ export function LandingPage() {
               conformité RGPD native (accès, portabilité, effacement).
             </p>
           </div>
-          <Link
-            to={primaryTo}
-            className="pm-btn-primary shrink-0 px-6 py-3 text-base"
-          >
+          <Link to={primaryTo} className="pm-btn-primary shrink-0 px-6 py-3 text-base">
             {primaryLabel} →
           </Link>
         </div>
