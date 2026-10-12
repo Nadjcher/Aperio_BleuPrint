@@ -7,7 +7,8 @@ COPY package.json package-lock.json tsconfig.base.json ./
 COPY shared/package.json ./shared/
 COPY backend/package.json ./backend/
 COPY frontend/package.json ./frontend/
-RUN npm ci
+# --include=dev : devDependencies (vite, tsc) nécessaires au build
+RUN npm ci --include=dev
 COPY shared ./shared
 COPY frontend ./frontend
 # Le frontend importe les types partagés : on build shared d'abord.

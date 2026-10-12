@@ -3,10 +3,14 @@ import { createApp } from "./app.js";
 import { AppDataSource } from "./db/data-source.js";
 import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
+import { startWorker, stopWorker } from "./workers/worker.js";
 
 async function main(): Promise<void> {
   await AppDataSource.initialize();
   logger.info("Base de données connectée");
+
+  // Worker asynchrone (dépile les jobs : sync de projets, etc.)
+  startWorker();
 
   const app = createApp();
   const server = app.listen(env.PORT, () => {
@@ -15,6 +19,7 @@ async function main(): Promise<void> {
 
   const shutdown = (signal: string): void => {
     logger.info({ signal }, "Arrêt en cours");
+    stopWorker();
     server.close(() => {
       void AppDataSource.destroy().then(() => process.exit(0));
     });

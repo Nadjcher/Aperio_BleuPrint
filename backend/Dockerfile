@@ -8,7 +8,8 @@ COPY package.json package-lock.json tsconfig.base.json ./
 COPY shared/package.json ./shared/
 COPY backend/package.json ./backend/
 COPY frontend/package.json ./frontend/
-RUN npm ci
+# --include=dev : devDependencies (tsc, tsx) nécessaires au build
+RUN npm ci --include=dev
 # Sources + build (shared puis backend)
 COPY shared ./shared
 COPY backend ./backend

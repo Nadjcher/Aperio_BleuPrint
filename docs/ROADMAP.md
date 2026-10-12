@@ -20,7 +20,7 @@ Déployer les 4 agents et la boucle d'apprentissage.
 - [x] Monitor · Analyst · Planner · Reporter (heuristiques v1)
 - [x] Learning loop : feedback humain → pondération de la confiance
 - [x] Enrichissement des agents par LLM (multi-provider : Claude ou Llama gratuit, repli heuristique)
-- [ ] File d'exécution asynchrone des agents
+- [x] File d'exécution asynchrone des agents (jobs en base + worker, SKIP LOCKED)
 
 ## Phase 3 — Synthèse & planification (semaines 9–12)
 

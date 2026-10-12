@@ -45,6 +45,13 @@ const schema = z.object({
 
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900_000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+
+  // Worker asynchrone (exécution différée des pipelines)
+  WORKER_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  WORKER_POLL_MS: z.coerce.number().int().positive().default(2000),
 });
 
 const parsed = schema.safeParse(process.env);

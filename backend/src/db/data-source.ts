@@ -10,6 +10,7 @@ import { Decision } from "../entities/Decision.js";
 import { DecisionFeedback } from "../entities/DecisionFeedback.js";
 import { AuditLog } from "../entities/AuditLog.js";
 import { Report } from "../entities/Report.js";
+import { Job } from "../entities/Job.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -29,6 +30,7 @@ export const AppDataSource = new DataSource({
     DecisionFeedback,
     AuditLog,
     Report,
+    Job,
   ],
   // En prod on charge les migrations compilées (dist), sinon les sources (CLI dev).
   migrations: [isProd ? "dist/migrations/*.js" : "src/migrations/*.ts"],

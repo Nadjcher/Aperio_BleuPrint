@@ -4,16 +4,22 @@ import type {
   Anomaly,
   AgentKind,
   Decision,
+  Job,
   Project,
   Report,
   ReportPeriod,
 } from "@projectmaster/shared";
 import { api, RequestError } from "../api/client";
 
-interface SyncResult {
-  ingested: number;
-  anomaly: Anomaly | null;
-  decisions: Decision[];
+interface EnqueueResult {
+  jobId: string;
+  status: Job["status"];
+}
+
+interface SyncJobResult {
+  ingested?: number;
+  decisions?: number;
+  anomalyDetected?: boolean;
 }
 
 const severityChip: Record<Anomaly["severity"], string> = {
@@ -63,16 +69,32 @@ export function ProjectDetailPage() {
     void load();
   }, [load]);
 
+  const pollJob = async (jobId: string): Promise<Job> => {
+    for (let i = 0; i < 60; i++) {
+      const job = await api.get<Job>(`/jobs/${jobId}`);
+      if (job.status === "done" || job.status === "failed") return job;
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    throw new RequestError(408, "timeout", "Délai dépassé");
+  };
+
   const onSync = async () => {
     if (!id) return;
     setSyncing(true);
-    setMessage(null);
+    setMessage("Synchronisation en file d'attente…");
     try {
-      const res = await api.post<SyncResult>(`/projects/${id}/sync`);
-      setMessage(
-        `${res.ingested} signaux ingérés · ${res.decisions.length} décisions produites` +
-          (res.anomaly ? " · anomalie détectée" : ""),
-      );
+      const { jobId } = await api.post<EnqueueResult>(`/projects/${id}/sync`);
+      setMessage("Analyse en cours…");
+      const job = await pollJob(jobId);
+      if (job.status === "done") {
+        const r = (job.result ?? {}) as SyncJobResult;
+        setMessage(
+          `${r.ingested ?? 0} signaux ingérés · ${r.decisions ?? 0} décisions` +
+            (r.anomalyDetected ? " · anomalie détectée" : ""),
+        );
+      } else {
+        setMessage(`Échec de la synchronisation : ${job.error ?? "erreur"}`);
+      }
       await load();
     } catch (err) {
       setMessage(

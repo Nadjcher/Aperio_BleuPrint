@@ -39,7 +39,17 @@ async function gh<T>(path: string): Promise<T> {
   };
   if (env.GITHUB_TOKEN) headers.Authorization = `Bearer ${env.GITHUB_TOKEN}`;
 
-  const res = await fetch(`${env.GITHUB_API_URL}${path}`, { headers });
+  // Timeout dur : un appel réseau bloqué ne doit jamais laisser un job coincé.
+  let res: Response;
+  try {
+    res = await fetch(`${env.GITHUB_API_URL}${path}`, {
+      headers,
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (err) {
+    logger.warn({ path, err }, "Appel GitHub injoignable (timeout/réseau)");
+    throw new AppError(504, "github_unreachable", `GitHub injoignable pour ${path}`);
+  }
   if (!res.ok) {
     logger.warn({ path, status: res.status }, "Appel GitHub en échec");
     throw new AppError(

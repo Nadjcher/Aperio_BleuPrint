@@ -11,6 +11,7 @@ import { signalsRouter } from "./routes/signals.js";
 import { anomaliesRouter } from "./routes/anomalies.js";
 import { decisionsRouter } from "./routes/decisions.js";
 import { reportsRouter } from "./routes/reports.js";
+import { jobsRouter } from "./routes/jobs.js";
 import { gdprRouter } from "./routes/gdpr.js";
 
 export function createApp(): Express {
@@ -32,6 +33,7 @@ export function createApp(): Express {
   api.use(anomaliesRouter);
   api.use(decisionsRouter);
   api.use(reportsRouter);
+  api.use(jobsRouter);
   api.use(gdprRouter);
   app.use("/api/v1", api);
 
