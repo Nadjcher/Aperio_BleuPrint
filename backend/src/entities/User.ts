@@ -26,6 +26,10 @@ export class User {
   @Column({ type: "varchar", length: 20, default: "viewer" })
   role!: Role;
 
+  /** E-mail confirmé via lien. Non bloquant sauf REQUIRE_EMAIL_VERIFICATION=true. */
+  @Column({ type: "boolean", default: false })
+  emailVerified!: boolean;
+
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

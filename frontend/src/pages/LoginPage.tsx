@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login, register } from "../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../store";
 
@@ -114,6 +114,14 @@ export function LoginPage() {
             >
               {mode === "login" ? "Se connecter" : "Créer mon compte"}
             </button>
+            {mode === "login" && (
+              <Link
+                to="/forgot-password"
+                className="block text-center text-xs text-slate-500 hover:text-slate-300"
+              >
+                Mot de passe oublié ?
+              </Link>
+            )}
           </form>
         </div>
 

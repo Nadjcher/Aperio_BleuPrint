@@ -1,0 +1,178 @@
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { api, RequestError } from "../api/client";
+
+function Shell({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <Link to="/" className="pm-gradient-text text-2xl font-extrabold tracking-tight">
+            Aperio
+          </Link>
+        </div>
+        <div className="pm-card pm-ticks relative p-7">
+          <h1 className="mb-5 text-lg font-semibold text-white">{title}</h1>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Mot de passe oublié — demande de lien. */
+export function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post("/auth/forgot-password", { email });
+    } catch {
+      /* réponse neutre : on n'expose rien */
+    }
+    setSent(true);
+  };
+
+  return (
+    <Shell title="Mot de passe oublié">
+      {sent ? (
+        <p className="text-sm text-slate-300">
+          Si un compte existe pour <span className="font-mono">{email}</span>, un
+          e-mail avec un lien de réinitialisation vient d'être envoyé. Pensez à
+          vérifier vos spams.
+          <br />
+          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+            ← Retour à la connexion
+          </Link>
+        </p>
+      ) : (
+        <form onSubmit={onSubmit} className="space-y-4">
+          <p className="text-sm text-slate-400">
+            Entrez votre e-mail : nous vous enverrons un lien pour choisir un
+            nouveau mot de passe.
+          </p>
+          <div>
+            <label className="pm-label">E-mail</label>
+            <input
+              className="pm-input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <button className="pm-btn-primary w-full">Envoyer le lien</button>
+          <Link to="/login" className="block text-center text-sm text-slate-400 hover:text-white">
+            Retour à la connexion
+          </Link>
+        </form>
+      )}
+    </Shell>
+  );
+}
+
+/** Réinitialisation — choix d'un nouveau mot de passe via le jeton du lien. */
+export function ResetPasswordPage() {
+  const [params] = useSearchParams();
+  const token = params.get("token") ?? "";
+  const navigate = useNavigate();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      await api.post("/auth/reset-password", { token, password });
+      setDone(true);
+      setTimeout(() => navigate("/login"), 2500);
+    } catch (err) {
+      setError(err instanceof RequestError ? err.message : "Erreur");
+    }
+  };
+
+  if (!token) {
+    return (
+      <Shell title="Lien invalide">
+        <p className="text-sm text-slate-300">
+          Ce lien de réinitialisation est incomplet.{" "}
+          <Link to="/forgot-password" className="text-brand hover:underline">
+            Redemander un lien
+          </Link>
+        </p>
+      </Shell>
+    );
+  }
+
+  return (
+    <Shell title="Nouveau mot de passe">
+      {done ? (
+        <p className="text-sm text-emerald-300">
+          Mot de passe mis à jour ✓ Redirection vers la connexion…
+        </p>
+      ) : (
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <label className="pm-label">Nouveau mot de passe</label>
+            <input
+              className="pm-input"
+              type="password"
+              placeholder="12 caractères min. (lettres + chiffres)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={12}
+              required
+            />
+          </div>
+          {error && <p className="text-sm text-red-300">{error}</p>}
+          <button className="pm-btn-primary w-full">Réinitialiser</button>
+        </form>
+      )}
+    </Shell>
+  );
+}
+
+/** Vérification d'e-mail — consomme le jeton du lien automatiquement. */
+export function VerifyEmailPage() {
+  const [params] = useSearchParams();
+  const token = params.get("token") ?? "";
+  const [state, setState] = useState<"loading" | "ok" | "error">("loading");
+
+  useEffect(() => {
+    if (!token) {
+      setState("error");
+      return;
+    }
+    api
+      .post("/auth/verify-email", { token })
+      .then(() => setState("ok"))
+      .catch(() => setState("error"));
+  }, [token]);
+
+  return (
+    <Shell title="Vérification de l'e-mail">
+      {state === "loading" && <p className="text-sm text-slate-400">Vérification en cours…</p>}
+      {state === "ok" && (
+        <p className="text-sm text-emerald-300">
+          Votre adresse e-mail est confirmée ✓
+          <br />
+          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+            Se connecter
+          </Link>
+        </p>
+      )}
+      {state === "error" && (
+        <p className="text-sm text-red-300">
+          Lien invalide ou expiré.
+          <br />
+          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+            Retour à la connexion
+          </Link>
+        </p>
+      )}
+    </Shell>
+  );
+}

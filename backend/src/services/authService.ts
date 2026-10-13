@@ -10,12 +10,16 @@ import type {
 import { AppDataSource } from "../db/data-source.js";
 import { User } from "../entities/User.js";
 import { RefreshToken } from "../entities/RefreshToken.js";
+import { OneTimeToken, type TokenPurpose } from "../entities/OneTimeToken.js";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
 import { AppError } from "../middleware/errorHandler.js";
+import { appBaseUrl, sendEmail } from "../email/index.js";
+import { passwordResetEmail, verificationEmail } from "../email/templates.js";
 
 const users = () => AppDataSource.getRepository(User);
 const refreshTokens = () => AppDataSource.getRepository(RefreshToken);
+const oneTimeTokens = () => AppDataSource.getRepository(OneTimeToken);
 
 const BCRYPT_ROUNDS = 12;
 
@@ -25,8 +29,51 @@ function toPublic(u: User): UserPublic {
     email: u.email,
     name: u.name,
     role: u.role,
+    emailVerified: u.emailVerified,
     createdAt: u.createdAt.toISOString(),
   };
+}
+
+/** Émet un jeton à usage unique, stocke son hash, renvoie le jeton en clair. */
+async function issueOneTimeToken(
+  userId: string,
+  purpose: TokenPurpose,
+  ttlMs: number,
+): Promise<string> {
+  const raw = crypto.randomBytes(32).toString("hex");
+  await oneTimeTokens().save(
+    oneTimeTokens().create({
+      userId,
+      purpose,
+      tokenHash: sha256(raw),
+      expiresAt: new Date(Date.now() + ttlMs),
+      usedAt: null,
+    }),
+  );
+  return raw;
+}
+
+/** Valide et consomme un jeton à usage unique. */
+async function consumeOneTimeToken(
+  rawToken: string,
+  purpose: TokenPurpose,
+): Promise<OneTimeToken> {
+  const stored = await oneTimeTokens().findOne({
+    where: { tokenHash: sha256(rawToken), purpose },
+  });
+  if (!stored || stored.usedAt || stored.expiresAt.getTime() < Date.now()) {
+    throw new AppError(400, "invalid_token", "Lien invalide ou expiré");
+  }
+  stored.usedAt = new Date();
+  await oneTimeTokens().save(stored);
+  return stored;
+}
+
+/** Envoie (ou journalise) l'e-mail de vérification d'adresse. */
+async function sendVerificationEmail(user: User): Promise<void> {
+  const raw = await issueOneTimeToken(user.id, "email_verify", 24 * 3600 * 1000);
+  const link = `${appBaseUrl()}/verify-email?token=${raw}`;
+  await sendEmail(verificationEmail(user.email, user.name, link));
 }
 
 function sha256(value: string): string {
@@ -73,13 +120,16 @@ export async function register(
   if (existing) {
     throw new AppError(409, "email_taken", "Cet email est déjà utilisé");
   }
-  // Le premier utilisateur inscrit devient admin.
+  // Le premier utilisateur inscrit devient admin (et est auto-vérifié).
   const count = await users().count();
   const role: Role = count === 0 ? "admin" : "viewer";
+  const emailVerified = count === 0;
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const user = await users().save(
-    users().create({ email: normalized, name, passwordHash, role }),
+    users().create({ email: normalized, name, passwordHash, role, emailVerified }),
   );
+  // E-mail de confirmation (sauf 1er admin déjà vérifié). N'échoue jamais.
+  if (!emailVerified) await sendVerificationEmail(user);
   return { user: toPublic(user), tokens: await tokensFor(user) };
 }
 
@@ -94,6 +144,9 @@ export async function login(
   const ok = await bcrypt.compare(password, hash);
   if (!user || !ok) {
     throw new AppError(401, "invalid_credentials", "Identifiants invalides");
+  }
+  if (env.REQUIRE_EMAIL_VERIFICATION && !user.emailVerified) {
+    throw new AppError(403, "email_not_verified", "Veuillez confirmer votre e-mail");
   }
   return { user: toPublic(user), tokens: await tokensFor(user) };
 }
@@ -134,6 +187,47 @@ export async function getUser(userId: string): Promise<UserPublic> {
   const user = await users().findOne({ where: { id: userId } });
   if (!user) throw new AppError(404, "not_found", "Utilisateur introuvable");
   return toPublic(user);
+}
+
+/**
+ * Demande de réinitialisation. Ne révèle jamais si l'e-mail existe (anti
+ * énumération) : renvoie toujours sans erreur. Si l'utilisateur existe, envoie
+ * un lien de réinitialisation (valable 1 h).
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const normalized = email.trim().toLowerCase();
+  const user = await users().findOne({ where: { email: normalized } });
+  if (!user) return;
+  const raw = await issueOneTimeToken(user.id, "password_reset", 3600 * 1000);
+  const link = `${appBaseUrl()}/reset-password?token=${raw}`;
+  await sendEmail(passwordResetEmail(user.email, user.name, link));
+}
+
+/** Réinitialise le mot de passe via un jeton valide, puis révoque les sessions. */
+export async function resetPassword(
+  rawToken: string,
+  newPassword: string,
+): Promise<void> {
+  const token = await consumeOneTimeToken(rawToken, "password_reset");
+  const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+  await users().update({ id: token.userId }, { passwordHash });
+  // Sécurité : invalider toutes les sessions existantes après un reset.
+  await revokeAllForUser(token.userId);
+  logger.info({ userId: token.userId }, "Mot de passe réinitialisé");
+}
+
+/** Confirme l'adresse e-mail via un jeton valide. */
+export async function verifyEmail(rawToken: string): Promise<void> {
+  const token = await consumeOneTimeToken(rawToken, "email_verify");
+  await users().update({ id: token.userId }, { emailVerified: true });
+  logger.info({ userId: token.userId }, "E-mail vérifié");
+}
+
+/** Renvoie un e-mail de vérification à l'utilisateur courant (si non vérifié). */
+export async function resendVerification(userId: string): Promise<void> {
+  const user = await users().findOne({ where: { id: userId } });
+  if (!user || user.emailVerified) return;
+  await sendVerificationEmail(user);
 }
 
 /** Droit de rectification RGPD : met à jour le profil (nom). */

@@ -13,6 +13,7 @@ import { DecisionFeedback } from "../entities/DecisionFeedback.js";
 import { AuditLog } from "../entities/AuditLog.js";
 import { Report } from "../entities/Report.js";
 import { Job } from "../entities/Job.js";
+import { OneTimeToken } from "../entities/OneTimeToken.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -38,6 +39,7 @@ export const AppDataSource = new DataSource({
     AuditLog,
     Report,
     Job,
+    OneTimeToken,
   ],
   // Chemin résolu depuis ce module (et non le cwd) : robuste quel que soit le
   // répertoire de lancement. En prod → dist/migrations/*.js, en dev → *.ts.

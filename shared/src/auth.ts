@@ -7,6 +7,7 @@ export interface UserPublic {
   email: string;
   name: string;
   role: Role;
+  emailVerified: boolean;
   createdAt: string;
 }
 

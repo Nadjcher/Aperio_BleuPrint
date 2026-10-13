@@ -137,6 +137,19 @@ Voir [`.env.production.example`](../.env.production.example). Essentielles :
 | `FIELD_ENCRYPTION_KEY` | Clé de chiffrement au repos (32 octets / 64 hex) |
 | `CORS_ORIGIN` | Origine publique du frontend |
 | `LLM_*` | LLM optionnel (ex. Groq gratuit — voir `backend/.env.example`) |
+| `EMAIL_PROVIDER` / `RESEND_API_KEY` / `EMAIL_FROM` | E-mail optionnel (reset MDP, vérif). `none` = journalisé |
+| `APP_BASE_URL` | URL publique du frontend (liens dans les e-mails) |
+
+### Activer l'envoi d'e-mails (optionnel)
+
+Par défaut les e-mails sont journalisés (pas envoyés) et l'inscription reste
+directe. Pour activer réinitialisation de mot de passe et vérification réelles :
+
+1. Créer un compte gratuit sur [Resend](https://resend.com), vérifier un domaine
+   d'envoi, générer une clé API.
+2. Côté API (Render/Fly), définir : `EMAIL_PROVIDER=resend`, `RESEND_API_KEY=re_…`,
+   `EMAIL_FROM="Aperio <no-reply@votredomaine.com>"`, `APP_BASE_URL=https://votre-frontend.vercel.app`.
+3. (Optionnel) `REQUIRE_EMAIL_VERIFICATION=true` pour exiger un e-mail confirmé à la connexion.
 
 ## Migrations (manuel, si besoin)
 

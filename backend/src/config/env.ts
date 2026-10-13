@@ -51,6 +51,24 @@ const schema = z.object({
   ANTHROPIC_API_KEY: z.string().default(""),
   ANTHROPIC_MODEL: z.string().default("claude-opus-5-5"),
 
+  // ─── E-mail (optionnel, dégradation gracieuse) ─────────────────────────────
+  // Sans provider configuré, les e-mails sont journalisés (pas envoyés) : le
+  // flux d'inscription reste direct, rien ne casse.
+  //   - "none"   : journalise seulement (défaut)
+  //   - "resend" : envoi réel via l'API Resend (RESEND_API_KEY requis)
+  EMAIL_PROVIDER: z.enum(["none", "resend"]).default("none"),
+  RESEND_API_KEY: z.string().default(""),
+  EMAIL_FROM: z.string().default("Aperio <onboarding@resend.dev>"),
+  // URL publique du frontend, pour construire les liens des e-mails. Si vide,
+  // on retombe sur CORS_ORIGIN.
+  APP_BASE_URL: z.string().default(""),
+  // Si true, la connexion exige un e-mail vérifié. Défaut false pour ne pas
+  // bloquer les comptes existants.
+  REQUIRE_EMAIL_VERIFICATION: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900_000),
   // Limite globale par IP. 100/15min était trop strict pour un SPA qui sonde
   // l'état des jobs ; 1000/15min (~66/min) borne l'abus sans gêner l'usage

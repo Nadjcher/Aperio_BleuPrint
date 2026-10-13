@@ -33,6 +33,22 @@ Via helmet : **CSP** (`default-src 'self'`, `frame-ancestors 'none'`,
 preload), `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`,
 `X-Content-Type-Options: nosniff`, suppression de `X-Powered-By`.
 
+## E-mail : réinitialisation & vérification
+
+Couche e-mail à **dégradation gracieuse** (`email/index.ts`) : sans provider
+configuré (`EMAIL_PROVIDER=none`, défaut), les e-mails sont journalisés et
+l'inscription reste directe ; avec **Resend** (`EMAIL_PROVIDER=resend` +
+`RESEND_API_KEY`), ils sont envoyés pour de vrai.
+
+- **Mot de passe oublié** : `POST /auth/forgot-password` renvoie toujours `202`
+  (anti-énumération), et n'envoie un lien que si le compte existe. Le lien
+  (`POST /auth/reset-password`) est un **jeton à usage unique**, haché en base,
+  valable 1 h ; après reset, **toutes les sessions sont révoquées**.
+- **Vérification d'e-mail** : jeton à usage unique valable 24 h
+  (`POST /auth/verify-email`). Le 1er compte (admin) est auto-vérifié. Non
+  bloquant par défaut ; `REQUIRE_EMAIL_VERIFICATION=true` exige un e-mail
+  confirmé à la connexion.
+
 ## Autorisation (RBAC)
 
 Trois rôles hiérarchiques : `viewer` < `manager` < `admin`. Le premier compte

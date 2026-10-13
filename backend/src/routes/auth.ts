@@ -19,6 +19,13 @@ const updateMeSchema = z.object({
   name: z.string().min(1).max(120),
 });
 
+const forgotSchema = z.object({ email: z.string().email() });
+const resetSchema = z.object({
+  token: z.string().min(1),
+  password: passwordSchema,
+});
+const tokenSchema = z.object({ token: z.string().min(1) });
+
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -68,6 +75,46 @@ authRouter.post(
     res.json(tokens);
   },
 );
+
+/** Mot de passe oublié : envoie un lien (réponse neutre, anti-énumération). */
+authRouter.post(
+  "/auth/forgot-password",
+  authRateLimiter,
+  validateBody(forgotSchema),
+  async (req, res) => {
+    await authService.requestPasswordReset(req.body.email);
+    await audit({ action: "auth.forgot_password", ip: anonymizeIp(req.ip) });
+    res.status(202).json({ status: "sent_if_exists" });
+  },
+);
+
+/** Réinitialisation via jeton reçu par e-mail. */
+authRouter.post(
+  "/auth/reset-password",
+  authRateLimiter,
+  validateBody(resetSchema),
+  async (req, res) => {
+    await authService.resetPassword(req.body.token, req.body.password);
+    await audit({ action: "auth.reset_password", ip: anonymizeIp(req.ip) });
+    res.status(204).send();
+  },
+);
+
+/** Confirmation d'adresse e-mail via jeton. */
+authRouter.post(
+  "/auth/verify-email",
+  validateBody(tokenSchema),
+  async (req, res) => {
+    await authService.verifyEmail(req.body.token);
+    res.status(204).send();
+  },
+);
+
+/** Renvoi de l'e-mail de vérification (utilisateur connecté). */
+authRouter.post("/auth/resend-verification", requireAuth, async (req, res) => {
+  await authService.resendVerification(req.user!.sub);
+  res.status(202).json({ status: "sent_if_needed" });
+});
 
 authRouter.get("/auth/me", requireAuth, async (req, res) => {
   const user = await authService.getUser(req.user!.sub);
