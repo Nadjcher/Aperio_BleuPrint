@@ -17,12 +17,15 @@ async function process(job: Job): Promise<void> {
         break;
       }
       default:
-        await jobService.markFailed(job.id, `Type inconnu: ${job.type}`);
+        await jobService.fail(job, `Type inconnu: ${job.type}`);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur inconnue";
-    await jobService.markFailed(job.id, message);
-    logger.warn({ jobId: job.id, err }, "Job en échec");
+    const willRetry = await jobService.fail(job, message);
+    logger.warn(
+      { jobId: job.id, attempts: job.attempts, maxAttempts: job.maxAttempts, willRetry, err },
+      willRetry ? "Job en échec, nouvelle tentative programmée" : "Job en échec définitif",
+    );
   }
 }
 

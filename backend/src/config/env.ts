@@ -52,6 +52,10 @@ const schema = z.object({
     .default("true")
     .transform((v) => v === "true"),
   WORKER_POLL_MS: z.coerce.number().int().positive().default(2000),
+  // Retry des jobs en échec : nombre max de tentatives et base du back-off
+  // exponentiel (délai = base * 2^(attempts-1), borné à 1h).
+  JOB_MAX_ATTEMPTS: z.coerce.number().int().positive().default(3),
+  JOB_BACKOFF_BASE_MS: z.coerce.number().int().positive().default(5000),
 });
 
 const parsed = schema.safeParse(process.env);

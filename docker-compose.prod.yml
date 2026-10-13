@@ -38,8 +38,42 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      # Le worker tourne dans un service dédié (voir « worker » ci-dessous).
+      WORKER_ENABLED: "false"
     expose:
       - "4000"
+
+  # Worker dédié : dépile la file de jobs. Scalable via
+  #   docker compose -f docker-compose.prod.yml up -d --scale worker=3
+  # La file est en base et FOR UPDATE SKIP LOCKED rend le parallélisme sûr.
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["node", "dist/worker-main.js"]
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      # L'API joue les migrations au boot ; le worker démarre après pour éviter
+      # toute course sur l'application des migrations (plusieurs instances).
+      backend:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-aperio}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-aperio}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      WORKER_ENABLED: "true"
+      WORKER_POLL_MS: ${WORKER_POLL_MS:-2000}
+      JOB_MAX_ATTEMPTS: ${JOB_MAX_ATTEMPTS:-3}
+      JOB_BACKOFF_BASE_MS: ${JOB_BACKOFF_BASE_MS:-5000}
 
   web:
     build:

@@ -21,10 +21,23 @@ Services lancés :
 | Service | Rôle | Port |
 | --- | --- | --- |
 | `postgres` | Base de données (volume persistant `pgdata`) | interne |
-| `backend` | API Node/Express, migrations jouées au boot | interne `4000` |
+| `backend` | API Node/Express, migrations jouées au boot (`WORKER_ENABLED=false`) | interne `4000` |
+| `worker` | Dépile la file de jobs asynchrones (sync de projets) | interne |
 | `web` | Frontend statique + nginx (proxy `/api` → backend) | `${WEB_PORT}` (8080) |
 
 Le frontend et l'API sont servis sur la **même origine** (nginx proxifie `/api`), donc pas de CORS côté navigateur.
+
+### Exécution asynchrone & montée en charge du worker
+
+Les syncs de projet sont **asynchrones** : l'API enfile un job (réponse `202` + `jobId`) et un **worker dédié** le dépile. La file vit en base et le worker réclame les jobs avec `FOR UPDATE SKIP LOCKED`, donc on peut lancer **plusieurs instances** sans qu'un job soit pris deux fois :
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --scale worker=3
+```
+
+L'API tourne avec `WORKER_ENABLED=false` (le travail est délégué au service `worker`). En dev / sur une plateforme managée à un seul process, on peut au contraire laisser `WORKER_ENABLED=true` sur l'API et ne pas déployer de worker séparé.
+
+**Retry avec back-off** : un job en échec est reprogrammé automatiquement tant qu'il reste des tentatives (`JOB_MAX_ATTEMPTS`, 3 par défaut), avec un back-off exponentiel (`JOB_BACKOFF_BASE_MS` × 2^(n-1), borné à 1 h). Après épuisement des tentatives il passe en `failed`.
 
 **TLS** : placer un reverse-proxy (Caddy, Traefik, ou nginx hôte) devant `web` pour le HTTPS + HSTS, ou terminer le TLS au niveau du cloud. Mettre `CORS_ORIGIN` à l'URL publique HTTPS.
 

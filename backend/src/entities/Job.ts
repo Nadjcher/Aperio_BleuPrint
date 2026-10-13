@@ -28,6 +28,14 @@ export class Job {
   @Column({ type: "int", default: 0 })
   attempts!: number;
 
+  @Column({ type: "int", default: 3 })
+  maxAttempts!: number;
+
+  /** Éligibilité : le worker ne prend le job que si runAfter <= now() (back-off). */
+  @Index()
+  @Column({ type: "timestamptz", default: () => "now()" })
+  runAfter!: Date;
+
   @Column({ type: "jsonb", nullable: true })
   result!: Record<string, unknown> | null;
 
