@@ -40,7 +40,7 @@ Fiabilité et passage à l'échelle.
 - [x] Déploiement Docker (backend + frontend nginx + Postgres) — voir `DEPLOY.md`
 - [x] Durcissement sécurité & conformité RGPD (reuse-detection, iss/aud, politique MDP, HSTS/CSP, rectification, purge rétention — voir `SECURITY.md`)
 - [x] Observabilité, monitoring, alerting opérationnel (Prometheus + Grafana + Alertmanager — voir `OBSERVABILITY.md`)
-- [ ] Montée en charge : 50+ projets
+- [x] Montée en charge : 50+ projets (test de charge réel — voir `LOADTEST.md`)
 - [ ] Onboarding et documentation utilisateur
 
 ## État de ce dépôt

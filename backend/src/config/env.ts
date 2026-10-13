@@ -47,7 +47,10 @@ const schema = z.object({
   ANTHROPIC_MODEL: z.string().default("claude-opus-5-5"),
 
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900_000),
-  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+  // Limite globale par IP. 100/15min était trop strict pour un SPA qui sonde
+  // l'état des jobs ; 1000/15min (~66/min) borne l'abus sans gêner l'usage
+  // normal. Les routes d'auth gardent leur limiteur strict (10/15min).
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(1000),
 
   // Observabilité
   // Niveau de log (override : par défaut info en prod, debug sinon).
