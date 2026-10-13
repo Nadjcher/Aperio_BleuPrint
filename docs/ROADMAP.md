@@ -39,7 +39,7 @@ Fiabilité et passage à l'échelle.
 - [x] LLM gratuit type Llama (Ollama / Groq, API compatible OpenAI)
 - [x] Déploiement Docker (backend + frontend nginx + Postgres) — voir `DEPLOY.md`
 - [ ] Durcissement sécurité & conformité RGPD (voir `SECURITY.md`)
-- [ ] Observabilité, monitoring, alerting opérationnel
+- [x] Observabilité, monitoring, alerting opérationnel (Prometheus + Grafana + Alertmanager — voir `OBSERVABILITY.md`)
 - [ ] Montée en charge : 50+ projets
 - [ ] Onboarding et documentation utilisateur
 

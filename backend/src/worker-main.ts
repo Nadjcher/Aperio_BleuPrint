@@ -1,7 +1,43 @@
 import "reflect-metadata";
+import { createServer, type Server } from "node:http";
 import { AppDataSource } from "./db/data-source.js";
+import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
+import { registry } from "./observability/metrics.js";
 import { startWorker, stopWorker } from "./workers/worker.js";
+
+/**
+ * Petit serveur HTTP dédié aux sondes : le worker n'a pas d'API, mais Prometheus
+ * doit pouvoir le scraper (/metrics) et les orchestrateurs le sonder (/healthz).
+ */
+function startMetricsServer(): Server {
+  const server = createServer((req, res) => {
+    if (req.url === "/healthz") {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ live: true }));
+      return;
+    }
+    if (req.url === "/metrics" && env.METRICS_ENABLED) {
+      if (env.METRICS_TOKEN && req.headers.authorization !== `Bearer ${env.METRICS_TOKEN}`) {
+        res.writeHead(401).end();
+        return;
+      }
+      registry
+        .metrics()
+        .then((body) => {
+          res.writeHead(200, { "content-type": registry.contentType });
+          res.end(body);
+        })
+        .catch(() => res.writeHead(500).end());
+      return;
+    }
+    res.writeHead(404).end();
+  });
+  server.listen(env.WORKER_METRICS_PORT, () => {
+    logger.info({ port: env.WORKER_METRICS_PORT }, "Worker : endpoint /metrics exposé");
+  });
+  return server;
+}
 
 /**
  * Attend que le schéma soit prêt (table `jobs` présente). Les migrations sont
@@ -33,12 +69,15 @@ async function main(): Promise<void> {
   await AppDataSource.initialize();
   logger.info("Worker : base de données connectée");
 
+  const metricsServer = env.METRICS_ENABLED ? startMetricsServer() : null;
+
   await waitForSchema();
   startWorker();
 
   const shutdown = (signal: string): void => {
     logger.info({ signal }, "Arrêt du worker en cours");
     stopWorker();
+    metricsServer?.close();
     void AppDataSource.destroy().then(() => process.exit(0));
   };
   process.on("SIGINT", () => shutdown("SIGINT"));

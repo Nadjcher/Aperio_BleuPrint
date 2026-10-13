@@ -2,7 +2,7 @@ import { pino } from "pino";
 import { env, isProd } from "../config/env.js";
 
 export const logger = pino({
-  level: isProd ? "info" : "debug",
+  level: env.LOG_LEVEL ?? (isProd ? "info" : "debug"),
   // En dev, une sortie lisible ; en prod, du JSON structuré.
   transport: isProd
     ? undefined

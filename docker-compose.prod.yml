@@ -40,6 +40,7 @@ services:
       LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
       # Le worker tourne dans un service dédié (voir « worker » ci-dessous).
       WORKER_ENABLED: "false"
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
     expose:
       - "4000"
 
@@ -76,6 +77,11 @@ services:
       WORKER_POLL_MS: ${WORKER_POLL_MS:-2000}
       JOB_MAX_ATTEMPTS: ${JOB_MAX_ATTEMPTS:-3}
       JOB_BACKOFF_BASE_MS: ${JOB_BACKOFF_BASE_MS:-5000}
+      WORKER_METRICS_PORT: 9091
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+    # Endpoint /metrics scrapé par Prometheus (voir docker-compose.observability.yml).
+    expose:
+      - "9091"
 
   web:
     build:

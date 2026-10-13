@@ -5,6 +5,9 @@ import { logger } from "./utils/logger.js";
 import { applySecurity, globalRateLimiter } from "./security/index.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { healthRouter } from "./routes/health.js";
+import { metricsRouter } from "./routes/metrics.js";
+import { metricsMiddleware } from "./observability/metrics.js";
+import { env } from "./config/env.js";
 import { authRouter } from "./routes/auth.js";
 import { projectsRouter } from "./routes/projects.js";
 import { signalsRouter } from "./routes/signals.js";
@@ -21,8 +24,12 @@ export function createApp(): Express {
   app.use(pinoHttp({ logger }));
   app.use(express.json({ limit: "1mb" }));
 
-  // Santé hors rate limiting pour les sondes.
+  // Instrumentation Prometheus de toutes les requêtes.
+  if (env.METRICS_ENABLED) app.use(metricsMiddleware);
+
+  // Santé et métriques hors rate limiting (sondes & scrape Prometheus).
   app.use(healthRouter);
+  app.use(metricsRouter);
 
   // API versionnée et limitée en débit.
   const api = express.Router();

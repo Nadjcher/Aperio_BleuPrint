@@ -46,6 +46,21 @@ const schema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900_000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
 
+  // Observabilité
+  // Niveau de log (override : par défaut info en prod, debug sinon).
+  LOG_LEVEL: z
+    .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+    .optional(),
+  // Exposition des métriques Prometheus (/metrics).
+  METRICS_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  // Jeton optionnel : si défini, /metrics exige Authorization: Bearer <token>.
+  METRICS_TOKEN: z.string().default(""),
+  // Port du endpoint /metrics du worker dédié (pas de serveur HTTP sinon).
+  WORKER_METRICS_PORT: z.coerce.number().int().positive().default(9091),
+
   // Jouer les migrations au boot (prod). À désactiver sur les process qui ne
   // doivent PAS migrer (ex. worker dédié) pour éviter toute course concurrente :
   // un seul process (l'API) applique les migrations, les autres attendent le schéma.

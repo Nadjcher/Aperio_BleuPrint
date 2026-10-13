@@ -1,0 +1,45 @@
+# Prometheus — scrape de l'API et des workers Aperio + règles d'alerte.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    env: production
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # API (Express) — /metrics sur le port applicatif.
+  - job_name: aperio-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["backend:4000"]
+        labels:
+          component: api
+    # Si METRICS_TOKEN est défini côté API, décommenter :
+    # authorization:
+    #   type: Bearer
+    #   credentials_file: /etc/prometheus/metrics_token
+
+  # Workers dédiés — /metrics sur WORKER_METRICS_PORT (9091).
+  # Avec `--scale worker=N`, le DNS Docker renvoie toutes les IP : dns_sd les
+  # découvre automatiquement.
+  - job_name: aperio-worker
+    metrics_path: /metrics
+    dns_sd_configs:
+      - names: ["worker"]
+        type: A
+        port: 9091
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        target_label: component
+        replacement: worker

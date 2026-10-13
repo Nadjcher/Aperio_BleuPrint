@@ -1,0 +1,92 @@
+groups:
+  - name: aperio-availability
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} injoignable"
+          description: "La cible {{ $labels.instance }} ({{ $labels.job }}) ne répond plus depuis 1 min."
+
+      - alert: HighHttp5xxRate
+        # Plus de 5 % de 5xx sur 5 min (et un minimum de trafic).
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taux de 5xx élevé sur l'API"
+          description: "{{ $value | humanizePercentage }} des requêtes renvoient une 5xx sur les 5 dernières minutes."
+
+      - alert: HighApiLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket{component="api"}[5m]))
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence API p95 > 1s"
+          description: "Le p95 de latence HTTP dépasse 1s depuis 10 min (valeur: {{ $value | humanizeDuration }})."
+
+  - name: aperio-jobs
+    rules:
+      - alert: JobBacklogGrowing
+        expr: max(jobs_by_status{status="pending"}) > 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "File de jobs en attente anormalement haute"
+          description: "{{ $value }} jobs en attente depuis 10 min — envisager de scaler le worker (--scale worker=N)."
+
+      - alert: HighJobFailureRate
+        expr: |
+          sum(rate(jobs_processed_total{outcome="failed"}[10m]))
+            /
+          sum(rate(jobs_processed_total[10m])) > 0.2
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taux d'échec définitif des jobs élevé"
+          description: "{{ $value | humanizePercentage }} des jobs échouent définitivement (après retries) sur 10 min."
+
+      - alert: WorkerStalled
+        # Des jobs attendent mais aucun n'est traité : worker bloqué/absent.
+        expr: |
+          max(jobs_by_status{status="pending"}) > 0
+            and
+          sum(increase(jobs_processed_total[15m])) == 0
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Worker à l'arrêt alors que la file n'est pas vide"
+          description: "Des jobs sont en attente mais aucun n'a été traité depuis 15 min."
+
+  - name: aperio-runtime
+    rules:
+      - alert: EventLoopLagHigh
+        expr: nodejs_eventloop_lag_p99_seconds > 0.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Event-loop Node saturé ({{ $labels.component }})"
+          description: "Le lag p99 de l'event-loop dépasse 200ms depuis 10 min sur {{ $labels.instance }}."
+
+      - alert: HighResidentMemory
+        expr: process_resident_memory_bytes > 512 * 1024 * 1024
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Mémoire résidente élevée ({{ $labels.component }})"
+          description: "RSS > 512 Mio depuis 15 min sur {{ $labels.instance }} (valeur: {{ $value | humanize1024 }}B)."
