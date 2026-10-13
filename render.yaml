@@ -1,0 +1,81 @@
+# Render Blueprint — API + worker Aperio (base de données : Neon, externe).
+# Déploiement : Render Dashboard → New → Blueprint → connecter ce repo.
+# Render lit ce fichier et crée les deux services. Renseignez les variables
+# marquées `sync: false` dans le dashboard (secrets), DATABASE_URL = chaîne Neon.
+#
+# Le frontend est déployé séparément sur Vercel (voir frontend/vercel.json).
+services:
+  # ─── API (web) ──────────────────────────────────────────────────────────────
+  - type: web
+    name: aperio-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: RUN_MIGRATIONS
+        value: "true" # l'API applique les migrations au boot
+      - key: WORKER_ENABLED
+        value: "false" # le worker tourne dans un service dédié
+      - key: DATABASE_SSL
+        value: "true" # Neon exige SSL
+      - key: DATABASE_URL
+        sync: false # chaîne de connexion Neon (…?sslmode=require)
+      - key: CORS_ORIGIN
+        sync: false # URL publique du frontend Vercel (https://…)
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FIELD_ENCRYPTION_KEY
+        sync: false # openssl rand -hex 32
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: LLM_PROVIDER
+        value: none
+      - key: METRICS_TOKEN
+        sync: false # protège /metrics (optionnel mais recommandé)
+
+  # ─── Worker dédié (background) ──────────────────────────────────────────────
+  - type: worker
+    name: aperio-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    dockerCommand: node dist/worker-main.js
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RUN_MIGRATIONS
+        value: "false" # l'API migre ; le worker attend le schéma
+      - key: WORKER_ENABLED
+        value: "true"
+      - key: DATABASE_SSL
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      # Mêmes secrets JWT/chiffrement que l'API (le worker lit la même base).
+      - key: JWT_ACCESS_SECRET
+        fromService:
+          type: web
+          name: aperio-api
+          envVarKey: JWT_ACCESS_SECRET
+      - key: JWT_REFRESH_SECRET
+        fromService:
+          type: web
+          name: aperio-api
+          envVarKey: JWT_REFRESH_SECRET
+      - key: FIELD_ENCRYPTION_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: LLM_PROVIDER
+        value: none

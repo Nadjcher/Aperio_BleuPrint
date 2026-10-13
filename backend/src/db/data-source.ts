@@ -17,6 +17,9 @@ import { Job } from "../entities/Job.js";
 export const AppDataSource = new DataSource({
   type: "postgres",
   url: env.DATABASE_URL,
+  // SSL pour les bases managées (Neon/Supabase/…). rejectUnauthorized:false
+  // suffit : la connexion est chiffrée, le CA du fournisseur n'est pas épinglé.
+  ssl: env.DATABASE_SSL ? { rejectUnauthorized: false } : false,
   // En dev : synchronisation automatique du schéma pour démarrer vite.
   // En prod : migrations uniquement (synchronize désactivé, migrations jouées au boot).
   synchronize: !isProd,

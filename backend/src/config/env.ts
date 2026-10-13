@@ -13,6 +13,11 @@ const schema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
 
   DATABASE_URL: z.string().min(1, "DATABASE_URL est requis"),
+  // SSL vers la base (requis par Neon, Supabase, Render Postgres externe…).
+  DATABASE_SSL: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
 
   JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET trop court"),
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET trop court"),

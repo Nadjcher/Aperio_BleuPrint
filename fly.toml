@@ -1,0 +1,51 @@
+# Fly.io — alternative à Render pour backend + worker (base : Neon).
+# Déploiement :
+#   fly launch --no-deploy --copy-config --name aperio-api   # crée l'app
+#   fly secrets set DATABASE_URL='postgres://…neon…?sslmode=require' \
+#                   JWT_ACCESS_SECRET=$(openssl rand -hex 32) \
+#                   JWT_REFRESH_SECRET=$(openssl rand -hex 32) \
+#                   FIELD_ENCRYPTION_KEY=$(openssl rand -hex 32) \
+#                   CORS_ORIGIN='https://votre-frontend.vercel.app' \
+#                   GITHUB_TOKEN='…'
+#   fly deploy
+#
+# Un seul app, deux process partageant la même image :
+#   - app    : l'API HTTP (joue les migrations au boot)
+#   - worker : le worker dédié (RUN_MIGRATIONS=false, attend le schéma)
+app = "aperio-api"
+primary_region = "cdg"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "4000"
+  DATABASE_SSL = "true"
+  RUN_MIGRATIONS = "true"   # pour le process `app`
+  WORKER_ENABLED = "false"  # l'API ne dépile pas ; le worker dédié s'en charge
+  LLM_PROVIDER = "none"
+
+[processes]
+  app = "node dist/index.js"
+  # Le worker force RUN_MIGRATIONS=false (pas de course) et WORKER_ENABLED=true.
+  worker = "sh -c 'RUN_MIGRATIONS=false WORKER_ENABLED=true node dist/worker-main.js'"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    interval = "15s"
+    timeout = "3s"
+
+# Pour scaler le worker : fly scale count worker=3
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
