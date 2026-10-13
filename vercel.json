@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://aperio-api.onrender.com/api/:path*"
+      "destination": "https://aperio-api-9q57.onrender.com/api/:path*"
     },
     {
       "source": "/((?!api/).*)",
