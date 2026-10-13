@@ -69,8 +69,51 @@ export function ProjectsPage() {
       </form>
 
       {projects.length === 0 ? (
-        <div className="pm-card p-10 text-center text-sm text-slate-500">
-          Aucun projet pour l'instant — créez le premier ci-dessus.
+        <div className="pm-card p-8">
+          <div className="pm-eyebrow">01 · Premiers pas</div>
+          <h2 className="mt-2 text-lg font-semibold text-white">
+            Bienvenue sur Aperio 👋
+          </h2>
+          <p className="mt-1 max-w-2xl text-sm text-slate-400">
+            Aperio surveille vos dépôts en continu, détecte les signaux faibles
+            et laisse des agents diagnostiquer, planifier et rendre compte. Trois
+            étapes pour démarrer :
+          </p>
+          <ol className="mt-6 grid gap-4 sm:grid-cols-3">
+            {[
+              { n: "1", t: "Reliez un dépôt", d: "Renseignez owner/repo dans le formulaire ci-dessus." },
+              { n: "2", t: "Lancez une synchronisation", d: "Depuis la fiche projet : Aperio collecte commits, PRs et issues." },
+              { n: "3", t: "Lisez les décisions", d: "Les agents remontent anomalies, plan correctif et rapports." },
+            ].map((s) => (
+              <li key={s.n} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/15 font-mono text-sm text-brand">
+                  {s.n}
+                </div>
+                <div className="mt-3 font-semibold text-slate-100">{s.t}</div>
+                <p className="mt-1 text-xs text-slate-400">{s.d}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-6 flex items-center gap-3">
+            <button
+              type="button"
+              className="pm-btn-ghost"
+              onClick={() => {
+                setName("Démo — React");
+                setRepo("facebook/react");
+              }}
+            >
+              Pré-remplir un exemple (facebook/react)
+            </button>
+            <a
+              href="https://github.com/Nadjcher/ajc_10/blob/main/docs/USER_GUIDE.md"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-brand hover:underline"
+            >
+              Guide d'utilisation →
+            </a>
+          </div>
         </div>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">

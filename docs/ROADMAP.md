@@ -41,7 +41,7 @@ Fiabilité et passage à l'échelle.
 - [x] Durcissement sécurité & conformité RGPD (reuse-detection, iss/aud, politique MDP, HSTS/CSP, rectification, purge rétention — voir `SECURITY.md`)
 - [x] Observabilité, monitoring, alerting opérationnel (Prometheus + Grafana + Alertmanager — voir `OBSERVABILITY.md`)
 - [x] Montée en charge : 50+ projets (test de charge réel — voir `LOADTEST.md`)
-- [ ] Onboarding et documentation utilisateur
+- [x] Onboarding et documentation utilisateur (onboarding 3 étapes in-app + `USER_GUIDE.md`)
 
 ## État de ce dépôt
 
