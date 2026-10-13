@@ -3,6 +3,7 @@ import { z } from "zod";
 import { validateBody } from "../middleware/validate.js";
 import { requireAuth } from "../middleware/auth.js";
 import { authRateLimiter } from "../security/index.js";
+import { passwordSchema } from "../security/password.js";
 import * as authService from "../services/authService.js";
 import { audit, anonymizeIp } from "../services/auditService.js";
 
@@ -10,7 +11,11 @@ export const authRouter = Router();
 
 const registerSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(10, "Mot de passe de 10 caractères minimum"),
+  password: passwordSchema,
+  name: z.string().min(1).max(120),
+});
+
+const updateMeSchema = z.object({
   name: z.string().min(1).max(120),
 });
 
@@ -68,6 +73,24 @@ authRouter.get("/auth/me", requireAuth, async (req, res) => {
   const user = await authService.getUser(req.user!.sub);
   res.json(user);
 });
+
+/** Droit de rectification RGPD : mise à jour du profil. */
+authRouter.patch(
+  "/auth/me",
+  requireAuth,
+  validateBody(updateMeSchema),
+  async (req, res) => {
+    const user = await authService.updateProfile(req.user!.sub, {
+      name: req.body.name,
+    });
+    await audit({
+      actorId: req.user!.sub,
+      action: "profile.update",
+      ip: anonymizeIp(req.ip),
+    });
+    res.json(user);
+  },
+);
 
 authRouter.post("/auth/logout", requireAuth, async (req, res) => {
   await authService.revokeAllForUser(req.user!.sub);

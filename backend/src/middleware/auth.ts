@@ -25,7 +25,10 @@ export function requireAuth(
   }
   const token = header.slice("Bearer ".length);
   try {
-    const payload = jwt.verify(token, env.JWT_ACCESS_SECRET) as AccessTokenPayload;
+    const payload = jwt.verify(token, env.JWT_ACCESS_SECRET, {
+      issuer: env.JWT_ISSUER,
+      audience: env.JWT_AUDIENCE,
+    }) as AccessTokenPayload;
     req.user = payload;
     next();
   } catch {

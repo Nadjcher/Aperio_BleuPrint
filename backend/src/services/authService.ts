@@ -11,6 +11,7 @@ import { AppDataSource } from "../db/data-source.js";
 import { User } from "../entities/User.js";
 import { RefreshToken } from "../entities/RefreshToken.js";
 import { env } from "../config/env.js";
+import { logger } from "../utils/logger.js";
 import { AppError } from "../middleware/errorHandler.js";
 
 const users = () => AppDataSource.getRepository(User);
@@ -35,6 +36,8 @@ function sha256(value: string): string {
 function signAccess(payload: AccessTokenPayload): string {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
     expiresIn: env.JWT_ACCESS_TTL,
+    issuer: env.JWT_ISSUER,
+    audience: env.JWT_AUDIENCE,
   } as jwt.SignOptions);
 }
 
@@ -98,9 +101,23 @@ export async function login(
 export async function refresh(rawToken: string): Promise<AuthTokens> {
   const tokenHash = sha256(rawToken);
   const stored = await refreshTokens().findOne({ where: { tokenHash } });
-  if (!stored || stored.revoked || stored.expiresAt.getTime() < Date.now()) {
+
+  if (!stored) {
     throw new AppError(401, "invalid_refresh", "Refresh token invalide");
   }
+
+  // Détection de réutilisation : un token déjà rotaté (révoqué) qui ressurgit
+  // signale un vol probable → on révoque TOUTE la famille de l'utilisateur.
+  if (stored.revoked) {
+    await revokeAllForUser(stored.userId);
+    logger.warn({ userId: stored.userId }, "Réutilisation de refresh token détectée — famille révoquée");
+    throw new AppError(401, "refresh_reuse", "Refresh token déjà utilisé");
+  }
+
+  if (stored.expiresAt.getTime() < Date.now()) {
+    throw new AppError(401, "invalid_refresh", "Refresh token invalide");
+  }
+
   // Rotation : on révoque l'ancien et on en émet un nouveau.
   stored.revoked = true;
   await refreshTokens().save(stored);
@@ -117,4 +134,16 @@ export async function getUser(userId: string): Promise<UserPublic> {
   const user = await users().findOne({ where: { id: userId } });
   if (!user) throw new AppError(404, "not_found", "Utilisateur introuvable");
   return toPublic(user);
+}
+
+/** Droit de rectification RGPD : met à jour le profil (nom). */
+export async function updateProfile(
+  userId: string,
+  changes: { name?: string },
+): Promise<UserPublic> {
+  const user = await users().findOne({ where: { id: userId } });
+  if (!user) throw new AppError(404, "not_found", "Utilisateur introuvable");
+  if (changes.name !== undefined) user.name = changes.name;
+  const saved = await users().save(user);
+  return toPublic(saved);
 }

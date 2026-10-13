@@ -79,6 +79,8 @@ services:
       JOB_BACKOFF_BASE_MS: ${JOB_BACKOFF_BASE_MS:-5000}
       WORKER_METRICS_PORT: 9091
       METRICS_TOKEN: ${METRICS_TOKEN:-}
+      # RGPD — conservation limitée (purge portée par le worker).
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS:-365}
     # Endpoint /metrics scrapé par Prometheus (voir docker-compose.observability.yml).
     expose:
       - "9091"

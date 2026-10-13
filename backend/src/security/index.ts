@@ -2,7 +2,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import type { Express } from "express";
-import { env } from "../config/env.js";
+import { env, isProd } from "../config/env.js";
 
 /**
  * Couche 1 (réseau) + durcissement HTTP.
@@ -19,9 +19,18 @@ export function applySecurity(app: Express): void {
         directives: {
           defaultSrc: ["'self'"],
           connectSrc: ["'self'", env.CORS_ORIGIN],
+          frameAncestors: ["'none'"],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
         },
       },
       crossOriginResourcePolicy: { policy: "same-site" },
+      referrerPolicy: { policy: "no-referrer" },
+      frameguard: { action: "deny" },
+      // HSTS seulement en prod (ignoré/piégeant sur http://localhost).
+      hsts: isProd
+        ? { maxAge: 15_552_000, includeSubDomains: true, preload: true }
+        : false,
     }),
   );
 

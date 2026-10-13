@@ -95,9 +95,10 @@ export function LoginPage() {
               <input
                 className="pm-input"
                 type="password"
-                placeholder="10 caractères minimum"
+                placeholder={mode === "register" ? "12 caractères min. (lettres + chiffres)" : "Votre mot de passe"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                minLength={mode === "register" ? 12 : undefined}
                 required
               />
             </div>

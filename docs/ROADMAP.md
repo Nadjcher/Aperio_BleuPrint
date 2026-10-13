@@ -38,7 +38,7 @@ Fiabilité et passage à l'échelle.
 - [x] Migrations de production (remplacement de `synchronize`, jouées au boot)
 - [x] LLM gratuit type Llama (Ollama / Groq, API compatible OpenAI)
 - [x] Déploiement Docker (backend + frontend nginx + Postgres) — voir `DEPLOY.md`
-- [ ] Durcissement sécurité & conformité RGPD (voir `SECURITY.md`)
+- [x] Durcissement sécurité & conformité RGPD (reuse-detection, iss/aud, politique MDP, HSTS/CSP, rectification, purge rétention — voir `SECURITY.md`)
 - [x] Observabilité, monitoring, alerting opérationnel (Prometheus + Grafana + Alertmanager — voir `OBSERVABILITY.md`)
 - [ ] Montée en charge : 50+ projets
 - [ ] Onboarding et documentation utilisateur

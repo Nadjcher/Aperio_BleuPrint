@@ -18,6 +18,9 @@ const schema = z.object({
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET trop court"),
   JWT_ACCESS_TTL: z.string().default("15m"),
   JWT_REFRESH_TTL: z.string().default("7d"),
+  // Claims iss/aud : le jeton n'est accepté que s'il a été émis par et pour ce service.
+  JWT_ISSUER: z.string().default("aperio"),
+  JWT_AUDIENCE: z.string().default("aperio-api"),
 
   FIELD_ENCRYPTION_KEY: z
     .string()
@@ -60,6 +63,11 @@ const schema = z.object({
   METRICS_TOKEN: z.string().default(""),
   // Port du endpoint /metrics du worker dédié (pas de serveur HTTP sinon).
   WORKER_METRICS_PORT: z.coerce.number().int().positive().default(9091),
+
+  // RGPD — conservation limitée. Purge périodique (jouée par le worker) des
+  // journaux d'audit anciens et des refresh tokens expirés/révoqués.
+  AUDIT_RETENTION_DAYS: z.coerce.number().int().positive().default(365),
+  MAINTENANCE_INTERVAL_MS: z.coerce.number().int().positive().default(86_400_000),
 
   // Jouer les migrations au boot (prod). À désactiver sur les process qui ne
   // doivent PAS migrer (ex. worker dédié) pour éviter toute course concurrente :

@@ -15,11 +15,23 @@ la donnée.
 ## Authentification
 
 - Mots de passe hachés avec **bcrypt** (12 rounds), jamais stockés en clair.
-- **JWT d'accès** court (15 min) + **refresh token** rotatif (7 j), stocké haché
-  (SHA-256) et révocable.
+- **Politique de mot de passe** : ≥ 12 caractères, au moins une lettre et un
+  chiffre, rejet des bases triviales (`security/password.ts`).
+- **JWT d'accès** court (15 min) avec claims **issuer/audience** vérifiés + **refresh
+  token** rotatif (7 j), stocké haché (SHA-256) et révocable.
+- **Détection de réutilisation du refresh token** : si un token déjà rotaté
+  (révoqué) ressurgit, c'est le signe d'un vol → **toute la famille de tokens de
+  l'utilisateur est révoquée** (`authService.refresh`).
 - Comparaison de mot de passe à temps constant même si l'utilisateur n'existe
   pas, pour limiter les oracles de timing.
 - Limiteur strict sur les routes d'authentification (anti brute-force).
+
+## En-têtes de sécurité HTTP
+
+Via helmet : **CSP** (`default-src 'self'`, `frame-ancestors 'none'`,
+`object-src 'none'`, `base-uri 'self'`), **HSTS** (prod, 180 j, includeSubDomains,
+preload), `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY`,
+`X-Content-Type-Options: nosniff`, suppression de `X-Powered-By`.
 
 ## Autorisation (RBAC)
 
@@ -44,10 +56,14 @@ sensibles, avec IV aléatoire et tag d'authentification. La clé provient de
 | Droit | Endpoint | Détail |
 | --- | --- | --- |
 | Accès & portabilité | `GET /api/v1/gdpr/export` | Export JSON structuré de toutes les données |
+| Rectification | `PATCH /api/v1/auth/me` | Mise à jour du profil (nom) |
 | Effacement | `DELETE /api/v1/gdpr/me` | Suppression complète ; audit anonymisé (actorId → null) |
 
 Principes appliqués : minimisation (pas d'email brut dans les signaux, IP
-tronquée), consentement traçable, et conservation limitée.
+tronquée), consentement traçable, et **conservation limitée** — une purge
+périodique (`maintenanceService`, portée par le worker) supprime les journaux
+d'audit au-delà de `AUDIT_RETENTION_DAYS` (365 j par défaut) et les refresh
+tokens expirés/révoqués.
 
 ## Réponse à incident
 
@@ -59,7 +75,7 @@ tronquée), consentement traçable, et conservation limitée.
 ## À faire avant la production
 
 - [ ] Remplacer tous les secrets `change-me` et la `FIELD_ENCRYPTION_KEY` de dev.
-- [ ] Désactiver `synchronize` TypeORM au profit de migrations versionnées.
-- [ ] Terminaison TLS en frontal (reverse proxy) et HSTS.
+- [x] Désactiver `synchronize` TypeORM au profit de migrations versionnées.
+- [x] HSTS activé côté app (prod) ; terminaison TLS en frontal (reverse proxy) à prévoir.
 - [ ] Rotation des secrets et gestion via un coffre (vault).
 - [ ] SOC 2 (optionnel) si des clients entreprise l'exigent.
