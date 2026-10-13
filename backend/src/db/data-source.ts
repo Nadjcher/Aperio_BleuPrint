@@ -1,4 +1,6 @@
 import "reflect-metadata";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { DataSource } from "typeorm";
 import { env, isProd } from "../config/env.js";
 import { User } from "../entities/User.js";
@@ -18,7 +20,9 @@ export const AppDataSource = new DataSource({
   // En dev : synchronisation automatique du schéma pour démarrer vite.
   // En prod : migrations uniquement (synchronize désactivé, migrations jouées au boot).
   synchronize: !isProd,
-  migrationsRun: isProd,
+  // Un seul process applique les migrations (RUN_MIGRATIONS=true, défaut) ;
+  // les workers dédiés démarrent avec RUN_MIGRATIONS=false et attendent le schéma.
+  migrationsRun: isProd && env.RUN_MIGRATIONS,
   logging: false,
   entities: [
     User,
@@ -32,6 +36,14 @@ export const AppDataSource = new DataSource({
     Report,
     Job,
   ],
-  // En prod on charge les migrations compilées (dist), sinon les sources (CLI dev).
-  migrations: [isProd ? "dist/migrations/*.js" : "src/migrations/*.ts"],
+  // Chemin résolu depuis ce module (et non le cwd) : robuste quel que soit le
+  // répertoire de lancement. En prod → dist/migrations/*.js, en dev → *.ts.
+  migrations: [
+    join(
+      dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "migrations",
+      isProd ? "*.js" : "*.ts",
+    ),
+  ],
 });

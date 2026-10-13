@@ -70,6 +70,8 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      # L'API applique les migrations ; le worker attend le schéma (pas de course).
+      RUN_MIGRATIONS: "false"
       WORKER_ENABLED: "true"
       WORKER_POLL_MS: ${WORKER_POLL_MS:-2000}
       JOB_MAX_ATTEMPTS: ${JOB_MAX_ATTEMPTS:-3}

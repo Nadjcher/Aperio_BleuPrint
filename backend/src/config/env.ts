@@ -46,6 +46,14 @@ const schema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900_000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
 
+  // Jouer les migrations au boot (prod). À désactiver sur les process qui ne
+  // doivent PAS migrer (ex. worker dédié) pour éviter toute course concurrente :
+  // un seul process (l'API) applique les migrations, les autres attendent le schéma.
+  RUN_MIGRATIONS: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+
   // Worker asynchrone (exécution différée des pipelines)
   WORKER_ENABLED: z
     .enum(["true", "false"])
