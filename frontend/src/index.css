@@ -87,7 +87,7 @@ body {
   }
 
   .pm-label {
-    @apply mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400;
+    @apply mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-300;
   }
 
   /* CTA : bleu électrique, halo maîtrisé */

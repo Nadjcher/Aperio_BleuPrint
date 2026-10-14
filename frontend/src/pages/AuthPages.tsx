@@ -56,8 +56,9 @@ export function ForgotPasswordPage() {
             nouveau mot de passe.
           </p>
           <div>
-            <label className="pm-label">E-mail</label>
+            <label htmlFor="fp-email" className="pm-label">E-mail</label>
             <input
+              id="fp-email"
               className="pm-input"
               type="email"
               value={email}
@@ -118,8 +119,9 @@ export function ResetPasswordPage() {
       ) : (
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label className="pm-label">Nouveau mot de passe</label>
+            <label htmlFor="rp-password" className="pm-label">Nouveau mot de passe</label>
             <input
+              id="rp-password"
               className="pm-input"
               type="password"
               placeholder="12 caractères min. (lettres + chiffres)"
@@ -160,16 +162,17 @@ export function UpgradePage() {
       </p>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="pm-label">Nom</label>
-          <input className="pm-input" value={name} onChange={(e) => setName(e.target.value)} required />
+          <label htmlFor="up-name" className="pm-label">Nom</label>
+          <input id="up-name" className="pm-input" value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
         <div>
-          <label className="pm-label">E-mail</label>
-          <input className="pm-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <label htmlFor="up-email" className="pm-label">E-mail</label>
+          <input id="up-email" className="pm-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div>
-          <label className="pm-label">Mot de passe</label>
+          <label htmlFor="up-password" className="pm-label">Mot de passe</label>
           <input
+            id="up-password"
             className="pm-input"
             type="password"
             placeholder="12 caractères min. (lettres + chiffres)"

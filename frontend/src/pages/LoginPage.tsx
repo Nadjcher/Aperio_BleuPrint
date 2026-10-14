@@ -45,8 +45,15 @@ export function LoginPage() {
         </div>
 
         <div className="pm-card pm-ticks relative p-7">
-          <div className="mb-6 flex rounded-lg border border-blue-400/15 bg-white/[0.03] p-1 text-sm">
+          <div
+            className="mb-6 flex rounded-lg border border-blue-400/15 bg-white/[0.03] p-1 text-sm"
+            role="tablist"
+            aria-label="Connexion ou inscription"
+          >
             <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "login"}
               onClick={() => setMode("login")}
               className={`flex-1 rounded-lg py-2 font-medium transition ${
                 mode === "login"
@@ -57,6 +64,9 @@ export function LoginPage() {
               Connexion
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "register"}
               onClick={() => setMode("register")}
               className={`flex-1 rounded-lg py-2 font-medium transition ${
                 mode === "register"
@@ -71,8 +81,9 @@ export function LoginPage() {
           <form onSubmit={onSubmit} className="space-y-4">
             {mode === "register" && (
               <div>
-                <label className="pm-label">Nom</label>
+                <label htmlFor="auth-name" className="pm-label">Nom</label>
                 <input
+                  id="auth-name"
                   className="pm-input"
                   placeholder="Votre nom"
                   value={name}
@@ -82,8 +93,9 @@ export function LoginPage() {
               </div>
             )}
             <div>
-              <label className="pm-label">Email</label>
+              <label htmlFor="auth-email" className="pm-label">Email</label>
               <input
+                id="auth-email"
                 className="pm-input"
                 type="email"
                 placeholder="vous@exemple.com"
@@ -93,8 +105,9 @@ export function LoginPage() {
               />
             </div>
             <div>
-              <label className="pm-label">Mot de passe</label>
+              <label htmlFor="auth-password" className="pm-label">Mot de passe</label>
               <input
+                id="auth-password"
                 className="pm-input"
                 type="password"
                 placeholder={mode === "register" ? "12 caractères min. (lettres + chiffres)" : "Votre mot de passe"}
