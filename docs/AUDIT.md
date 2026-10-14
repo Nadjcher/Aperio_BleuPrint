@@ -113,24 +113,36 @@ services`. Aucune couche métier n'importe `middleware/`.
 
 ## 5. Plan de refactoring Phase 0 (petits lots, 0 changement visible)
 
+> **État : réalisé** (7 commits `lot0`→`lot6b`, 47 tests verts, lint/build OK,
+> aucun changement de comportement). Détail par lot ci-dessous.
+
 Chaque lot = 1 commit, tests verts avant/après. Ordre proposé (du plus sûr au plus
 structurant) :
 
-1. **Lot 0 — garde-fous** : installer/configurer eslint + prettier [M13] ; corriger
-   `down()` du schéma initial [M7] ; nettoyer le ternaire mort et les exports morts
-   évidents. *(Aucun risque fonctionnel.)*
-2. **Lot 1 — erreurs** : déplacer `AppError` dans `src/errors` [M6] (ré-export depuis
-   l'ancien emplacement pour compat), `toErrorMessage` côté front.
-3. **Lot 2 — propriété projet** : middleware `requireProjectOwnership` + suppression
-   des `ownedProject` dupliqués [M3].
-4. **Lot 3 — DTO & logique en service** : `decisionToDTO` partagé [M4] ; sortir la
-   logique de `routes/decisions.ts` et la règle invité vers les services [M2].
-5. **Lot 4 — kit UI front** : `PageHeader`, `Spinner`, `ErrorBanner`, `EmptyState`,
-   `Logo` [M10] (remplacement mécanique, rendu identique).
-6. **Lot 5 — hook data** : `useAsync` + migration des pages existantes [M8], cache
-   `/projects` partagé [M9].
-7. **Lot 6 — découpe** : éclater `ProjectDetailPage` et `TeamPage` [M11] ; scinder
-   `authService` [M5] (avec tests B1 ajoutés d'abord).
+1. ✅ **Lot 0 — garde-fous** : eslint 9 + prettier configurés, `npm run lint` réparé
+   [M13] ; `down()` du schéma initial corrigé [M7] ; ternaire + export morts nettoyés.
+2. ✅ **Lot 1 — erreurs** : `AppError` déplacé dans `src/errors` [M6] (ré-export
+   compat), `toErrorMessage` côté front.
+3. ✅ **Lot 2 — propriété projet** : `projectService.getOwnedProject(OrNull)` ;
+   `ownedProject` dupliqués supprimés, ordre d'args unifié [M3].
+4. ✅ **Lot 3 — DTO & logique en service** : `decisionToDTO`/`loadOwnedDecision`/
+   `submitFeedback`/`listDecisions` [M4][M2] ; `createProject` + règle invité en
+   service ; routes `decisions`/`projects` ne touchent plus TypeORM.
+5. ✅ **Lot 4 — kit UI front** : `PageHeader`, `Loading`, `ErrorBanner`, `EmptyState`
+   [M10], branchés dans Dashboard/Projets/Équipe.
+6. ✅ **Lot 5 — hook data** : `useAsync` [M8] + contexte `ProjectsProvider` (fetch
+   unique de `/projects`) [M9] ; pages migrées.
+7. ✅ **Lot 6 — découpe + auth** : `tokenService` extrait d'`authService` [M5] +
+   `verifyAccess` centralisé ; **tests auth/RBAC ajoutés** [B1] ;
+   `ProjectDetailPage` 516→200 et `TeamPage` 505→403 lignes [M11].
+
+### Reste à traiter hors Phase 0 (planifié)
+
+- **M14** — tests d'intégration des 15 routes HTTP (decisions/gdpr/jobs) → Phase 5.
+- **M12** — a11y complète (labels associés, rôles tabs, contrastes AA) → Phase 1/5.
+- **B2** — chiffrement de champ : laissé tel quel (décision), à câbler en Phase 4.
+- Mineurs non repris : TTL refresh en dur, `req.user!` → `AuthedRequest`, pagination
+  fictive, gauge Prometheus morte, nommage Aperio/projectmaster.
 
 > Les tests d'intégration des routes [M14] et l'a11y complète [M12] relèvent plutôt
 > des Phases 1/5 ; on pose B1 (tests auth) dès le Lot 6 car il conditionne la
