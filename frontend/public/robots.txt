@@ -1,0 +1,8 @@
+# Aperio — robots.txt
+# Accès autorisé aux pages publiques (accueil, pages légales).
+# Les pages applicatives sont derrière authentification (SPA) et non indexables.
+User-agent: *
+Allow: /
+
+# Après mise en ligne, décommentez et remplacez par votre domaine :
+# Sitemap: https://votre-domaine.tld/sitemap.xml

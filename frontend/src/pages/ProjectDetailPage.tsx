@@ -123,7 +123,7 @@ export function ProjectDetailPage() {
     }
   };
 
-  if (!project) return <p className="text-slate-500">Chargement…</p>;
+  if (!project) return <p className="text-slate-400">Chargement…</p>;
 
   return (
     <div>
@@ -133,7 +133,7 @@ export function ProjectDetailPage() {
             {project.name}
           </h1>
           {project.repo && (
-            <p className="mt-1 font-mono text-sm text-slate-500">{project.repo}</p>
+            <p className="mt-1 font-mono text-sm text-slate-400">{project.repo}</p>
           )}
         </div>
         <button
@@ -166,7 +166,7 @@ export function ProjectDetailPage() {
                   <span className={`pm-chip ${severityChip[a.severity]}`}>
                     {a.severity}
                   </span>
-                  <span className="font-mono text-xs text-slate-500">
+                  <span className="font-mono text-xs text-slate-400">
                     {a.metric} · z={a.zScore.toFixed(1)}
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export function ProjectDetailPage() {
               <li key={d.id} className="pm-card p-5">
                 <div className="flex items-center justify-between">
                   <span className={`pm-chip ${agentChip[d.agent]}`}>{d.agent}</span>
-                  <span className="font-mono text-xs text-slate-500">
+                  <span className="font-mono text-xs text-slate-400">
                     confiance {(d.confidence * 100).toFixed(0)}% · {d.status}
                   </span>
                 </div>
@@ -253,7 +253,7 @@ export function ProjectDetailPage() {
           <ul className="space-y-3">
             {reports.map((r) => (
               <li key={r.id} className="pm-card p-5">
-                <div className="mb-3 flex items-center justify-between font-mono text-xs text-slate-500">
+                <div className="mb-3 flex items-center justify-between font-mono text-xs text-slate-400">
                   <span>
                     {r.period} · {r.periodStart.slice(0, 10)} →{" "}
                     {r.periodEnd.slice(0, 10)}
@@ -313,6 +313,6 @@ function Section({
 
 function Empty({ children }: { children: ReactNode }) {
   return (
-    <div className="pm-card p-8 text-center text-sm text-slate-500">{children}</div>
+    <div className="pm-card p-8 text-center text-sm text-slate-400">{children}</div>
   );
 }

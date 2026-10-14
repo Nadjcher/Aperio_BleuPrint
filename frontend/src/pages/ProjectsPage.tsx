@@ -133,12 +133,12 @@ export function ProjectsPage() {
                     {p.name}
                   </div>
                   {p.repo && (
-                    <div className="mt-1 font-mono text-xs text-slate-500">
+                    <div className="mt-1 font-mono text-xs text-slate-400">
                       {p.repo}
                     </div>
                   )}
                 </div>
-                <span className="text-slate-600 transition group-hover:translate-x-0.5 group-hover:text-brand">
+                <span className="text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-brand">
                   →
                 </span>
               </Link>

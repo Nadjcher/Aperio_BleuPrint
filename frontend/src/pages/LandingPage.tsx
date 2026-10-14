@@ -3,6 +3,7 @@ import { tokenStore } from "../api/client";
 import { Icon, type IconName } from "../components/Icon";
 import { guest } from "../store/authSlice";
 import { useAppDispatch } from "../store";
+import { SiteFooter } from "../components/SiteFooter";
 
 const authed = Boolean(tokenStore.access);
 const primaryTo = authed ? "/dashboard" : "/login";
@@ -131,11 +132,11 @@ export function LandingPage() {
             </a>
           </div>
           {!authed && (
-            <p className="mt-3 font-mono text-xs text-slate-500">
+            <p className="mt-3 font-mono text-xs text-slate-400">
               Essai immédiat · 1 projet · sans e-mail — créez un compte ensuite pour continuer
             </p>
           )}
-          <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-slate-500">
+          <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-slate-400">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 animate-pulseGlow rounded-full bg-brand-400 shadow-[0_0_8px_2px_rgba(56,189,248,0.6)]" />
               Sans carte bancaire
@@ -153,7 +154,7 @@ export function LandingPage() {
               </span>
               <span className="text-sm font-semibold text-slate-200">Aperio</span>
             </div>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-slate-400">
               live
             </span>
           </div>
@@ -170,7 +171,7 @@ export function LandingPage() {
             {stats.map((s) => (
               <div key={s.label}>
                 <div className="pm-gradient-text font-mono text-base font-bold">{s.value}</div>
-                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-500">
+                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-400">
                   {s.label}
                 </div>
               </div>
@@ -247,9 +248,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-blue-400/10 py-8 text-center font-mono text-xs uppercase tracking-widest text-slate-600">
-        Aperio · gestion de projet prédictive &amp; agentique
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

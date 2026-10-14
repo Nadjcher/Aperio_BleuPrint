@@ -37,7 +37,7 @@ export function LoginPage() {
               Aperio
             </span>
           </div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-400">
             Plateforme IA autonome
           </p>
         </div>
@@ -117,7 +117,7 @@ export function LoginPage() {
             {mode === "login" && (
               <Link
                 to="/forgot-password"
-                className="block text-center text-xs text-slate-500 hover:text-slate-300"
+                className="block text-center text-xs text-slate-400 hover:text-slate-300"
               >
                 Mot de passe oublié ?
               </Link>
@@ -125,7 +125,7 @@ export function LoginPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-600">
+        <p className="mt-6 text-center text-xs text-slate-400">
           Signaux en temps réel · Détection d'anomalies · 4 agents autonomes
         </p>
       </div>

@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { logout } from "../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../store";
+import { SiteFooter } from "./SiteFooter";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `pm-nav-link ${isActive ? "pm-nav-link-active" : ""}`;
@@ -16,7 +17,13 @@ export function Layout() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
+      <a
+        href="#contenu"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-ink-950"
+      >
+        Aller au contenu
+      </a>
       <header className="sticky top-0 z-20 border-b border-white/10 bg-ink-950/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
           <div className="flex items-center gap-6">
@@ -38,7 +45,7 @@ export function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="hidden font-mono text-xs text-slate-500 sm:inline">
+            <span className="hidden font-mono text-xs text-slate-400 sm:inline">
               {user?.isGuest ? "Mode invité" : user?.email}
             </span>
             <button onClick={onLogout} className="pm-btn-ghost py-1.5">
@@ -61,9 +68,10 @@ export function Layout() {
           </div>
         </div>
       )}
-      <main className="mx-auto max-w-6xl px-5 py-10">
+      <main id="contenu" className="mx-auto w-full max-w-6xl flex-1 px-5 py-10">
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   );
 }

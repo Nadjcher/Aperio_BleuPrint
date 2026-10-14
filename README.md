@@ -17,6 +17,7 @@ Voir le blueprint produit complet (plan, architecture, sécurité & RGPD) dans
 | [Observabilité](./docs/OBSERVABILITY.md) | Ops — logs, métriques Prometheus, alerting |
 | [Sécurité & RGPD](./docs/SECURITY.md) | Ops / conformité — défense en profondeur, droits RGPD |
 | [Test de charge](./docs/LOADTEST.md) | Ops — méthodologie et résultats 50+ projets |
+| [Conformité (RGPD/cookies/accessibilité)](./docs/COMPLIANCE.md) | Éditeur — registre des données, sous-traitants, checklist avant mise en ligne |
 | [Feuille de route](./docs/ROADMAP.md) | Tous — avancement des 4 phases |
 
 **LLM gratuit (optionnel)** — les agents et les synthèses peuvent être enrichis

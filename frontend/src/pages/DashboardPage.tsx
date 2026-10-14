@@ -27,7 +27,7 @@ export function DashboardPage() {
       </div>
 
       {loading ? (
-        <p className="text-slate-500">Chargement…</p>
+        <p className="text-slate-400">Chargement…</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
           <Stat label="Projets suivis" value={projects.length} accent="brand" />

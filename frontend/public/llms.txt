@@ -1,0 +1,33 @@
+# Aperio
+
+> Outil de gestion de projet prédictif et agentique : Aperio surveille des
+> dépôts (GitHub) en continu, détecte les signaux faibles et déploie des agents
+> autonomes qui diagnostiquent, planifient et rendent compte.
+
+## Ce que fait le produit
+- Collecte de signaux (commits, PRs, issues) depuis des dépôts publics.
+- Détection d'anomalies (écart robuste médiane/MAD) avec niveau de sévérité.
+- Quatre agents : Monitor, Analyst, Planner, Reporter, avec boucle d'apprentissage.
+- Synthèses et rapports ; enrichissement LLM optionnel.
+
+## Accès
+- Essai sans compte (mode invité, 1 projet) depuis la page d'accueil.
+- Compte requis pour conserver ses données et dépasser la limite d'essai.
+
+## Pages publiques
+- / : présentation du produit
+- /legal/mentions : mentions légales
+- /legal/confidentialite : politique de confidentialité (RGPD)
+- /legal/cgu : conditions générales d'utilisation
+- /legal/cookies : politique cookies (aucun traceur)
+
+## Données & confidentialité
+- Collecte minimisée : e-mail, nom, mot de passe haché ; IP tronquée dans l'audit.
+- Aucun cookie de traçage, aucune publicité, aucune revente.
+- Droits RGPD : accès/portabilité (export JSON), rectification, effacement.
+
+## Notes pour agents
+- L'API est sous /api/v1/** et requiert un jeton Bearer (JWT) ; seules les routes
+  /health, /ready, /live et /metrics sont publiques.
+- Interface accessible (WCAG AA visé) : contrastes conformes, ALT/aria sur les
+  éléments, lien d'évitement, HTML sémantique.
