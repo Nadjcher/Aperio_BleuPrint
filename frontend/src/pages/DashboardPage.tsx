@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { Briefing, BriefingItem, BriefingPriority, RiskLevel } from "@projectmaster/shared";
 import { api } from "../api/client";
-import { PageHeader, Loading } from "../components/ui";
+import { PageHeader, Loading, InfoTip } from "../components/ui";
 import { useAsync } from "../hooks/useAsync";
 import { useProjects } from "../hooks/ProjectsContext";
 import { useAppSelector } from "../store";
@@ -58,7 +59,11 @@ function SimpleView({ briefing, projectCount }: { briefing: Briefing; projectCou
       <div className="grid gap-4 sm:grid-cols-3">
         <HealthTile score={briefing.health.score} risk={briefing.health.risk} />
         <Tile label="Niveau de risque" value={risk.label} valueClass={risk.text} />
-        <Tile label="Activité (7 j)" value={`${briefing.activity7d}`} hint="signaux ingérés" />
+        <Tile
+          label={<InfoTip termKey="commit">Activité (7 j)</InfoTip>}
+          value={`${briefing.activity7d}`}
+          hint="modifications de code"
+        />
       </div>
 
       <h2 className="mt-10 mb-4 text-lg font-semibold text-white">À traiter aujourd'hui</h2>
@@ -132,7 +137,7 @@ function HealthTile({ score, risk }: { score: number; risk: RiskLevel }) {
   return (
     <div className="pm-card p-6">
       <div className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
-        Santé globale
+        <InfoTip termKey="health">Santé globale</InfoTip>
       </div>
       <div className={`mt-2 font-mono text-4xl font-bold tracking-tight ${tone.text}`}>
         {score}
@@ -154,7 +159,7 @@ function Tile({
   valueClass = "text-slate-100",
   hint,
 }: {
-  label: string;
+  label: ReactNode;
   value: string;
   valueClass?: string;
   hint?: string;

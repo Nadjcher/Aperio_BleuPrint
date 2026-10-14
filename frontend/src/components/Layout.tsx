@@ -47,6 +47,9 @@ export function Layout() {
               <NavLink to="/team" className={linkClass}>
                 Équipe
               </NavLink>
+              <NavLink to="/glossaire" className={linkClass}>
+                Aide
+              </NavLink>
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
