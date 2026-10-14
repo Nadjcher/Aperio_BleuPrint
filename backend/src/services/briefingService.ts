@@ -1,3 +1,4 @@
+import { In } from "typeorm";
 import type { Briefing, BriefingItem, BriefingPriority } from "@projectmaster/shared";
 import { AppDataSource } from "../db/data-source.js";
 import { Project } from "../entities/Project.js";
@@ -105,27 +106,46 @@ export async function buildBriefing(userId: string): Promise<Briefing> {
     order: { createdAt: "DESC" },
   });
 
-  const anomalies = AppDataSource.getRepository(Anomaly);
-  const decisions = AppDataSource.getRepository(Decision);
+  if (projects.length === 0) return composeBriefing([], new Date());
 
-  const briefs: ProjectBrief[] = [];
-  for (const p of projects) {
-    const open = await anomalies.find({
-      where: { projectId: p.id, status: "open" },
-    });
-    const pending = await decisions.find({
-      where: { projectId: p.id, status: "pending_approval" },
+  // Deux requêtes groupées (au lieu de 2 par projet) : évite le N+1 et tient
+  // la charge quand un compte a beaucoup de projets.
+  const ids = projects.map((p) => p.id);
+  const [openAll, pendingAll] = await Promise.all([
+    AppDataSource.getRepository(Anomaly).find({
+      where: { projectId: In(ids), status: "open" },
+    }),
+    AppDataSource.getRepository(Decision).find({
+      where: { projectId: In(ids), status: "pending_approval" },
       order: { createdAt: "DESC" },
-    });
-    briefs.push({
+    }),
+  ]);
+
+  const openByProject = new Map<string, Anomaly[]>();
+  for (const a of openAll) {
+    const list = openByProject.get(a.projectId) ?? [];
+    list.push(a);
+    openByProject.set(a.projectId, list);
+  }
+  const pendingByProject = new Map<string, Decision[]>();
+  for (const d of pendingAll) {
+    const list = pendingByProject.get(d.projectId) ?? [];
+    list.push(d);
+    pendingByProject.set(d.projectId, list);
+  }
+
+  const briefs: ProjectBrief[] = projects.map((p) => {
+    const open = openByProject.get(p.id) ?? [];
+    const pending = pendingByProject.get(p.id) ?? [];
+    return {
       projectId: p.id,
       projectName: p.name,
       criticalAnomalies: open.filter((a) => a.severity === "critical").map((a) => a.explanation),
       warningCount: open.filter((a) => a.severity === "warning").length,
       openCount: open.length,
       pendingDecisions: pending.map((d) => ({ id: d.id, title: d.title, rationale: d.rationale })),
-    });
-  }
+    };
+  });
 
   return composeBriefing(briefs, new Date());
 }

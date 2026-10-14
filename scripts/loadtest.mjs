@@ -101,6 +101,45 @@ async function main() {
   console.log(`  latence p99   : ${pct(latencies, 99).toFixed(1)} ms`);
   console.log(`  latence max   : ${latencies[latencies.length - 1].toFixed(1)} ms\n`);
 
+  // 2bis. Phase LECTURE AVANCÉE — routes analytiques (briefing, forecast,
+  //        resourcing, members). Ces routes agrègent des données : on vérifie
+  //        qu'elles tiennent la charge concurrente sans erreur.
+  const advRoutes = [
+    () => "/api/v1/briefing",
+    () => "/api/v1/members",
+    () => `/api/v1/projects/${ids[(Math.random() * ids.length) | 0]}/forecast`,
+    () => `/api/v1/projects/${ids[(Math.random() * ids.length) | 0]}/resourcing`,
+  ];
+  const advLat = [];
+  let advOk = 0;
+  let advErr = 0;
+  const advEndAt = Date.now() + DURATION;
+  async function advReader() {
+    while (Date.now() < advEndAt) {
+      const path = advRoutes[(Math.random() * advRoutes.length) | 0]();
+      const t0 = performance.now();
+      try {
+        const r = await j("GET", path, token);
+        advLat.push(performance.now() - t0);
+        if (r.status === 200) advOk++;
+        else advErr++;
+      } catch {
+        advErr++;
+      }
+    }
+  }
+  const advStart = Date.now();
+  await Promise.all(Array.from({ length: CONCURRENCY }, advReader));
+  const advSecs = (Date.now() - advStart) / 1000;
+  advLat.sort((a, b) => a - b);
+  const advTotal = advOk + advErr;
+  console.log("── Phase LECTURE AVANCÉE (briefing / forecast / resourcing / members) ──");
+  console.log(`  requêtes      : ${advTotal}  (ok ${advOk} / err ${advErr})`);
+  console.log(`  débit         : ${(advTotal / advSecs).toFixed(0)} req/s`);
+  console.log(`  latence p50   : ${pct(advLat, 50).toFixed(1)} ms`);
+  console.log(`  latence p95   : ${pct(advLat, 95).toFixed(1)} ms`);
+  console.log(`  latence p99   : ${pct(advLat, 99).toFixed(1)} ms\n`);
+
   // 3. Phase ASYNC — enfile un sync par projet, mesure le vidage
   console.log("── Phase ASYNC (enqueue + drain) ──");
   const enqStart = Date.now();

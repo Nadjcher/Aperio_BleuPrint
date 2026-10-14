@@ -24,6 +24,9 @@ export const AppDataSource = new DataSource({
   // SSL pour les bases managées (Neon/Supabase/…). rejectUnauthorized:false
   // suffit : la connexion est chiffrée, le CA du fournisseur n'est pas épinglé.
   ssl: env.DATABASE_SSL ? { rejectUnauthorized: false } : false,
+  // Pool de connexions (driver pg). Taille configurable pour tenir les rafales
+  // de requêtes analytiques sans saturer la limite du fournisseur.
+  extra: { max: env.DB_POOL_MAX },
   // En dev : synchronisation automatique du schéma pour démarrer vite.
   // En prod : migrations uniquement (synchronize désactivé, migrations jouées au boot).
   synchronize: !isProd,

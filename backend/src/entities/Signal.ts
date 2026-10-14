@@ -9,6 +9,9 @@ import type { SignalSource, SignalType } from "@projectmaster/shared";
 
 @Entity({ name: "signals" })
 @Index(["projectId", "occurredAt"])
+// Sert les agrégats temporels par métrique (forecast/briefing : filtre
+// projectId + type + fenêtre occurredAt).
+@Index(["projectId", "type", "occurredAt"])
 export class Signal {
   @PrimaryGeneratedColumn("uuid")
   id!: string;

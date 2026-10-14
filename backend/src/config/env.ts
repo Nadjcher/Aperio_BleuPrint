@@ -95,6 +95,12 @@ const schema = z.object({
   // normal. Les routes d'auth gardent leur limiteur strict (10/15min).
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(1000),
 
+  // Taille max du pool de connexions PostgreSQL par process. Le défaut du
+  // driver (10) sature sous rafales de requêtes analytiques concurrentes
+  // (chacune enchaîne plusieurs requêtes). 20 lisse la latence de queue ;
+  // à ajuster selon la limite de connexions du fournisseur (Neon pooler, etc.).
+  DB_POOL_MAX: z.coerce.number().int().positive().max(100).default(20),
+
   // Observabilité
   // Niveau de log (override : par défaut info en prod, debug sinon).
   LOG_LEVEL: z
