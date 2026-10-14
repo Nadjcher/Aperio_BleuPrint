@@ -1,14 +1,9 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import type {
-  Briefing,
-  BriefingItem,
-  BriefingPriority,
-  Paginated,
-  Project,
-} from "@projectmaster/shared";
+import type { Briefing, BriefingItem, BriefingPriority } from "@projectmaster/shared";
 import { api } from "../api/client";
 import { PageHeader, Loading } from "../components/ui";
+import { useAsync } from "../hooks/useAsync";
+import { useProjects } from "../hooks/ProjectsContext";
 
 const priorityStyle: Record<BriefingPriority, { chip: string; border: string; label: string }> = {
   critical: { chip: "border-red-500/40 bg-red-500/10 text-red-300", border: "border-l-red-500/70", label: "Critique" },
@@ -18,16 +13,12 @@ const priorityStyle: Record<BriefingPriority, { chip: string; border: string; la
 };
 
 export function DashboardPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [briefing, setBriefing] = useState<Briefing | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.all([
-      api.get<Paginated<Project>>("/projects").then((r) => setProjects(r.items)),
-      api.get<Briefing>("/briefing").then(setBriefing),
-    ]).finally(() => setLoading(false));
-  }, []);
+  const { projects, loading: projectsLoading } = useProjects();
+  const { data: briefing, loading: briefingLoading } = useAsync(
+    () => api.get<Briefing>("/briefing"),
+    [],
+  );
+  const loading = projectsLoading || briefingLoading;
 
   return (
     <div>

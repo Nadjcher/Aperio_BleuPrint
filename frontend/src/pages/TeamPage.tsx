@@ -1,13 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type {
   Member,
-  Paginated,
-  Project,
   ProjectResourcing,
   ResourceMoveAnalysis,
 } from "@projectmaster/shared";
-import { api, RequestError } from "../api/client";
+import { api, toErrorMessage } from "../api/client";
 import { PageHeader, ErrorBanner } from "../components/ui";
+import { useProjects } from "../hooks/ProjectsContext";
 
 /** Jauge de gravité 0..100 (vert → ambre → rouge). */
 function GravityGauge({ score }: { score: number }) {
@@ -38,7 +37,7 @@ function GravityGauge({ score }: { score: number }) {
 }
 
 export function TeamPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { projects } = useProjects();
   const [members, setMembers] = useState<Member[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,9 +64,6 @@ export function TeamPage() {
     api.get<{ items: Member[] }>("/members").then((r) => setMembers(r.items));
 
   useEffect(() => {
-    void api
-      .get<Paginated<Project>>("/projects")
-      .then((r) => setProjects(r.items));
     void loadMembers();
   }, []);
 
@@ -87,7 +83,7 @@ export function TeamPage() {
       setSkills("");
       await loadMembers();
     } catch (err) {
-      setError(err instanceof RequestError ? err.message : "Erreur");
+      setError(toErrorMessage(err));
     }
   };
 
@@ -122,7 +118,7 @@ export function TeamPage() {
       setAssignMember("");
       await loadResourcing(projectId);
     } catch (err) {
-      setError(err instanceof RequestError ? err.message : "Erreur");
+      setError(toErrorMessage(err));
     }
   };
 
@@ -155,7 +151,7 @@ export function TeamPage() {
       );
       setAnalysis(r);
     } catch (err) {
-      setSimError(err instanceof RequestError ? err.message : "Erreur");
+      setSimError(toErrorMessage(err));
     }
   };
 

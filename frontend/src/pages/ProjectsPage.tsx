@@ -1,22 +1,16 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { Paginated, Project } from "@projectmaster/shared";
-import { api, RequestError } from "../api/client";
+import type { Project } from "@projectmaster/shared";
+import { api, RequestError, toErrorMessage } from "../api/client";
 import { PageHeader } from "../components/ui";
+import { useProjects } from "../hooks/ProjectsContext";
 
 export function ProjectsPage() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { projects, reload } = useProjects();
   const [name, setName] = useState("");
   const [repo, setRepo] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  const load = () =>
-    api.get<Paginated<Project>>("/projects").then((r) => setProjects(r.items));
-
-  useEffect(() => {
-    void load();
-  }, []);
 
   const onCreate = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,13 +22,13 @@ export function ProjectsPage() {
       });
       setName("");
       setRepo("");
-      await load();
+      await reload();
     } catch (err) {
       if (err instanceof RequestError && err.code === "guest_limit") {
         navigate("/upgrade");
         return;
       }
-      setError(err instanceof RequestError ? err.message : "Erreur");
+      setError(toErrorMessage(err));
     }
   };
 

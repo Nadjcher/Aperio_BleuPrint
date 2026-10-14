@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { logout } from "../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { SiteFooter } from "./SiteFooter";
+import { ProjectsProvider } from "../hooks/ProjectsContext";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `pm-nav-link ${isActive ? "pm-nav-link-active" : ""}`;
@@ -72,7 +73,9 @@ export function Layout() {
         </div>
       )}
       <main id="contenu" className="mx-auto w-full max-w-6xl flex-1 px-5 py-10">
-        <Outlet />
+        <ProjectsProvider>
+          <Outlet />
+        </ProjectsProvider>
       </main>
       <SiteFooter />
     </div>
