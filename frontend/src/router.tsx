@@ -10,6 +10,7 @@ import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { TeamPage } from "./pages/TeamPage";
 import { GlossaryPage } from "./pages/GlossaryPage";
+import { OnboardingPage } from "./pages/OnboardingPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
           { path: "/projects/:id", element: <ProjectDetailPage /> },
           { path: "/team", element: <TeamPage /> },
           { path: "/glossaire", element: <GlossaryPage /> },
+          { path: "/onboarding", element: <OnboardingPage /> },
         ],
       },
     ],

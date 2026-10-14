@@ -20,7 +20,9 @@ export function LoginPage() {
         ? login({ email, password })
         : register({ email, password, name });
     const result = await dispatch(action);
-    if (login.fulfilled.match(result) || register.fulfilled.match(result)) {
+    if (register.fulfilled.match(result)) {
+      navigate("/onboarding");
+    } else if (login.fulfilled.match(result)) {
       navigate("/dashboard");
     }
   };
