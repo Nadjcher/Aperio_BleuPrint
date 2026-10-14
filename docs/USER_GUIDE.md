@@ -46,28 +46,49 @@ invité**, sans e-mail ni mot de passe.
 | `manager` | + créer des projets, lancer des synchronisations, donner du feedback |
 | `admin` | + administration (premier inscrit) |
 
-## 4. Premiers pas (onboarding)
+## 4. Premiers pas (onboarding guidé)
 
-Depuis la page **Projets**, suivez les trois étapes :
+Juste après l'inscription, un **assistant en 3 étapes** s'ouvre
+(`/onboarding`), avec un indicateur de progression :
 
-1. **Reliez un dépôt** — saisissez `owner/repo` (ex. `facebook/react`) et créez
-   le projet. Un bouton *Pré-remplir un exemple* est disponible au premier usage.
-2. **Lancez une synchronisation** — depuis la fiche projet, bouton
-   **Synchroniser**. Aperio collecte commits, pull requests et issues, puis
-   lance la détection et les agents. Le traitement est **asynchrone** : la
-   synchro part en arrière-plan et la fiche se met à jour quand c'est prêt.
-3. **Lisez les décisions** — anomalies détectées, plan correctif et rapports
-   apparaissent sur la fiche.
+1. **Décrire le projet** — donnez-lui un nom clair (ex. « Refonte du site »).
+2. **Connecter le dépôt** — saisissez `propriétaire/dépôt` (ex. `facebook/react`).
+   Étape facultative : vous pourrez relier un dépôt plus tard.
+3. **Lancer l'analyse** — Aperio collecte l'activité et fait travailler ses
+   agents. Le traitement est **asynchrone** (il part en arrière-plan).
 
-## 5. Comprendre le tableau de bord
+Vous pouvez quitter l'assistant à tout moment (**Plus tard**) et le relancer
+depuis l'état vide du tableau de bord (**Démarrer en 3 étapes**).
+
+## 5. Deux niveaux d'affichage : simple et expert
+
+Un sélecteur **Simple / Expert** est présent dans l'en-tête ; votre choix est
+enregistré sur votre compte.
+
+- **Mode simple** (par défaut, pensé pour les chefs de projet) : le tableau de
+  bord montre trois indicateurs — **Santé globale** (0–100), **Niveau de
+  risque**, **Activité (7 j)** — et une liste **« À traiter aujourd'hui »**
+  limitée à l'essentiel. Le vocabulaire est métier (« activité »,
+  « point d'attention », « recommandation »…).
+- **Mode expert** : affiche le briefing complet, les tendances détaillées, la
+  simulation de gravité et les métriques brutes, avec le vocabulaire technique.
+
+Le **moteur est le même** : seule la présentation change.
+
+> **Besoin d'une définition ?** Les termes sont expliqués au survol (infobulles)
+> et rassemblés dans le **Glossaire** (menu **Aide**, page `/glossaire`).
+
+## 6. Comprendre le tableau de bord (expert)
 
 - **Signaux** : séries temporelles brutes (commits/jour, PRs, issues).
 - **Anomalies** : écarts significatifs par rapport à la ligne de base (détection
   robuste médiane + MAD). Chaque anomalie porte une **sévérité**.
-- **Décisions** : ce que les agents recommandent. Vous pouvez **valider** 👍 ou
-  **rejeter** 👎 — ce feedback entraîne les agents.
+- **Décisions** : ce que les agents recommandent. Chaque décision explique **en
+  clair** ce qu'une approbation ou un rejet déclenche ; les actions sûres sont
+  signalées (**Action sûre**) et restent **réversibles 24 h**. Vous pouvez
+  **valider** 👍 ou **rejeter** 👎 — ce feedback entraîne les agents.
 
-## 6. Synchronisation : que se passe-t-il ?
+## 7. Synchronisation : que se passe-t-il ?
 
 1. Vous cliquez sur **Synchroniser** → l'API répond immédiatement avec un
    identifiant de tâche (`jobId`).
@@ -81,7 +102,7 @@ Depuis la page **Projets**, suivez les trois étapes :
 > Un jeton GitHub en lecture seule (`GITHUB_TOKEN`) augmente les quotas d'API
 > et permet d'accéder aux dépôts privés. Côté hébergeur.
 
-## 7. Notifications par e-mail
+## 8. Notifications par e-mail
 
 Si l'administrateur a configuré l'envoi d'e-mails (Resend), Aperio vous prévient :
 
@@ -96,7 +117,7 @@ Vous pouvez couper les notifications (`notifyByEmail`) via votre profil. Sans
 fournisseur d'e-mail configuré, aucun e-mail n'est envoyé — l'app reste
 pleinement utilisable.
 
-## 8. Vos données & vos droits (RGPD)
+## 9. Vos données & vos droits (RGPD)
 
 Aperio applique la **minimisation** (pas d'email brut dans les signaux, IP
 tronquées dans l'audit) et la **conservation limitée**.
@@ -107,7 +128,7 @@ tronquées dans l'audit) et la **conservation limitée**.
 | **Rectification** | Modifiez votre profil : `PATCH /api/v1/auth/me` |
 | **Effacement** | Supprimez votre compte et vos données : `DELETE /api/v1/gdpr/me` |
 
-## 9. Questions fréquentes
+## 10. Questions fréquentes
 
 **Ma synchro reste « en cours » longtemps.**
 Le dépôt est peut-être volumineux, ou GitHub limite le débit. Elle se terminera
