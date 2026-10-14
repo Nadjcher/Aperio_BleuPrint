@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { validateBody } from "../middleware/validate.js";
 import { requireAuth } from "../middleware/auth.js";
-import { authRateLimiter } from "../security/index.js";
+import { authRateLimiter, guestRateLimiter } from "../security/index.js";
 import { passwordSchema } from "../security/password.js";
 import * as authService from "../services/authService.js";
 import { audit, anonymizeIp } from "../services/auditService.js";
@@ -84,7 +84,7 @@ authRouter.post(
 );
 
 /** Essai sans inscription : crée un compte invité et renvoie des tokens. */
-authRouter.post("/auth/guest", authRateLimiter, async (req, res) => {
+authRouter.post("/auth/guest", guestRateLimiter, async (req, res) => {
   const result = await authService.createGuest();
   await audit({
     actorId: result.user.id,

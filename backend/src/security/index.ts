@@ -58,3 +58,15 @@ export const authRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+/**
+ * Limiteur très strict pour la création de comptes invités : empêche la
+ * création massive de comptes d'essai (abus / DoS / pollution de la base).
+ */
+export const guestRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 h
+  max: 5, // 5 comptes invités / h / IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { code: "guest_rate_limited", message: "Trop d'essais — réessayez plus tard ou créez un compte." } },
+});

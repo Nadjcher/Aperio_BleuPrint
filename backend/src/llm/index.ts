@@ -1,6 +1,6 @@
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
-import { completeAnthropic } from "./providers/anthropic.js";
+import { completeAnthropic, completeAnthropicWithMcp } from "./providers/anthropic.js";
 import { completeOpenAICompatible } from "./providers/openai.js";
 
 /**
@@ -41,6 +41,53 @@ export interface CompleteOptions {
   system: string;
   user: string;
   maxTokens?: number;
+}
+
+/** Serveur MCP distant (Model Context Protocol) exposant des outils au LLM. */
+export interface McpServer {
+  name: string;
+  url: string;
+  token?: string;
+}
+
+/** Parse la liste des serveurs MCP depuis l'env (JSON). Tolérant aux erreurs. */
+export function mcpServers(): McpServer[] {
+  if (!env.MCP_SERVERS.trim()) return [];
+  try {
+    const parsed: unknown = JSON.parse(env.MCP_SERVERS);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (s): s is { name: string; url: string; token?: string } =>
+          !!s && typeof s.name === "string" && typeof s.url === "string",
+      )
+      .map((s) => ({ name: s.name, url: s.url, token: typeof s.token === "string" ? s.token : undefined }));
+  } catch {
+    logger.warn("MCP_SERVERS invalide (JSON attendu) — MCP désactivé");
+    return [];
+  }
+}
+
+/** MCP actif : provider Anthropic + activé + au moins un serveur configuré. */
+export function isMcpEnabled(): boolean {
+  return resolveProvider() === "anthropic" && env.PLANNER_USE_MCP && mcpServers().length > 0;
+}
+
+/**
+ * Complétion pour le Planner : si MCP est actif, le LLM peut appeler des outils
+ * exposés par les serveurs MCP distants (connecteur MCP de l'API Claude) ;
+ * sinon, complétion texte classique.
+ */
+export async function completePlanner(opts: CompleteOptions): Promise<string | null> {
+  if (isMcpEnabled()) {
+    try {
+      return await completeAnthropicWithMcp(opts, mcpServers());
+    } catch (err) {
+      logger.warn({ err }, "Planner MCP indisponible, repli sur l'heuristique");
+      return null;
+    }
+  }
+  return complete(opts);
 }
 
 /** Appel texte unique. Renvoie null si le LLM est désactivé ou en cas d'échec. */

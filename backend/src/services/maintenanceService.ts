@@ -2,12 +2,17 @@ import { LessThan } from "typeorm";
 import { AppDataSource } from "../db/data-source.js";
 import { AuditLog } from "../entities/AuditLog.js";
 import { RefreshToken } from "../entities/RefreshToken.js";
+import { OneTimeToken } from "../entities/OneTimeToken.js";
+import { User } from "../entities/User.js";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
+import { eraseUser } from "./gdprService.js";
 
 export interface PurgeResult {
   auditLogs: number;
   refreshTokens: number;
+  oneTimeTokens: number;
+  guests: number;
 }
 
 /**
@@ -32,9 +37,33 @@ export async function purgeExpiredData(): Promise<PurgeResult> {
     revoked: true,
   });
 
+  // Jetons à usage unique expirés ou déjà consommés.
+  const otExpired = await AppDataSource.getRepository(OneTimeToken).delete({
+    expiresAt: LessThan(new Date()),
+  });
+
+  // Comptes INVITÉS périmés : essai sans suite → suppression complète (RGPD +
+  // anti-pollution de la base). On réutilise l'effacement GDPR pour tout nettoyer.
+  const guestCutoff = new Date(Date.now() - env.GUEST_TTL_HOURS * 3600 * 1000);
+  const staleGuests = await AppDataSource.getRepository(User).find({
+    where: { isGuest: true, createdAt: LessThan(guestCutoff) },
+    select: ["id"],
+  });
+  let guests = 0;
+  for (const g of staleGuests) {
+    try {
+      await eraseUser(g.id);
+      guests += 1;
+    } catch (err) {
+      logger.warn({ err, userId: g.id }, "Échec de purge d'un compte invité");
+    }
+  }
+
   return {
     auditLogs: audit.affected ?? 0,
     refreshTokens: (expired.affected ?? 0) + (revoked.affected ?? 0),
+    oneTimeTokens: otExpired.affected ?? 0,
+    guests,
   };
 }
 
@@ -45,7 +74,7 @@ export function startMaintenance(): void {
   const run = (): void => {
     purgeExpiredData()
       .then((r) => {
-        if (r.auditLogs || r.refreshTokens) {
+        if (r.auditLogs || r.refreshTokens || r.oneTimeTokens || r.guests) {
           logger.info(r, "Purge RGPD : données expirées supprimées");
         }
       })

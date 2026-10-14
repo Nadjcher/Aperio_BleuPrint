@@ -89,9 +89,8 @@ function signAccess(payload: AccessTokenPayload): string {
   } as jwt.SignOptions);
 }
 
-async function issueRefresh(userId: string): Promise<string> {
+async function issueRefresh(userId: string, ttlDays = 7): Promise<string> {
   const raw = crypto.randomBytes(40).toString("hex");
-  const ttlDays = 7;
   const expiresAt = new Date(Date.now() + ttlDays * 24 * 3600 * 1000);
   await refreshTokens().save(
     refreshTokens().create({ userId, tokenHash: sha256(raw), expiresAt }),
@@ -108,7 +107,8 @@ async function tokensFor(user: User): Promise<AuthTokens> {
   };
   return {
     accessToken: signAccess(payload),
-    refreshToken: await issueRefresh(user.id),
+    // Session plus courte pour les invités (compte éphémère).
+    refreshToken: await issueRefresh(user.id, user.isGuest ? 1 : 7),
   };
 }
 

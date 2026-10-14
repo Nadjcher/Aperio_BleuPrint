@@ -25,6 +25,10 @@ par un LLM compatible OpenAI : **Ollama** (local, gratuit) ou **Groq** (héberg�
 gratuit, Llama 3.3). Sans configuration, fonctionnement heuristique. Détails
 dans `backend/.env.example`.
 
+**MCP (optionnel)** — avec le provider Anthropic, le **Planner** peut appeler des
+outils exposés par des serveurs **MCP distants** (connecteur MCP de l'API Claude)
+pour enrichir ses plans d'action. Config via `MCP_SERVERS` (voir `backend/.env.example`).
+
 ## Architecture (4 couches)
 
 ```

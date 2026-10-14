@@ -51,6 +51,18 @@ const schema = z.object({
   ANTHROPIC_API_KEY: z.string().default(""),
   ANTHROPIC_MODEL: z.string().default("claude-opus-5-5"),
 
+  // MCP (Model Context Protocol) — outils externes pour le Planner.
+  // Nécessite LLM_PROVIDER=anthropic + ANTHROPIC_API_KEY. Liste de serveurs MCP
+  // DISTANTS (URL) au format JSON : [{"name":"github","url":"https://…","token":"…"}]
+  MCP_SERVERS: z.string().default(""),
+  PLANNER_USE_MCP: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+
+  // Mode invité : durée de vie avant purge automatique des comptes d'essai.
+  GUEST_TTL_HOURS: z.coerce.number().int().positive().default(48),
+
   // ─── E-mail (optionnel, dégradation gracieuse) ─────────────────────────────
   // Sans provider configuré, les e-mails sont journalisés (pas envoyés) : le
   // flux d'inscription reste direct, rien ne casse.

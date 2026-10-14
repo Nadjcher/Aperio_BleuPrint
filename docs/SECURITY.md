@@ -49,6 +49,18 @@ l'inscription reste directe ; avec **Resend** (`EMAIL_PROVIDER=resend` +
   bloquant par défaut ; `REQUIRE_EMAIL_VERIFICATION=true` exige un e-mail
   confirmé à la connexion.
 
+## Mode invité (essai sans compte) — durcissement
+
+- Création **fortement limitée** : 5 comptes invités / heure / IP (`guestRateLimiter`),
+  contre l'abus et la pollution de la base.
+- **Session courte** : refresh token de 1 jour pour un invité (vs 7 j),
+  limitant la fenêtre d'exposition.
+- **Purge automatique** : les comptes invités de plus de `GUEST_TTL_HOURS`
+  (48 h) sont supprimés intégralement (via l'effacement RGPD) par la tâche de
+  maintenance — pas de données d'essai qui traînent.
+- **Capacité bornée** : un invité est limité à 1 projet (`guest_limit`), ne peut
+  pas se connecter par mot de passe (hash aléatoire), et ne reçoit aucun e-mail.
+
 ## Autorisation (RBAC)
 
 Trois rôles hiérarchiques : `viewer` < `manager` < `admin`. Le premier compte

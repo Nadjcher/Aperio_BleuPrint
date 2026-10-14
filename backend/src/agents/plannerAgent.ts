@@ -1,6 +1,6 @@
 import type { AgentContext } from "@projectmaster/shared";
 import type { Agent, DraftDecision } from "./types.js";
-import { complete, extractJson, isLLMEnabled } from "../llm/index.js";
+import { completePlanner, extractJson, isLLMEnabled } from "../llm/index.js";
 import { plannerPrompt } from "../llm/prompts.js";
 
 interface LlmPlan {
@@ -26,7 +26,8 @@ export const plannerAgent: Agent = {
 
     if (isLLMEnabled()) {
       const { system, user } = plannerPrompt(open);
-      const plan = extractJson<LlmPlan>(await complete({ system, user }));
+      // completePlanner : utilise les outils MCP si configurés, sinon LLM simple.
+      const plan = extractJson<LlmPlan>(await completePlanner({ system, user }));
       if (plan && Array.isArray(plan.actions)) {
         return [
           {
