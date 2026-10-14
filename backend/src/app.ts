@@ -20,6 +20,7 @@ import { mcpRouter } from "./routes/mcp.js";
 import { briefingRouter } from "./routes/briefing.js";
 import { forecastRouter } from "./routes/forecast.js";
 import { gdprRouter } from "./routes/gdpr.js";
+import { resourcesRouter } from "./routes/resources.js";
 
 export function createApp(): Express {
   const app = express();
@@ -50,6 +51,7 @@ export function createApp(): Express {
   api.use(briefingRouter);
   api.use(forecastRouter);
   api.use(gdprRouter);
+  api.use(resourcesRouter);
   app.use("/api/v1", api);
 
   app.use(notFound);
