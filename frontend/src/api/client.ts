@@ -33,6 +33,13 @@ export class RequestError extends Error {
   }
 }
 
+/** Message lisible à partir d'une erreur inconnue (centralise le motif répété). */
+export function toErrorMessage(err: unknown, fallback = "Une erreur est survenue"): string {
+  if (err instanceof RequestError) return err.message;
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
+}
+
 async function raw<T>(
   path: string,
   options: RequestInit & { retry?: boolean } = {},

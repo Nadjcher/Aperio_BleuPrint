@@ -2,19 +2,11 @@ import type { NextFunction, Request, Response } from "express";
 import type { ApiError } from "@projectmaster/shared";
 import { ZodError } from "zod";
 import { logger } from "../utils/logger.js";
+import { AppError } from "../errors/index.js";
 
-/** Erreur applicative portant un code et un statut HTTP. */
-export class AppError extends Error {
-  constructor(
-    public readonly status: number,
-    public readonly code: string,
-    message: string,
-    public readonly details?: Record<string, string>,
-  ) {
-    super(message);
-    this.name = "AppError";
-  }
-}
+// Ré-export pour compatibilité : de nombreux modules importent AppError depuis
+// ce fichier. La définition vit désormais dans la couche neutre `src/errors`.
+export { AppError };
 
 export function notFound(_req: Request, res: Response): void {
   const body: ApiError = {
@@ -23,7 +15,6 @@ export function notFound(_req: Request, res: Response): void {
   res.status(404).json(body);
 }
 
- 
 export function errorHandler(
   err: unknown,
   _req: Request,
