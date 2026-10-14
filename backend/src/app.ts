@@ -17,6 +17,7 @@ import { reportsRouter } from "./routes/reports.js";
 import { jobsRouter } from "./routes/jobs.js";
 import { notificationsRouter } from "./routes/notifications.js";
 import { mcpRouter } from "./routes/mcp.js";
+import { briefingRouter } from "./routes/briefing.js";
 import { gdprRouter } from "./routes/gdpr.js";
 
 export function createApp(): Express {
@@ -45,6 +46,7 @@ export function createApp(): Express {
   api.use(jobsRouter);
   api.use(notificationsRouter);
   api.use(mcpRouter);
+  api.use(briefingRouter);
   api.use(gdprRouter);
   app.use("/api/v1", api);
 
