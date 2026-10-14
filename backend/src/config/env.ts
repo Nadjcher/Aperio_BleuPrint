@@ -59,6 +59,9 @@ const schema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((v) => v === "true"),
+  // Orchestration MCP côté client (dispatcher) : timeout par appel + TTL du cache.
+  MCP_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+  MCP_CACHE_TTL_MS: z.coerce.number().int().positive().default(3_600_000),
 
   // Mode invité : durée de vie avant purge automatique des comptes d'essai.
   GUEST_TTL_HOURS: z.coerce.number().int().positive().default(48),
