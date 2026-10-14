@@ -15,7 +15,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  status: tokenStore.access ? "idle" : "idle",
+  status: "idle",
   error: null,
 };
 

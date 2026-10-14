@@ -31,27 +31,17 @@ export class InitialSchema1739200000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "users"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_97672ac88f789774dd47f7c8be"`);
-    await queryRunner.query(`DROP TABLE "refresh_tokens"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_610102b60fea1455310ccd299d"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_c25bc63d248ca90e8dcc1d92d0"`);
-    await queryRunner.query(`DROP TABLE "projects"`);
-    await queryRunner.query(`DROP TABLE "signals"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_9ba441ebe7443ff5a0709f147c"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_959fd980851b47334488f8ad23"`);
-    await queryRunner.query(`DROP TABLE "anomalies"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_fa49554c38b6dd57f01926b575"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_87b11d4117895afcb9b0b0332e"`);
-    await queryRunner.query(`DROP TABLE "decisions"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_0a014f1046b858edc5a754e157"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_88bfea315ce4fd3629e2fc5328"`);
-    await queryRunner.query(`DROP TABLE "decision_feedback"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_d366624907114a2545812f6513"`);
-    await queryRunner.query(`DROP TABLE "audit_logs"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_678217ebecd415a0db47435d15"`);
-    await queryRunner.query(`DROP TABLE "reports"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_b123aed1a96e282b13ac2abcb3"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_1e301f9abf6130785071bbfc26"`);
+    // DROP TABLE emporte ses propres index : inutile (et incorrect) de droper
+    // les index séparément après la table. Aucune contrainte FK entre ces
+    // tables, l'ordre est donc libre.
+    await queryRunner.query(`DROP TABLE IF EXISTS "reports"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "audit_logs"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "decision_feedback"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "decisions"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "anomalies"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "signals"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "projects"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "refresh_tokens"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "users"`);
   }
 }

@@ -14,12 +14,20 @@
     "dev:backend": "npm run -w backend dev",
     "dev:frontend": "npm run -w frontend dev",
     "build": "npm run -w shared build && npm run -w backend build && npm run -w frontend build",
-    "lint": "npm run -w shared lint --if-present && npm run -w backend lint --if-present && npm run -w frontend lint --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "npm run -w shared test --if-present && npm run -w backend test --if-present && npm run -w frontend test --if-present"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "typescript": "^5.4.5"
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^15.11.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.11.0"
   },
   "engines": {
     "node": ">=20"

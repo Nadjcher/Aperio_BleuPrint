@@ -15,10 +15,6 @@ export function resolveEmailProvider(): EmailProvider {
   return "none";
 }
 
-export function isEmailEnabled(): boolean {
-  return resolveEmailProvider() !== "none";
-}
-
 /** Base publique pour les liens contenus dans les e-mails. */
 export function appBaseUrl(): string {
   return (env.APP_BASE_URL || env.CORS_ORIGIN || "").replace(/\/$/, "");
