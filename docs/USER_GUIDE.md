@@ -19,7 +19,19 @@ faibles** (chute d'activité, pics d'anomalies) et met au travail quatre agents 
 Les agents **apprennent** de vos retours : valider ou rejeter une décision
 ajuste leur niveau de confiance au fil du temps.
 
-## 2. Créer un compte
+## 2. Essayer sans compte (mode invité)
+
+Pas envie de vous inscrire tout de suite ? Depuis la page d'accueil, cliquez sur
+**« Essayer sans compte »** : vous accédez immédiatement à l'app en **mode
+invité**, sans e-mail ni mot de passe.
+
+- Vous pouvez créer **1 projet** et le synchroniser pour voir Aperio à l'œuvre.
+- Un bandeau rappelle que votre travail n'est pas sauvegardé.
+- Pour continuer (2ᵉ projet, sauvegarde durable), cliquez sur **« Créer mon
+  compte »** : votre projet d'essai est **conservé** et rattaché à votre
+  nouveau compte.
+
+## 3. Créer un compte
 
 1. Ouvrez l'application et cliquez sur **Créer mon compte**.
 2. Renseignez email, nom et un mot de passe (**12 caractères minimum**, avec au
@@ -34,7 +46,7 @@ ajuste leur niveau de confiance au fil du temps.
 | `manager` | + créer des projets, lancer des synchronisations, donner du feedback |
 | `admin` | + administration (premier inscrit) |
 
-## 3. Premiers pas (onboarding)
+## 4. Premiers pas (onboarding)
 
 Depuis la page **Projets**, suivez les trois étapes :
 
@@ -47,7 +59,7 @@ Depuis la page **Projets**, suivez les trois étapes :
 3. **Lisez les décisions** — anomalies détectées, plan correctif et rapports
    apparaissent sur la fiche.
 
-## 4. Comprendre le tableau de bord
+## 5. Comprendre le tableau de bord
 
 - **Signaux** : séries temporelles brutes (commits/jour, PRs, issues).
 - **Anomalies** : écarts significatifs par rapport à la ligne de base (détection
@@ -55,7 +67,7 @@ Depuis la page **Projets**, suivez les trois étapes :
 - **Décisions** : ce que les agents recommandent. Vous pouvez **valider** 👍 ou
   **rejeter** 👎 — ce feedback entraîne les agents.
 
-## 5. Synchronisation : que se passe-t-il ?
+## 6. Synchronisation : que se passe-t-il ?
 
 1. Vous cliquez sur **Synchroniser** → l'API répond immédiatement avec un
    identifiant de tâche (`jobId`).
@@ -69,7 +81,22 @@ Depuis la page **Projets**, suivez les trois étapes :
 > Un jeton GitHub en lecture seule (`GITHUB_TOKEN`) augmente les quotas d'API
 > et permet d'accéder aux dépôts privés. Côté hébergeur.
 
-## 6. Vos données & vos droits (RGPD)
+## 7. Notifications par e-mail
+
+Si l'administrateur a configuré l'envoi d'e-mails (Resend), Aperio vous prévient :
+
+- **Alerte d'anomalie** : un e-mail est envoyé au propriétaire du projet dès
+  qu'une anomalie est détectée lors d'une synchronisation.
+- **Résumé hebdomadaire** : un digest de l'activité de vos projets (anomalies,
+  décisions des 7 derniers jours).
+- **Réinitialisation / vérification** : liens « mot de passe oublié » et
+  confirmation d'adresse.
+
+Vous pouvez couper les notifications (`notifyByEmail`) via votre profil. Sans
+fournisseur d'e-mail configuré, aucun e-mail n'est envoyé — l'app reste
+pleinement utilisable.
+
+## 8. Vos données & vos droits (RGPD)
 
 Aperio applique la **minimisation** (pas d'email brut dans les signaux, IP
 tronquées dans l'audit) et la **conservation limitée**.
@@ -80,7 +107,7 @@ tronquées dans l'audit) et la **conservation limitée**.
 | **Rectification** | Modifiez votre profil : `PATCH /api/v1/auth/me` |
 | **Effacement** | Supprimez votre compte et vos données : `DELETE /api/v1/gdpr/me` |
 
-## 7. Questions fréquentes
+## 9. Questions fréquentes
 
 **Ma synchro reste « en cours » longtemps.**
 Le dépôt est peut-être volumineux, ou GitHub limite le débit. Elle se terminera

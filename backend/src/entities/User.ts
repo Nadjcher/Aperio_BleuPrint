@@ -30,6 +30,14 @@ export class User {
   @Column({ type: "boolean", default: false })
   emailVerified!: boolean;
 
+  /** Compte d'essai créé sans inscription (limité ; convertible en compte réel). */
+  @Column({ type: "boolean", default: false })
+  isGuest!: boolean;
+
+  /** Reçoit les notifications par e-mail (alertes d'anomalies, digest). */
+  @Column({ type: "boolean", default: true })
+  notifyByEmail!: boolean;
+
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

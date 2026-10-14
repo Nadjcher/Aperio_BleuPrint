@@ -30,6 +30,7 @@ function toPublic(u: User): UserPublic {
     name: u.name,
     role: u.role,
     emailVerified: u.emailVerified,
+    isGuest: u.isGuest,
     createdAt: u.createdAt.toISOString(),
   };
 }
@@ -103,6 +104,7 @@ async function tokensFor(user: User): Promise<AuthTokens> {
     sub: user.id,
     email: user.email,
     role: user.role,
+    isGuest: user.isGuest,
   };
   return {
     accessToken: signAccess(payload),
@@ -120,8 +122,8 @@ export async function register(
   if (existing) {
     throw new AppError(409, "email_taken", "Cet email est déjà utilisé");
   }
-  // Le premier utilisateur inscrit devient admin (et est auto-vérifié).
-  const count = await users().count();
+  // Le premier utilisateur RÉEL (hors invités) devient admin (et auto-vérifié).
+  const count = await users().count({ where: { isGuest: false } });
   const role: Role = count === 0 ? "admin" : "viewer";
   const emailVerified = count === 0;
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -131,6 +133,69 @@ export async function register(
   // E-mail de confirmation (sauf 1er admin déjà vérifié). N'échoue jamais.
   if (!emailVerified) await sendVerificationEmail(user);
   return { user: toPublic(user), tokens: await tokensFor(user) };
+}
+
+/**
+ * Crée un compte INVITÉ (essai sans inscription). Rôle manager pour pouvoir
+ * créer/synchroniser un projet, mais marqué isGuest : limité à 1 projet et
+ * convertible en compte réel via upgradeGuest.
+ */
+export async function createGuest(): Promise<{
+  user: UserPublic;
+  tokens: AuthTokens;
+}> {
+  const id = crypto.randomUUID();
+  const email = `guest-${id}@guest.aperio.local`;
+  // Mot de passe aléatoire non utilisable (le guest n'a pas de login par MDP).
+  const passwordHash = await bcrypt.hash(crypto.randomBytes(24).toString("hex"), BCRYPT_ROUNDS);
+  const user = await users().save(
+    users().create({
+      email,
+      name: "Invité",
+      passwordHash,
+      role: "manager",
+      isGuest: true,
+      emailVerified: false,
+      notifyByEmail: false,
+    }),
+  );
+  return { user: toPublic(user), tokens: await tokensFor(user) };
+}
+
+/**
+ * Convertit un compte invité en compte réel : fixe email/nom/mot de passe,
+ * lève le flag invité. Les projets de l'invité sont conservés (même userId).
+ */
+export async function upgradeGuest(
+  userId: string,
+  email: string,
+  password: string,
+  name: string,
+): Promise<{ user: UserPublic; tokens: AuthTokens }> {
+  const user = await users().findOne({ where: { id: userId } });
+  if (!user || !user.isGuest) {
+    throw new AppError(400, "not_guest", "Ce compte n'est pas un compte invité");
+  }
+  const normalized = email.trim().toLowerCase();
+  const existing = await users().findOne({ where: { email: normalized } });
+  if (existing) {
+    throw new AppError(409, "email_taken", "Cet email est déjà utilisé");
+  }
+  // Si aucun compte réel n'existe encore, ce 1er converti devient admin.
+  const realUsers = await users().count({ where: { isGuest: false } });
+  user.email = normalized;
+  user.name = name;
+  user.passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  user.isGuest = false;
+  user.notifyByEmail = true;
+  if (realUsers === 0) {
+    user.role = "admin";
+    user.emailVerified = true;
+  }
+  const saved = await users().save(user);
+  if (!saved.emailVerified) await sendVerificationEmail(saved);
+  // Réémettre des tokens : le JWT ne porte plus isGuest.
+  return { user: toPublic(saved), tokens: await tokensFor(saved) };
 }
 
 export async function login(
@@ -233,11 +298,12 @@ export async function resendVerification(userId: string): Promise<void> {
 /** Droit de rectification RGPD : met à jour le profil (nom). */
 export async function updateProfile(
   userId: string,
-  changes: { name?: string },
+  changes: { name?: string; notifyByEmail?: boolean },
 ): Promise<UserPublic> {
   const user = await users().findOne({ where: { id: userId } });
   if (!user) throw new AppError(404, "not_found", "Utilisateur introuvable");
   if (changes.name !== undefined) user.name = changes.name;
+  if (changes.notifyByEmail !== undefined) user.notifyByEmail = changes.notifyByEmail;
   const saved = await users().save(user);
   return toPublic(saved);
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, RequestError } from "../api/client";
+import { upgrade } from "../store/authSlice";
+import { useAppDispatch, useAppSelector } from "../store";
 
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -131,6 +133,55 @@ export function ResetPasswordPage() {
           <button className="pm-btn-primary w-full">Réinitialiser</button>
         </form>
       )}
+    </Shell>
+  );
+}
+
+/** Conversion d'un compte invité en compte réel (conserve les projets). */
+export function UpgradePage() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { error } = useAppSelector((s) => s.auth);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const res = await dispatch(upgrade({ email, password, name }));
+    if (upgrade.fulfilled.match(res)) navigate("/projects");
+  };
+
+  return (
+    <Shell title="Créez votre compte">
+      <p className="mb-5 text-sm text-slate-400">
+        Vous êtes en mode invité. Créez un compte pour <b>conserver votre projet</b>
+        {" "}et continuer sans limite.
+      </p>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div>
+          <label className="pm-label">Nom</label>
+          <input className="pm-input" value={name} onChange={(e) => setName(e.target.value)} required />
+        </div>
+        <div>
+          <label className="pm-label">E-mail</label>
+          <input className="pm-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div>
+          <label className="pm-label">Mot de passe</label>
+          <input
+            className="pm-input"
+            type="password"
+            placeholder="12 caractères min. (lettres + chiffres)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={12}
+            required
+          />
+        </div>
+        {error && <p className="text-sm text-red-300">{error}</p>}
+        <button className="pm-btn-primary w-full">Créer mon compte</button>
+      </form>
     </Shell>
   );
 }

@@ -4,6 +4,7 @@ import { fetchRepoSignals } from "../connectors/github.js";
 import * as signalService from "./signalService.js";
 import * as anomalyService from "./anomalyService.js";
 import { runAgents } from "../agents/orchestrator.js";
+import { notifyAnomaly } from "./notificationService.js";
 import { AppError } from "../middleware/errorHandler.js";
 
 export interface SyncResult {
@@ -37,6 +38,8 @@ export async function syncProject(projectId: string): Promise<SyncResult> {
   if (detection?.isAnomaly) {
     await anomalyService.record(project.id, detection);
     anomalyDetected = true;
+    // Notification e-mail au propriétaire (n'échoue jamais, respecte l'opt-in).
+    await notifyAnomaly(project, detection);
   }
 
   const decisions = await runAgents(project.id);

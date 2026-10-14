@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { tokenStore } from "../api/client";
 import { Icon, type IconName } from "../components/Icon";
+import { guest } from "../store/authSlice";
+import { useAppDispatch } from "../store";
 
 const authed = Boolean(tokenStore.access);
 const primaryTo = authed ? "/dashboard" : "/login";
@@ -66,6 +68,14 @@ function SectionHead({ num, eyebrow, title, grad, sub }: { num: string; eyebrow:
 }
 
 export function LandingPage() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const onTryGuest = async () => {
+    const res = await dispatch(guest());
+    if (guest.fulfilled.match(res)) navigate("/projects");
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Halos bleus discrets */}
@@ -111,10 +121,20 @@ export function LandingPage() {
             <Link to={primaryTo} className="pm-btn-primary px-6 py-3 text-base">
               {primaryLabel} →
             </Link>
+            {!authed && (
+              <button onClick={onTryGuest} className="pm-btn-ghost px-6 py-3 text-base">
+                Essayer sans compte
+              </button>
+            )}
             <a href="#how" className="pm-btn-ghost px-6 py-3 text-base">
               Comment ça marche
             </a>
           </div>
+          {!authed && (
+            <p className="mt-3 font-mono text-xs text-slate-500">
+              Essai immédiat · 1 projet · sans e-mail — créez un compte ensuite pour continuer
+            </p>
+          )}
           <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-slate-500">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 animate-pulseGlow rounded-full bg-brand-400 shadow-[0_0_8px_2px_rgba(56,189,248,0.6)]" />

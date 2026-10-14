@@ -8,6 +8,8 @@ export interface UserPublic {
   name: string;
   role: Role;
   emailVerified: boolean;
+  /** Compte d'essai sans inscription (limité, convertible en compte réel). */
+  isGuest: boolean;
   createdAt: string;
 }
 
@@ -16,6 +18,7 @@ export interface AccessTokenPayload {
   sub: string;
   email: string;
   role: Role;
+  isGuest?: boolean;
 }
 
 export interface AuthTokens {

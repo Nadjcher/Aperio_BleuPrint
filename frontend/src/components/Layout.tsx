@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { logout } from "../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../store";
 
@@ -39,14 +39,28 @@ export function Layout() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden font-mono text-xs text-slate-500 sm:inline">
-              {user?.email}
+              {user?.isGuest ? "Mode invité" : user?.email}
             </span>
             <button onClick={onLogout} className="pm-btn-ghost py-1.5">
-              Déconnexion
+              {user?.isGuest ? "Quitter" : "Déconnexion"}
             </button>
           </div>
         </div>
       </header>
+
+      {user?.isGuest && (
+        <div className="border-b border-brand/20 bg-brand/10">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-2.5 text-sm">
+            <span className="text-slate-300">
+              👋 Mode invité — votre travail n'est pas sauvegardé. Créez un compte
+              pour le conserver et continuer sans limite.
+            </span>
+            <Link to="/upgrade" className="pm-btn-primary py-1.5">
+              Créer mon compte
+            </Link>
+          </div>
+        </div>
+      )}
       <main className="mx-auto max-w-6xl px-5 py-10">
         <Outlet />
       </main>

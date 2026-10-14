@@ -44,6 +44,17 @@ projectsRouter.post(
   requireRole("manager"),
   validateBody(createSchema),
   async (req, res) => {
+    // Mode invité : limité à 1 projet. Au-delà → inviter à créer un compte.
+    if (req.user!.isGuest) {
+      const count = await projects().count({ where: { ownerId: req.user!.sub } });
+      if (count >= 1) {
+        throw new AppError(
+          403,
+          "guest_limit",
+          "Limite du mode invité atteinte — créez un compte pour continuer",
+        );
+      }
+    }
     const saved = await projects().save(
       projects().create({
         name: req.body.name,

@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Paginated, Project } from "@projectmaster/shared";
 import { api, RequestError } from "../api/client";
 
 export function ProjectsPage() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [name, setName] = useState("");
   const [repo, setRepo] = useState("");
@@ -28,6 +29,10 @@ export function ProjectsPage() {
       setRepo("");
       await load();
     } catch (err) {
+      if (err instanceof RequestError && err.code === "guest_limit") {
+        navigate("/upgrade");
+        return;
+      }
       setError(err instanceof RequestError ? err.message : "Erreur");
     }
   };

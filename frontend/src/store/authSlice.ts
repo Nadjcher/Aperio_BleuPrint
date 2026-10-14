@@ -39,6 +39,21 @@ export const register = createAsyncThunk(
   },
 );
 
+export const guest = createAsyncThunk("auth/guest", async () => {
+  const res = await api.post<AuthResponse>("/auth/guest");
+  tokenStore.set(res.tokens);
+  return res.user;
+});
+
+export const upgrade = createAsyncThunk(
+  "auth/upgrade",
+  async (body: RegisterRequest) => {
+    const res = await api.post<AuthResponse>("/auth/upgrade", body);
+    tokenStore.set(res.tokens);
+    return res.user;
+  },
+);
+
 export const loadMe = createAsyncThunk("auth/me", async () => {
   return api.get<UserPublic>("/auth/me");
 });
@@ -76,6 +91,18 @@ const authSlice = createSlice({
       .addCase(register.rejected, (s, a) => {
         s.status = "error";
         s.error = a.error.message ?? "Échec d'inscription";
+      })
+      .addCase(guest.fulfilled, (s, a) => {
+        s.status = "authenticated";
+        s.user = a.payload;
+      })
+      .addCase(upgrade.fulfilled, (s, a) => {
+        s.status = "authenticated";
+        s.user = a.payload;
+      })
+      .addCase(upgrade.rejected, (s, a) => {
+        s.status = "error";
+        s.error = a.error.message ?? "Échec de la création du compte";
       })
       .addCase(loadMe.fulfilled, (s, a) => {
         s.status = "authenticated";

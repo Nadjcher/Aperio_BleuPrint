@@ -16,6 +16,13 @@ const registerSchema = z.object({
 });
 
 const updateMeSchema = z.object({
+  name: z.string().min(1).max(120).optional(),
+  notifyByEmail: z.boolean().optional(),
+});
+
+const upgradeSchema = z.object({
+  email: z.string().email(),
+  password: passwordSchema,
   name: z.string().min(1).max(120),
 });
 
@@ -76,6 +83,34 @@ authRouter.post(
   },
 );
 
+/** Essai sans inscription : crée un compte invité et renvoie des tokens. */
+authRouter.post("/auth/guest", authRateLimiter, async (req, res) => {
+  const result = await authService.createGuest();
+  await audit({
+    actorId: result.user.id,
+    action: "auth.guest_created",
+    ip: anonymizeIp(req.ip),
+  });
+  res.status(201).json(result);
+});
+
+/** Conversion d'un compte invité en compte réel (conserve ses projets). */
+authRouter.post(
+  "/auth/upgrade",
+  requireAuth,
+  validateBody(upgradeSchema),
+  async (req, res) => {
+    const { email, password, name } = req.body;
+    const result = await authService.upgradeGuest(req.user!.sub, email, password, name);
+    await audit({
+      actorId: result.user.id,
+      action: "auth.guest_upgraded",
+      ip: anonymizeIp(req.ip),
+    });
+    res.status(200).json(result);
+  },
+);
+
 /** Mot de passe oublié : envoie un lien (réponse neutre, anti-énumération). */
 authRouter.post(
   "/auth/forgot-password",
@@ -129,6 +164,7 @@ authRouter.patch(
   async (req, res) => {
     const user = await authService.updateProfile(req.user!.sub, {
       name: req.body.name,
+      notifyByEmail: req.body.notifyByEmail,
     });
     await audit({
       actorId: req.user!.sub,
