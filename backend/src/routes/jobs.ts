@@ -1,9 +1,8 @@
 import { Router } from "express";
-import { AppDataSource } from "../db/data-source.js";
-import { Project } from "../entities/Project.js";
 import { requireAuth } from "../middleware/auth.js";
 import { AppError } from "../middleware/errorHandler.js";
 import * as jobService from "../services/jobService.js";
+import { getOwnedProjectOrNull } from "../services/projectService.js";
 
 export const jobsRouter = Router();
 
@@ -14,9 +13,9 @@ jobsRouter.get("/jobs/:id", async (req, res) => {
   const job = await jobService.get(req.params.id);
   if (!job) throw new AppError(404, "not_found", "Job introuvable");
 
-  const owns = await AppDataSource.getRepository(Project).findOne({
-    where: { id: job.projectId, ownerId: req.user!.sub },
-  });
+  // 404 « Job introuvable » (et non « Projet introuvable ») pour ne pas
+  // divulguer l'existence d'un job appartenant à un autre compte.
+  const owns = await getOwnedProjectOrNull(req.user!.sub, job.projectId);
   if (!owns) throw new AppError(404, "not_found", "Job introuvable");
 
   res.json(job);

@@ -1,23 +1,16 @@
 import { Router } from "express";
 import { AppDataSource } from "../db/data-source.js";
-import { Project } from "../entities/Project.js";
 import { Signal } from "../entities/Signal.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/rbac.js";
 import { AppError } from "../middleware/errorHandler.js";
 import * as jobService from "../services/jobService.js";
+import { getOwnedProject } from "../services/projectService.js";
 import { audit, anonymizeIp } from "../services/auditService.js";
 
 export const signalsRouter = Router();
-const projects = () => AppDataSource.getRepository(Project);
 
 signalsRouter.use(requireAuth);
-
-async function ownedProject(id: string, ownerId: string): Promise<Project> {
-  const p = await projects().findOne({ where: { id, ownerId } });
-  if (!p) throw new AppError(404, "not_found", "Projet introuvable");
-  return p;
-}
 
 /**
  * Enfile une synchronisation de projet (exécution asynchrone par le worker).
@@ -28,7 +21,7 @@ signalsRouter.post(
   "/projects/:id/sync",
   requireRole("manager"),
   async (req, res) => {
-    const project = await ownedProject(req.params.id, req.user!.sub);
+    const project = await getOwnedProject(req.user!.sub, req.params.id);
     if (!project.repo) {
       throw new AppError(400, "no_repo", "Aucun dépôt associé à ce projet");
     }
@@ -48,7 +41,7 @@ signalsRouter.post(
 );
 
 signalsRouter.get("/projects/:id/signals", async (req, res) => {
-  await ownedProject(req.params.id, req.user!.sub);
+  await getOwnedProject(req.user!.sub, req.params.id);
   const rows = await AppDataSource.getRepository(Signal).find({
     where: { projectId: req.params.id },
     order: { occurredAt: "DESC" },

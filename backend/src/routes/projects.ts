@@ -8,6 +8,7 @@ import { requireRole } from "../middleware/rbac.js";
 import { validateBody } from "../middleware/validate.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { audit, anonymizeIp } from "../services/auditService.js";
+import { getOwnedProject } from "../services/projectService.js";
 
 export const projectsRouter = Router();
 const projects = () => AppDataSource.getRepository(Project);
@@ -73,9 +74,6 @@ projectsRouter.post(
 );
 
 projectsRouter.get("/projects/:id", async (req, res) => {
-  const p = await projects().findOne({
-    where: { id: req.params.id, ownerId: req.user!.sub },
-  });
-  if (!p) throw new AppError(404, "not_found", "Projet introuvable");
+  const p = await getOwnedProject(req.user!.sub, req.params.id);
   res.json(toDTO(p));
 });
