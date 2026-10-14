@@ -30,6 +30,7 @@ function toPublic(u: User): UserPublic {
     role: u.role,
     emailVerified: u.emailVerified,
     isGuest: u.isGuest,
+    uiMode: u.uiMode,
     createdAt: u.createdAt.toISOString(),
   };
 }
@@ -241,12 +242,13 @@ export async function resendVerification(userId: string): Promise<void> {
 /** Droit de rectification RGPD : met à jour le profil (nom). */
 export async function updateProfile(
   userId: string,
-  changes: { name?: string; notifyByEmail?: boolean },
+  changes: { name?: string; notifyByEmail?: boolean; uiMode?: UserPublic["uiMode"] },
 ): Promise<UserPublic> {
   const user = await users().findOne({ where: { id: userId } });
   if (!user) throw new AppError(404, "not_found", "Utilisateur introuvable");
   if (changes.name !== undefined) user.name = changes.name;
   if (changes.notifyByEmail !== undefined) user.notifyByEmail = changes.notifyByEmail;
+  if (changes.uiMode !== undefined) user.uiMode = changes.uiMode;
   const saved = await users().save(user);
   return toPublic(saved);
 }

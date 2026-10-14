@@ -3,6 +3,7 @@ import type {
   AuthTokens,
   LoginRequest,
   RegisterRequest,
+  UiMode,
   UserPublic,
 } from "@projectmaster/shared";
 import { api, tokenStore } from "../api/client";
@@ -58,6 +59,11 @@ export const loadMe = createAsyncThunk("auth/me", async () => {
   return api.get<UserPublic>("/auth/me");
 });
 
+/** Change la préférence d'affichage (mode simple/expert) et la persiste. */
+export const setUiMode = createAsyncThunk("auth/setUiMode", async (uiMode: UiMode) => {
+  return api.patch<UserPublic>("/auth/me", { uiMode });
+});
+
 export const logout = createAsyncThunk("auth/logout", async () => {
   try {
     await api.post("/auth/logout");
@@ -106,6 +112,9 @@ const authSlice = createSlice({
       })
       .addCase(loadMe.fulfilled, (s, a) => {
         s.status = "authenticated";
+        s.user = a.payload;
+      })
+      .addCase(setUiMode.fulfilled, (s, a) => {
         s.user = a.payload;
       })
       .addCase(loadMe.rejected, (s) => {

@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { logout } from "../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { SiteFooter } from "./SiteFooter";
+import { ModeToggle } from "./ModeToggle";
 import { ProjectsProvider } from "../hooks/ProjectsContext";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -49,6 +50,7 @@ export function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
+            <ModeToggle />
             <span className="hidden font-mono text-xs text-slate-400 sm:inline">
               {user?.isGuest ? "Mode invité" : user?.email}
             </span>

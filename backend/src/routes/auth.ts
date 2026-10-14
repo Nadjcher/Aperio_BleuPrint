@@ -18,6 +18,7 @@ const registerSchema = z.object({
 const updateMeSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   notifyByEmail: z.boolean().optional(),
+  uiMode: z.enum(["simple", "expert"]).optional(),
 });
 
 const upgradeSchema = z.object({
@@ -165,6 +166,7 @@ authRouter.patch(
     const user = await authService.updateProfile(req.user!.sub, {
       name: req.body.name,
       notifyByEmail: req.body.notifyByEmail,
+      uiMode: req.body.uiMode,
     });
     await audit({
       actorId: req.user!.sub,
