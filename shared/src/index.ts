@@ -11,3 +11,4 @@ export * from "./api.js";
 export * from "./reports.js";
 export * from "./jobs.js";
 export * from "./briefing.js";
+export * from "./forecast.js";

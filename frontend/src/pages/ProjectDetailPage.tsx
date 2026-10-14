@@ -4,10 +4,13 @@ import type {
   Anomaly,
   AgentKind,
   Decision,
+  Forecast,
+  ForecastRisk,
   Job,
   Project,
   Report,
   ReportPeriod,
+  TrendMetric,
 } from "@projectmaster/shared";
 import { api, RequestError } from "../api/client";
 
@@ -47,22 +50,25 @@ export function ProjectDetailPage() {
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
+  const [forecast, setForecast] = useState<Forecast | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
-    const [p, a, d, r] = await Promise.all([
+    const [p, a, d, r, f] = await Promise.all([
       api.get<Project>(`/projects/${id}`),
       api.get<{ items: Anomaly[] }>(`/projects/${id}/anomalies`),
       api.get<{ items: Decision[] }>(`/projects/${id}/decisions`),
       api.get<{ items: Report[] }>(`/projects/${id}/reports`),
+      api.get<Forecast>(`/projects/${id}/forecast`),
     ]);
     setProject(p);
     setAnomalies(a.items);
     setDecisions(d.items);
     setReports(r.items);
+    setForecast(f);
   }, [id]);
 
   useEffect(() => {
@@ -176,6 +182,8 @@ export function ProjectDetailPage() {
           {message}
         </p>
       )}
+
+      {forecast && <ForecastSection forecast={forecast} />}
 
       <Section title="Anomalies ouvertes" count={anomalies.length}>
         {anomalies.length === 0 ? (
@@ -382,6 +390,104 @@ function Section({
 function Empty({ children }: { children: ReactNode }) {
   return (
     <div className="pm-card p-8 text-center text-sm text-slate-400">{children}</div>
+  );
+}
+
+const riskStyle: Record<ForecastRisk, { chip: string; label: string }> = {
+  ok: { chip: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300", label: "Sous contrôle" },
+  watch: { chip: "border-slate-400/30 bg-slate-400/10 text-slate-200", label: "À surveiller" },
+  high: { chip: "border-amber-500/40 bg-amber-500/10 text-amber-300", label: "Risque élevé" },
+  critical: { chip: "border-red-500/40 bg-red-500/10 text-red-300", label: "Critique" },
+};
+
+const metricLabel: Record<string, string> = {
+  commits: "Commits",
+  pull_requests: "Pull requests",
+  issues: "Issues",
+};
+
+function TrendPill({ t }: { t: TrendMetric }) {
+  const arrow = t.direction === "up" ? "↑" : t.direction === "down" ? "↓" : "→";
+  // Pour les issues, une hausse est défavorable ; pour commits/PR, une hausse est favorable.
+  const higherIsBetter = t.metric !== "issues";
+  const favorable = t.direction === "up" ? higherIsBetter : !higherIsBetter;
+  const color =
+    t.direction === "flat"
+      ? "text-slate-400"
+      : favorable
+        ? "text-emerald-300"
+        : "text-red-300";
+  return (
+    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
+      <div className="font-mono text-[11px] uppercase tracking-wider text-slate-400">
+        {metricLabel[t.metric] ?? t.metric}
+      </div>
+      <div className="mt-1 flex items-baseline gap-2">
+        <span className="text-lg font-semibold text-slate-100">{t.current7d}</span>
+        <span className={`font-mono text-xs ${color}`}>
+          {arrow} {t.changePct > 0 ? "+" : ""}
+          {t.changePct}%
+        </span>
+      </div>
+      <div className="font-mono text-[10px] text-slate-500">7 j · préc. {t.previous7d}</div>
+    </div>
+  );
+}
+
+function ForecastSection({ forecast: f }: { forecast: Forecast }) {
+  const r = riskStyle[f.riskLevel];
+  return (
+    <Section title="Alerte précoce" count={f.signals.length}>
+      <div className="pm-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <span className={`pm-chip ${r.chip}`}>{r.label}</span>
+            {f.horizonWeeks && (
+              <span className="font-mono text-xs text-slate-400">
+                fenêtre d'intervention ≈ {f.horizonWeeks} sem.
+              </span>
+            )}
+          </div>
+          <span className="font-mono text-[11px] text-slate-500">
+            confiance {(f.confidence * 100).toFixed(0)}% · {f.dataDays} j de données
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {f.trends.map((t) => (
+            <TrendPill key={t.metric} t={t} />
+          ))}
+        </div>
+
+        {f.signals.length > 0 && (
+          <ul className="mt-4 space-y-1.5">
+            {f.signals.map((s, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                <span
+                  className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
+                    s.severity === "critical" ? "bg-red-400" : "bg-amber-400"
+                  }`}
+                />
+                {s.label}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {f.recommendations.length > 0 && (
+          <div className="mt-4 rounded-lg border border-brand/15 bg-brand/5 p-3 text-sm text-slate-300">
+            <div className="mb-1 font-mono text-[11px] uppercase tracking-wider text-brand-300">
+              Recommandations
+            </div>
+            <ul className="space-y-1">
+              {f.recommendations.map((rec, i) => (
+                <li key={i}>• {rec}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </Section>
   );
 }
 
