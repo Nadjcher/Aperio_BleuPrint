@@ -1,0 +1,41 @@
+{
+  "projet": "Aperio",
+  "date": "2026-10-14",
+  "methode": "Lecture du code réel (backend/src/agents, /llm, /connectors) — pas d'estimation",
+  "forces": [
+    "Socle technique complet et déployé en prod (Neon + Render + Vercel, migrations au boot, observabilité Prometheus/Grafana, sécurité RGPD, tests).",
+    "Détection d'anomalies explicable : z-score + robuste médiane/MAD, avec niveau de sévérité (anomalyService).",
+    "Pipeline asynchrone fiable : file de jobs en base, retry + back-off exponentiel, worker scalable (FOR UPDATE SKIP LOCKED).",
+    "Boucle d'apprentissage v1 : trustFactor pondère la confiance des agents par le taux d'acceptation humain (orchestrator).",
+    "Couche LLM multi-provider (Anthropic / OpenAI-compatible / none) + connecteur MCP amorcé, le tout à dégradation gracieuse."
+  ],
+  "faiblesses": [
+    "Agents NON autonomes : ils produisent des DraftDecision (title/rationale/actions) enregistrées en 'proposed'. Aucune exécution, aucun effet de bord, aucun système d'approbation ni de rollback.",
+    "Une seule source de données : GitHub (commits/PRs/issues). Vision partielle d'un projet.",
+    "MCP minimal : un seul point d'intégration (Planner), 0 serveur configuré par défaut, Anthropic uniquement. Pas d'orchestration (dispatcher, parallélisation, cache, table d'audit).",
+    "Aucune feature différenciante : pas de simulation before/after, pas d'analyse de gravité cross-projet, pas de forecasting 4 semaines, pas de briefing proactif.",
+    "Signaux limités : uniquement l'activité du dépôt (ex. commits/jour). Pas de vélocité, scope, couverture de tests, sentiment d'équipe — donc la détection ne couvre pas les vrais risques projet."
+  ],
+  "connecteurs_existants": ["github"],
+  "connecteurs_manquants": [
+    "jira", "slack", "xray", "confluence", "figma", "aws", "linear", "notion", "datadog"
+  ],
+  "agents": {
+    "verdict": "SIMULÉS (analyseurs/suggesteurs), pas autonomes",
+    "preuve": "orchestrator.runAgents() enregistre chaque décision avec status='proposed'; aucun execute/approve/rollback/snapshot dans le code (grep = 0).",
+    "detail": {
+      "monitor": "Escalade les anomalies critiques (heuristique). Ne corrige rien.",
+      "analyst": "Diagnostique les causes (LLM si dispo, sinon heuristique).",
+      "planner": "Propose un plan correctif (LLM + MCP si configuré, sinon heuristique).",
+      "reporter": "Produit une synthèse d'état (heuristique)."
+    }
+  },
+  "mcp": {
+    "points_integration": 1,
+    "ou": "Planner → completeAnthropicWithMcp (connecteur MCP de l'API Claude)",
+    "serveurs_configures_par_defaut": 0,
+    "provider_requis": "anthropic",
+    "fallback": "MCP → LLM simple → heuristique",
+    "manque_vs_guide": ["dispatcher", "appels parallèles", "cache", "table d'audit mcp_calls", "timeouts par serveur"]
+  }
+}
