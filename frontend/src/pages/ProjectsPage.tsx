@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { Paginated, Project } from "@projectmaster/shared";
 import { api, RequestError } from "../api/client";
+import { PageHeader } from "../components/ui";
 
 export function ProjectsPage() {
   const navigate = useNavigate();
@@ -39,12 +40,10 @@ export function ProjectsPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Projets</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Reliez un dépôt pour collecter les signaux et lancer les agents.
-        </p>
-      </div>
+      <PageHeader
+        title="Projets"
+        subtitle="Reliez un dépôt pour collecter les signaux et lancer les agents."
+      />
 
       <form
         onSubmit={onCreate}

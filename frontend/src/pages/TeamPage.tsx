@@ -7,6 +7,7 @@ import type {
   ResourceMoveAnalysis,
 } from "@projectmaster/shared";
 import { api, RequestError } from "../api/client";
+import { PageHeader, ErrorBanner } from "../components/ui";
 
 /** Jauge de gravité 0..100 (vert → ambre → rouge). */
 function GravityGauge({ score }: { score: number }) {
@@ -166,22 +167,16 @@ export function TeamPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <div className="pm-eyebrow">Équipe & ressources</div>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">
-          Gravité des déplacements
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-400">
-          Déclarez votre équipe, affectez-la aux projets, puis simulez l'impact
-          d'un déplacement : perte de vélocité, allongement de durée et perte
-          d'expertise sont estimés pour éviter les décisions coûteuses.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Équipe & ressources"
+        title="Gravité des déplacements"
+        subtitle="Déclarez votre équipe, affectez-la aux projets, puis simulez l'impact d'un déplacement : perte de vélocité, allongement de durée et perte d'expertise sont estimés pour éviter les décisions coûteuses."
+      />
 
       {error && (
-        <p role="alert" className="mb-4 text-sm text-red-300">
-          {error}
-        </p>
+        <div className="mb-4">
+          <ErrorBanner message={error} />
+        </div>
       )}
 
       {/* Membres */}
@@ -426,9 +421,9 @@ export function TeamPage() {
         </form>
 
         {simError && (
-          <p role="alert" className="mt-3 text-sm text-red-300">
-            {simError}
-          </p>
+          <div className="mt-3">
+            <ErrorBanner message={simError} />
+          </div>
         )}
 
         {analysis && (

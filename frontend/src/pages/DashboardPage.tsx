@@ -8,6 +8,7 @@ import type {
   Project,
 } from "@projectmaster/shared";
 import { api } from "../api/client";
+import { PageHeader, Loading } from "../components/ui";
 
 const priorityStyle: Record<BriefingPriority, { chip: string; border: string; label: string }> = {
   critical: { chip: "border-red-500/40 bg-red-500/10 text-red-300", border: "border-l-red-500/70", label: "Critique" },
@@ -30,18 +31,14 @@ export function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <span className="pm-eyebrow mb-3">Briefing</span>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-white">
-          {briefing?.greeting ?? "Tableau de bord"}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Voici ce qu'il faut faire — priorisé, avec les actions directes.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Briefing"
+        title={briefing?.greeting ?? "Tableau de bord"}
+        subtitle="Voici ce qu'il faut faire — priorisé, avec les actions directes."
+      />
 
       {loading ? (
-        <p className="text-slate-400">Chargement…</p>
+        <Loading />
       ) : (
         <>
           {briefing && briefing.items.length > 0 ? (
