@@ -140,17 +140,50 @@ export interface DecisionHandlers {
   onFeedback: (id: string, accepted: boolean) => void;
 }
 
+/** Explication en clair : ce que l'approbation / le rejet déclenche. */
+function DecisionExplain({ d }: { d: Decision }) {
+  const hasAction = Boolean(d.actionType && d.actionType !== "none");
+  let text: string;
+  if (!hasAction) {
+    text =
+      "Recommandation sans action automatique. Votre retour (valider / rejeter) aide les agents à s'améliorer — rien n'est modifié sur le projet.";
+  } else if (d.autoApproved) {
+    text =
+      "Action à faible risque, appliquée automatiquement. Vous pouvez l'annuler sous 24 h si besoin.";
+  } else if (d.status === "pending_approval") {
+    text =
+      "Si vous approuvez : l'action est appliquée (réversible pendant 24 h). Si vous rejetez : rien ne se passe sur le projet.";
+  } else if (d.status === "executed") {
+    text = "Action appliquée. Vous pouvez encore l'annuler dans la fenêtre de 24 h.";
+  } else {
+    return null;
+  }
+  return (
+    <p className="mt-2 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 text-xs text-slate-400">
+      {text}
+    </p>
+  );
+}
+
 export function DecisionCard({ d, h }: { d: Decision; h: DecisionHandlers }) {
   return (
     <li className="pm-card p-5">
-      <div className="flex items-center justify-between">
-        <span className={`pm-chip ${agentChip[d.agent]}`}>{d.agent}</span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`pm-chip ${agentChip[d.agent]}`}>{d.agent}</span>
+          {d.autoApproved && (
+            <span className="pm-chip border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
+              Action sûre
+            </span>
+          )}
+        </div>
         <span className="font-mono text-xs text-slate-400">
           confiance {(d.confidence * 100).toFixed(0)}% · {statusLabel(d.status)}
         </span>
       </div>
       <h3 className="mt-3 font-semibold text-slate-100">{d.title}</h3>
       <p className="mt-1 text-sm text-slate-400">{d.rationale}</p>
+      <DecisionExplain d={d} />
       {d.actions.length > 0 && (
         <ul className="mt-3 space-y-1.5">
           {d.actions.map((action, i) => (
