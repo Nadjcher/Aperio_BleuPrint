@@ -110,6 +110,32 @@ export function ProjectDetailPage() {
     await load();
   };
 
+  // Simulations par décision (aperçu before/after sans exécuter).
+  const [sims, setSims] = useState<
+    Record<string, { label: string; before: unknown; after: unknown }>
+  >({});
+
+  const simulate = async (decisionId: string) => {
+    try {
+      const s = await api.post<{ label: string; before: unknown; after: unknown }>(
+        `/decisions/${decisionId}/simulate`,
+      );
+      setSims((prev) => ({ ...prev, [decisionId]: s }));
+    } catch (err) {
+      setMessage(err instanceof RequestError ? err.message : "Erreur de simulation");
+    }
+  };
+
+  const actOnDecision = async (decisionId: string, verb: "approve" | "reject" | "undo") => {
+    try {
+      await api.post(`/decisions/${decisionId}/${verb}`);
+      setMessage(null);
+    } catch (err) {
+      setMessage(err instanceof RequestError ? err.message : "Action impossible");
+    }
+    await load();
+  };
+
   const generateReport = async (period: ReportPeriod) => {
     if (!id) return;
     setReporting(true);
@@ -187,7 +213,7 @@ export function ProjectDetailPage() {
                 <div className="flex items-center justify-between">
                   <span className={`pm-chip ${agentChip[d.agent]}`}>{d.agent}</span>
                   <span className="font-mono text-xs text-slate-400">
-                    confiance {(d.confidence * 100).toFixed(0)}% · {d.status}
+                    confiance {(d.confidence * 100).toFixed(0)}% · {statusLabel(d.status)}
                   </span>
                 </div>
                 <h3 className="mt-3 font-semibold text-slate-100">{d.title}</h3>
@@ -205,7 +231,49 @@ export function ProjectDetailPage() {
                     ))}
                   </ul>
                 )}
-                {d.status === "proposed" && (
+                {/* Actions encadrées : décisions portant une action réversible */}
+                {d.actionType && d.actionType !== "none" && (
+                  <div className="mt-4 space-y-3">
+                    {sims[d.id] && (
+                      <div className="rounded-lg border border-brand/20 bg-brand/5 px-3 py-2 text-sm text-slate-300">
+                        Simulation — {sims[d.id].label} :{" "}
+                        <span className="font-mono text-brand-300">
+                          {fmtState(sims[d.id].before)} → {fmtState(sims[d.id].after)}
+                        </span>
+                      </div>
+                    )}
+                    {d.status === "pending_approval" && (
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => simulate(d.id)} className="pm-btn-ghost py-1.5">
+                          Simuler
+                        </button>
+                        <button
+                          onClick={() => actOnDecision(d.id, "approve")}
+                          className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/20"
+                        >
+                          ✓ Approuver
+                        </button>
+                        <button
+                          onClick={() => actOnDecision(d.id, "reject")}
+                          className="rounded-lg border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-sm font-medium text-red-300 transition hover:bg-red-500/20"
+                        >
+                          ✕ Rejeter
+                        </button>
+                      </div>
+                    )}
+                    {d.status === "executed" && (
+                      <button
+                        onClick={() => actOnDecision(d.id, "undo")}
+                        className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-1.5 text-sm font-medium text-amber-300 transition hover:bg-amber-500/20"
+                      >
+                        ↩ Annuler (fenêtre 24 h)
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Recommandations sans action : feedback d'apprentissage */}
+                {d.status === "proposed" && (!d.actionType || d.actionType === "none") && (
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => giveFeedback(d.id, true)}
@@ -315,4 +383,28 @@ function Empty({ children }: { children: ReactNode }) {
   return (
     <div className="pm-card p-8 text-center text-sm text-slate-400">{children}</div>
   );
+}
+
+/** Formate un état de snapshot (ex. {status:"open"}) pour l'affichage. */
+function fmtState(x: unknown): string {
+  if (x && typeof x === "object" && "status" in x) {
+    return String((x as { status: unknown }).status);
+  }
+  return x === null || x === undefined ? "—" : JSON.stringify(x);
+}
+
+/** Libellés lisibles des statuts de décision. */
+function statusLabel(status: Decision["status"]): string {
+  const map: Record<string, string> = {
+    proposed: "proposée",
+    pending_approval: "à approuver",
+    executed: "exécutée",
+    undone: "annulée",
+    rejected: "rejetée",
+    expired: "expirée",
+    accepted: "validée",
+    applied: "appliquée",
+    superseded: "remplacée",
+  };
+  return map[status] ?? status;
 }
