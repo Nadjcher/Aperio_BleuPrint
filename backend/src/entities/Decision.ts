@@ -5,7 +5,11 @@ import {
   Index,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import type { AgentKind, DecisionStatus } from "@projectmaster/shared";
+import type {
+  AgentKind,
+  DecisionActionType,
+  DecisionStatus,
+} from "@projectmaster/shared";
 
 @Entity({ name: "decisions" })
 @Index(["projectId", "status"])
@@ -35,8 +39,31 @@ export class Decision {
   @Column({ type: "double precision", default: 0.5 })
   confidence!: number;
 
-  @Column({ type: "varchar", length: 15, default: "proposed" })
+  @Column({ type: "varchar", length: 20, default: "proposed" })
   status!: DecisionStatus;
+
+  /** Action exécutable (none = simple recommandation). */
+  @Column({ type: "varchar", length: 40, default: "none" })
+  actionType!: DecisionActionType;
+
+  @Column({ type: "boolean", default: false })
+  autoApproved!: boolean;
+
+  /** Snapshots avant/après pour le rollback. */
+  @Column({ type: "jsonb", nullable: true })
+  beforeSnapshot!: Record<string, unknown> | null;
+
+  @Column({ type: "jsonb", nullable: true })
+  afterSnapshot!: Record<string, unknown> | null;
+
+  @Column({ type: "timestamptz", nullable: true })
+  executedAt!: Date | null;
+
+  @Column({ type: "timestamptz", nullable: true })
+  undoneAt!: Date | null;
+
+  @Column({ type: "timestamptz", nullable: true })
+  approvalDeadline!: Date | null;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;

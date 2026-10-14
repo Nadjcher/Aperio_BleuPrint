@@ -23,6 +23,9 @@ export const monitorAgent: Agent = {
           (a) => `Examiner « ${a.metric} » : ${a.explanation}`,
         ),
         confidence: 0.9,
+        // Action à faible impact : accuser réception (auto-approuvée si
+        // AGENT_AUTONOMY=auto, sinon file d'approbation). Réversible.
+        actionType: "anomaly.acknowledge",
       },
     ];
   },

@@ -3,7 +3,10 @@ import { AppDataSource } from "../db/data-source.js";
 import { Decision as DecisionEntity } from "../entities/Decision.js";
 import { DecisionFeedback } from "../entities/DecisionFeedback.js";
 import * as anomalyService from "../services/anomalyService.js";
+import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
+import { getAction, UNDO_WINDOW_MS } from "./actions.js";
+import { executeDecision } from "../services/decisionService.js";
 import { monitorAgent } from "./monitorAgent.js";
 import { analystAgent } from "./analystAgent.js";
 import { plannerAgent } from "./plannerAgent.js";
@@ -14,6 +17,27 @@ const AGENTS: Agent[] = [monitorAgent, analystAgent, plannerAgent, reporterAgent
 
 const decisions = () => AppDataSource.getRepository(DecisionEntity);
 const feedback = () => AppDataSource.getRepository(DecisionFeedback);
+
+/** Mappe une décision persistée vers le DTO partagé (champs d'action inclus). */
+function toDTO(d: DecisionEntity): Decision {
+  return {
+    id: d.id,
+    projectId: d.projectId,
+    agent: d.agent,
+    anomalyId: d.anomalyId ?? undefined,
+    title: d.title,
+    rationale: d.rationale,
+    actions: d.actions,
+    confidence: d.confidence,
+    status: d.status,
+    actionType: d.actionType,
+    autoApproved: d.autoApproved,
+    executedAt: d.executedAt?.toISOString(),
+    undoneAt: d.undoneAt?.toISOString(),
+    approvalDeadline: d.approvalDeadline?.toISOString(),
+    createdAt: d.createdAt.toISOString(),
+  };
+}
 
 /**
  * Pondère la confiance d'un agent par son taux d'acceptation passé.
@@ -47,20 +71,29 @@ export async function runAgents(projectId: string): Promise<Decision[]> {
       const factor = await trustFactor(agent.kind);
 
       for (const draft of drafts) {
-        const saved = await decisions().save(
-          decisions().create({
-            ...draft,
-            confidence: Math.min(1, draft.confidence * factor),
-            status: "proposed",
-          }),
-        );
-        produced.push({
+        const action = getAction(draft.actionType);
+        let saved = decisions().create({
           ...draft,
-          id: saved.id,
-          confidence: saved.confidence,
-          status: saved.status,
-          createdAt: saved.createdAt.toISOString(),
+          confidence: Math.min(1, draft.confidence * factor),
+          status: "proposed",
+          autoApproved: action?.autoApproved ?? false,
         });
+
+        if (action) {
+          // Action à faible impact + autonomie activée → exécution immédiate ;
+          // sinon file d'approbation humaine (délai de 24 h).
+          if (action.autoApproved && env.AGENT_AUTONOMY === "auto") {
+            saved = await executeDecision(await decisions().save(saved));
+          } else {
+            saved.status = "pending_approval";
+            saved.approvalDeadline = new Date(Date.now() + UNDO_WINDOW_MS);
+            saved = await decisions().save(saved);
+          }
+        } else {
+          saved = await decisions().save(saved);
+        }
+
+        produced.push(toDTO(saved));
       }
     } catch (err) {
       logger.error({ err, agent: agent.kind }, "Agent en échec");

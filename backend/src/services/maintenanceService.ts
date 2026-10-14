@@ -7,12 +7,14 @@ import { User } from "../entities/User.js";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
 import { eraseUser } from "./gdprService.js";
+import { expireStaleApprovals } from "./decisionService.js";
 
 export interface PurgeResult {
   auditLogs: number;
   refreshTokens: number;
   oneTimeTokens: number;
   guests: number;
+  expiredApprovals: number;
 }
 
 /**
@@ -59,11 +61,15 @@ export async function purgeExpiredData(): Promise<PurgeResult> {
     }
   }
 
+  // Décisions en attente d'approbation dont le délai est dépassé → expirées.
+  const expiredApprovals = await expireStaleApprovals();
+
   return {
     auditLogs: audit.affected ?? 0,
     refreshTokens: (expired.affected ?? 0) + (revoked.affected ?? 0),
     oneTimeTokens: otExpired.affected ?? 0,
     guests,
+    expiredApprovals,
   };
 }
 
@@ -74,7 +80,7 @@ export function startMaintenance(): void {
   const run = (): void => {
     purgeExpiredData()
       .then((r) => {
-        if (r.auditLogs || r.refreshTokens || r.oneTimeTokens || r.guests) {
+        if (r.auditLogs || r.refreshTokens || r.oneTimeTokens || r.guests || r.expiredApprovals) {
           logger.info(r, "Purge RGPD : données expirées supprimées");
         }
       })

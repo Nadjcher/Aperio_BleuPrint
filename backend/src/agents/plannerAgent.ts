@@ -59,6 +59,8 @@ export const plannerAgent: Agent = {
           "Définir un seuil d'alerte et un critère de retour à la normale",
         ],
         confidence: 0.55,
+        // Action à impact : proposer la résolution → nécessite une approbation.
+        actionType: "anomaly.resolve",
       },
     ];
   },

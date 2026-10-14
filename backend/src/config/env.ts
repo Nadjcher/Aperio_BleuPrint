@@ -66,6 +66,11 @@ const schema = z.object({
   // Mode invité : durée de vie avant purge automatique des comptes d'essai.
   GUEST_TTL_HOURS: z.coerce.number().int().positive().default(48),
 
+  // Autonomie des agents :
+  //   - "propose" (défaut, sûr) : toute action nécessite une approbation humaine.
+  //   - "auto" : les actions à faible impact (auto-approuvées) s'exécutent seules.
+  AGENT_AUTONOMY: z.enum(["propose", "auto"]).default("propose"),
+
   // ─── E-mail (optionnel, dégradation gracieuse) ─────────────────────────────
   // Sans provider configuré, les e-mails sont journalisés (pas envoyés) : le
   // flux d'inscription reste direct, rien ne casse.
