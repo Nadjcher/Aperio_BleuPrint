@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { composeBriefing, type ProjectBrief } from "./briefingService.js";
+import { composeBriefing, healthFromCounts, type ProjectBrief } from "./briefingService.js";
 
 const now = new Date("2026-10-14T08:00:00Z");
 
@@ -50,5 +50,34 @@ describe("composeBriefing", () => {
       now,
     );
     expect(b.items[0].actions[0].to).toBe("/projects/pid");
+  });
+
+  it("expose santé + activité dans la sortie", () => {
+    const b = composeBriefing([], now, 42);
+    expect(b.activity7d).toBe(42);
+    expect(b.health).toEqual({ score: 100, risk: "faible" });
+  });
+});
+
+describe("healthFromCounts", () => {
+  it("100 et risque faible quand rien", () => {
+    expect(healthFromCounts({ critical: 0, important: 0, fyi: 0, win: 3 })).toEqual({
+      score: 100,
+      risk: "faible",
+    });
+  });
+
+  it("risque élevé dès une criticité, score pénalisé", () => {
+    const h = healthFromCounts({ critical: 1, important: 2, fyi: 0, win: 0 });
+    expect(h.risk).toBe("élevé");
+    expect(h.score).toBe(100 - 25 - 16); // 59
+  });
+
+  it("risque moyen sans critique mais avec décisions à approuver", () => {
+    expect(healthFromCounts({ critical: 0, important: 1, fyi: 0, win: 0 }).risk).toBe("moyen");
+  });
+
+  it("borne le score à 0", () => {
+    expect(healthFromCounts({ critical: 10, important: 0, fyi: 0, win: 0 }).score).toBe(0);
   });
 });

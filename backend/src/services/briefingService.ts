@@ -1,9 +1,15 @@
-import { In } from "typeorm";
-import type { Briefing, BriefingItem, BriefingPriority } from "@projectmaster/shared";
+import { In, MoreThan } from "typeorm";
+import type {
+  Briefing,
+  BriefingItem,
+  BriefingPriority,
+  HealthSummary,
+} from "@projectmaster/shared";
 import { AppDataSource } from "../db/data-source.js";
 import { Project } from "../entities/Project.js";
 import { Anomaly } from "../entities/Anomaly.js";
 import { Decision } from "../entities/Decision.js";
+import { Signal } from "../entities/Signal.js";
 
 /** Données agrégées d'un projet pour le briefing (entrée pure, testable). */
 export interface ProjectBrief {
@@ -26,7 +32,21 @@ const ORDER: Record<BriefingPriority, number> = {
  * Compose un briefing priorisé à partir des données agrégées. Fonction PURE
  * (pas d'accès base) → testable et déterministe.
  */
-export function composeBriefing(projects: ProjectBrief[], now: Date): Briefing {
+/** Santé agrégée (pure) : 100 moins des pénalités par priorité. */
+export function healthFromCounts(counts: Record<BriefingPriority, number>): HealthSummary {
+  const score = Math.max(
+    0,
+    Math.min(100, 100 - counts.critical * 25 - counts.important * 8 - counts.fyi * 3),
+  );
+  const risk = counts.critical > 0 ? "élevé" : counts.important > 0 ? "moyen" : "faible";
+  return { score, risk };
+}
+
+export function composeBriefing(
+  projects: ProjectBrief[],
+  now: Date,
+  activity7d = 0,
+): Briefing {
   const items: BriefingItem[] = [];
 
   for (const p of projects) {
@@ -96,7 +116,14 @@ export function composeBriefing(projects: ProjectBrief[], now: Date): Briefing {
           ? "Bonjour. Reliez un projet pour commencer."
           : "Bonjour. Tout est sous contrôle — rien d'urgent.";
 
-  return { greeting, generatedAt: now.toISOString(), items, counts };
+  return {
+    greeting,
+    generatedAt: now.toISOString(),
+    items,
+    counts,
+    health: healthFromCounts(counts),
+    activity7d,
+  };
 }
 
 /** Construit le briefing de l'utilisateur à partir de ses projets. */
@@ -111,13 +138,17 @@ export async function buildBriefing(userId: string): Promise<Briefing> {
   // Deux requêtes groupées (au lieu de 2 par projet) : évite le N+1 et tient
   // la charge quand un compte a beaucoup de projets.
   const ids = projects.map((p) => p.id);
-  const [openAll, pendingAll] = await Promise.all([
+  const since7d = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+  const [openAll, pendingAll, activity7d] = await Promise.all([
     AppDataSource.getRepository(Anomaly).find({
       where: { projectId: In(ids), status: "open" },
     }),
     AppDataSource.getRepository(Decision).find({
       where: { projectId: In(ids), status: "pending_approval" },
       order: { createdAt: "DESC" },
+    }),
+    AppDataSource.getRepository(Signal).count({
+      where: { projectId: In(ids), occurredAt: MoreThan(since7d) },
     }),
   ]);
 
@@ -147,5 +178,5 @@ export async function buildBriefing(userId: string): Promise<Briefing> {
     };
   });
 
-  return composeBriefing(briefs, new Date());
+  return composeBriefing(briefs, new Date(), activity7d);
 }
