@@ -128,12 +128,28 @@ automatiquement, et la liste est triée par gravité. On peut aussi **créer un
 risque depuis une anomalie ouverte** en un clic. Les risques majeurs ouverts
 apparaissent dans les rapports.
 
-## 9. Synchronisation : que se passe-t-il ?
+## 9. Connecteurs (sources de données)
+
+Chaque projet peut se brancher sur une source via **Intégrations** (bouton sur
+la fiche projet) :
+
+| Connecteur | Collecte | Paramètres |
+| --- | --- | --- |
+| **GitHub** | commits, PR, issues | dépôt `owner/repo` |
+| **GitLab** | commits, merge requests, issues | hôte + `groupe/projet` |
+| **Jira** | tickets (issues) | hôte, e-mail, clé de projet |
+| **Linear** | tickets (issues) | ID d'équipe |
+
+Le **token** du connecteur est **chiffré au repos (AES-256-GCM)** et n'est jamais
+réaffiché. À défaut de connecteur configuré, Aperio utilise le dépôt GitHub
+renseigné sur le projet (rétro-compatibilité).
+
+## 10. Synchronisation : que se passe-t-il ?
 
 1. Vous cliquez sur **Synchroniser** → l'API répond immédiatement avec un
    identifiant de tâche (`jobId`).
-2. Un **worker** en arrière-plan collecte les données GitHub, détecte les
-   anomalies et exécute les agents.
+2. Un **worker** en arrière-plan collecte les données de la source configurée,
+   détecte les anomalies et exécute les agents.
 3. En cas d'échec transitoire (GitHub indisponible), la tâche est **réessayée
    automatiquement** avec un délai croissant, puis marquée en échec si elle
    n'aboutit pas.
@@ -142,22 +158,22 @@ apparaissent dans les rapports.
 > Un jeton GitHub en lecture seule (`GITHUB_TOKEN`) augmente les quotas d'API
 > et permet d'accéder aux dépôts privés. Côté hébergeur.
 
-## 10. Notifications par e-mail
+## 11. Notifications (e-mail & Slack)
 
-Si l'administrateur a configuré l'envoi d'e-mails (Resend), Aperio vous prévient :
+**E-mail** (si l'administrateur a configuré Resend) :
+- **Alerte d'anomalie** au propriétaire du projet, **digest hebdomadaire**,
+  liens **mot de passe oublié / vérification**.
+- Coupez-les via votre profil (`notifyByEmail`).
 
-- **Alerte d'anomalie** : un e-mail est envoyé au propriétaire du projet dès
-  qu'une anomalie est détectée lors d'une synchronisation.
-- **Résumé hebdomadaire** : un digest de l'activité de vos projets (anomalies,
-  décisions des 7 derniers jours).
-- **Réinitialisation / vérification** : liens « mot de passe oublié » et
-  confirmation d'adresse.
+**Slack** (par projet, dans **Intégrations**) : collez un **webhook Slack** pour
+recevoir les **anomalies critiques** et les **décisions en attente** (avec lien
+direct). Deux bascules permettent d'activer/désactiver chaque type **par
+projet**. Le webhook est **chiffré au repos**.
 
-Vous pouvez couper les notifications (`notifyByEmail`) via votre profil. Sans
-fournisseur d'e-mail configuré, aucun e-mail n'est envoyé — l'app reste
-pleinement utilisable.
+Sans fournisseur d'e-mail ni webhook, aucune notification n'est envoyée — l'app
+reste pleinement utilisable.
 
-## 11. Vos données & vos droits (RGPD)
+## 12. Vos données & vos droits (RGPD)
 
 Aperio applique la **minimisation** (pas d'email brut dans les signaux, IP
 tronquées dans l'audit) et la **conservation limitée**.
@@ -168,7 +184,7 @@ tronquées dans l'audit) et la **conservation limitée**.
 | **Rectification** | Modifiez votre profil : `PATCH /api/v1/auth/me` |
 | **Effacement** | Supprimez votre compte et vos données : `DELETE /api/v1/gdpr/me` |
 
-## 12. Questions fréquentes
+## 13. Questions fréquentes
 
 **Ma synchro reste « en cours » longtemps.**
 Le dépôt est peut-être volumineux, ou GitHub limite le débit. Elle se terminera

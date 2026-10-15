@@ -140,7 +140,9 @@ structurant) :
 
 - **M14** — tests d'intégration des 15 routes HTTP (decisions/gdpr/jobs) → Phase 5.
 - **M12** — a11y complète (labels associés, rôles tabs, contrastes AA) → Phase 1/5.
-- **B2** — chiffrement de champ : laissé tel quel (décision), à câbler en Phase 4.
+- **B2** — chiffrement de champ : **résolu (Phase 4)** — `encryptField`/`decryptField`
+  chiffrent désormais les tokens de connecteur et les webhooks Slack au repos
+  (vérifié : aucun plaintext en base, jamais réaffichés).
 - Mineurs non repris : TTL refresh en dur, `req.user!` → `AuthedRequest`, pagination
   fictive, gauge Prometheus morte, nommage Aperio/projectmaster.
 
