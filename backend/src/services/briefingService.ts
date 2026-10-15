@@ -10,6 +10,7 @@ import { Project } from "../entities/Project.js";
 import { Anomaly } from "../entities/Anomaly.js";
 import { Decision } from "../entities/Decision.js";
 import { Signal } from "../entities/Signal.js";
+import { atRiskByProjects } from "./planService.js";
 
 /** Données agrégées d'un projet pour le briefing (entrée pure, testable). */
 export interface ProjectBrief {
@@ -19,6 +20,8 @@ export interface ProjectBrief {
   warningCount: number;
   openCount: number;
   pendingDecisions: { id: string; title: string; rationale: string }[];
+  /** Jalons dont la fin projetée dépasse l'échéance (noms). */
+  lateMilestones?: string[];
 }
 
 const ORDER: Record<BriefingPriority, number> = {
@@ -63,6 +66,17 @@ export function composeBriefing(
       });
     }
 
+    for (const name of p.lateMilestones ?? []) {
+      items.push({
+        priority: "important",
+        title: `Jalon en retard probable — ${p.projectName}`,
+        detail: `« ${name} » risque de dépasser son échéance au rythme actuel.`,
+        projectId: p.projectId,
+        projectName: p.projectName,
+        actions: [{ label: "Voir le planning", to: `${to}/planning` }],
+      });
+    }
+
     for (const d of p.pendingDecisions) {
       items.push({
         priority: "important",
@@ -85,7 +99,11 @@ export function composeBriefing(
       });
     }
 
-    if (p.openCount === 0 && p.pendingDecisions.length === 0) {
+    if (
+      p.openCount === 0 &&
+      p.pendingDecisions.length === 0 &&
+      (p.lateMilestones ?? []).length === 0
+    ) {
       items.push({
         priority: "win",
         title: `${p.projectName} : sur les rails`,
@@ -139,7 +157,7 @@ export async function buildBriefing(userId: string): Promise<Briefing> {
   // la charge quand un compte a beaucoup de projets.
   const ids = projects.map((p) => p.id);
   const since7d = new Date(Date.now() - 7 * 24 * 3600 * 1000);
-  const [openAll, pendingAll, activity7d] = await Promise.all([
+  const [openAll, pendingAll, activity7d, lateByProject] = await Promise.all([
     AppDataSource.getRepository(Anomaly).find({
       where: { projectId: In(ids), status: "open" },
     }),
@@ -150,6 +168,7 @@ export async function buildBriefing(userId: string): Promise<Briefing> {
     AppDataSource.getRepository(Signal).count({
       where: { projectId: In(ids), occurredAt: MoreThan(since7d) },
     }),
+    atRiskByProjects(ids),
   ]);
 
   const openByProject = new Map<string, Anomaly[]>();
@@ -175,6 +194,7 @@ export async function buildBriefing(userId: string): Promise<Briefing> {
       warningCount: open.filter((a) => a.severity === "warning").length,
       openCount: open.length,
       pendingDecisions: pending.map((d) => ({ id: d.id, title: d.title, rationale: d.rationale })),
+      lateMilestones: (lateByProject.get(p.id) ?? []).map((lm) => lm.name),
     };
   });
 
