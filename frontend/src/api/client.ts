@@ -97,6 +97,8 @@ export const api = {
   get: <T>(path: string) => raw<T>(path),
   post: <T>(path: string, body?: unknown) =>
     raw<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined }),
+  put: <T>(path: string, body?: unknown) =>
+    raw<T>(path, { method: "PUT", body: body ? JSON.stringify(body) : undefined }),
   patch: <T>(path: string, body?: unknown) =>
     raw<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
   del: <T>(path: string) => raw<T>(path, { method: "DELETE" }),
