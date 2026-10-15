@@ -1,6 +1,12 @@
 /** Signaux bruts collectés auprès des connecteurs externes. */
 
-export type SignalSource = "github" | "webhook" | "manual";
+export type SignalSource =
+  | "github"
+  | "gitlab"
+  | "jira"
+  | "linear"
+  | "webhook"
+  | "manual";
 
 export type SignalType =
   | "commit"
