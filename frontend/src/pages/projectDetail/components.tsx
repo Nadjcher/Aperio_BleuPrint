@@ -110,7 +110,7 @@ export function AnomalyList({ anomalies }: { anomalies: Anomaly[] }) {
       {anomalies.map((a) => (
         <li
           key={a.id}
-          className={`pm-card p-5 ${a.severity === "critical" ? "pm-ticks relative" : ""}`}
+          className={`pm-card p-5 ${a.severity === "critical" ? "relative" : ""}`}
         >
           <div className="flex items-center gap-2.5">
             <span className={`h-2 w-2 rounded-full ${severityDot[a.severity]}`} />

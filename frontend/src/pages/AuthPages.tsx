@@ -13,7 +13,7 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
             Aperio
           </Link>
         </div>
-        <div className="pm-card pm-ticks relative p-7">
+        <div className="pm-card relative p-7">
           <h1 className="mb-5 text-lg font-semibold text-heading">{title}</h1>
           {children}
         </div>

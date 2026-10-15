@@ -146,7 +146,7 @@ export function LandingPage() {
         </div>
 
         {/* Aperçu produit — cadre blueprint avec repères d'angle */}
-        <div className="pm-card pm-ticks relative p-5">
+        <div className="pm-card relative p-5">
           <div className="mb-4 flex items-center justify-between border-b border-blue-400/10 pb-3">
             <div className="flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-gradient-to-br from-brand-500 to-accent-600">
@@ -234,7 +234,7 @@ export function LandingPage() {
 
       {/* Sécurité */}
       <section id="securite" className="mx-auto max-w-6xl px-5 pb-20">
-        <div className="pm-card pm-ticks relative flex flex-col items-center gap-6 p-10 text-center sm:flex-row sm:justify-between sm:text-left">
+        <div className="pm-card relative flex flex-col items-center gap-6 p-10 text-center sm:flex-row sm:justify-between sm:text-left">
           <div className="max-w-xl">
             <span className="pm-eyebrow mb-3">03 — Sécurité &amp; conformité</span>
             <h2 className="mt-3 text-2xl font-bold text-heading">

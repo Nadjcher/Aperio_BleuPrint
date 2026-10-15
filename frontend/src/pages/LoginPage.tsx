@@ -44,7 +44,7 @@ export function LoginPage() {
           </p>
         </div>
 
-        <div className="pm-card pm-ticks relative p-7">
+        <div className="pm-card relative p-7">
           <div
             className="mb-6 flex rounded-lg border border-line bg-surface p-1 text-sm"
             role="tablist"

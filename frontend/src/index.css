@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Thème clair (par défaut) ─────────────────────────────────────────────── */
+/* ── Thème clair (unique) ─────────────────────────────────────────────────── */
 :root {
   color-scheme: light;
   --c-app: 247 248 250; /* fond de page, gris très doux */
@@ -19,25 +19,6 @@
   --c-danger: 185 28 28; /* red-700 */
   --panel-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -16px rgba(15, 23, 42, 0.18);
   --focus-ring: #2563eb;
-}
-
-/* ── Thème sombre (adouci : ardoise plutôt que quasi-noir) ─────────────────── */
-:root.dark {
-  color-scheme: dark;
-  --c-app: 15 23 42; /* slate-900 (moins dur que #070b16) */
-  --c-surface: 30 41 59; /* slate-800 */
-  --c-surface2: 51 65 85; /* slate-700 */
-  --c-line: 51 65 85; /* slate-700 */
-  --c-heading: 248 250 252;
-  --c-fg: 203 213 225; /* slate-300 */
-  --c-muted: 148 163 184; /* slate-400 */
-  --c-faint: 100 116 139; /* slate-500 */
-  --c-link: 125 211 252; /* sky-300 */
-  --c-success: 110 231 183;
-  --c-warning: 252 211 77;
-  --c-danger: 252 165 165;
-  --panel-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 24px 60px -28px rgba(0, 0, 0, 0.6);
-  --focus-ring: #7dd3fc;
 }
 
 html,
@@ -84,16 +65,6 @@ textarea:focus-visible,
 body {
   @apply bg-app text-fg antialiased;
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-}
-
-/* Grille « blueprint » discrète : uniquement en thème sombre. */
-:root.dark body {
-  background-image:
-    radial-gradient(48rem 36rem at 50% -12%, rgba(59, 130, 246, 0.12), transparent 60%),
-    linear-gradient(rgba(96, 165, 250, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(96, 165, 250, 0.04) 1px, transparent 1px);
-  background-size: 100% 100%, 160px 160px, 160px 160px;
-  background-attachment: fixed;
 }
 
 ::-webkit-scrollbar {
@@ -161,44 +132,10 @@ body {
   }
 }
 
-/* Dégradé de texte : bleu plus profond en clair pour le contraste. */
+/* Dégradé de texte : bleu profond pour le contraste sur fond clair. */
 .pm-gradient-text {
   background: linear-gradient(100deg, #2563eb 0%, #3b82f6 55%, #1d4ed8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-:root.dark .pm-gradient-text {
-  background: linear-gradient(100deg, #7dd3fc 0%, #38bdf8 45%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-/* Repères d'angle (crosshair) — discrets, seulement en sombre. */
-.pm-ticks::before,
-.pm-ticks::after {
-  content: "";
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-color: rgba(56, 189, 248, 0.45);
-  pointer-events: none;
-}
-:root:not(.dark) .pm-ticks::before,
-:root:not(.dark) .pm-ticks::after {
-  display: none;
-}
-.pm-ticks::before {
-  top: -1px;
-  left: -1px;
-  border-top: 1.5px solid;
-  border-left: 1.5px solid;
-  border-top-left-radius: 4px;
-}
-.pm-ticks::after {
-  bottom: -1px;
-  right: -1px;
-  border-bottom: 1.5px solid;
-  border-right: 1.5px solid;
-  border-bottom-right-radius: 4px;
 }

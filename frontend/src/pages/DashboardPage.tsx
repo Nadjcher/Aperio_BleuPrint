@@ -203,7 +203,7 @@ function BriefingCard({ item }: { item: BriefingItem }) {
 function Stat({ label, value, accent }: { label: string; value: number; accent: "brand" | "accent" }) {
   const bar = accent === "brand" ? "from-brand-500 to-brand-400" : "from-accent-500 to-accent-600";
   return (
-    <div className="pm-card pm-ticks relative overflow-hidden p-6">
+    <div className="pm-card relative overflow-hidden p-6">
       <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${bar} opacity-70`} />
       <div className="pm-gradient-text font-mono text-4xl font-bold tracking-tight">
         {value.toString().padStart(2, "0")}
