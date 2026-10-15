@@ -6,6 +6,24 @@ des agents autonomes qui diagnostiquent, planifient et rendent compte.
 
 Voir le blueprint produit complet (plan, architecture, sécurité & RGPD) dans
 [`docs/`](./docs). Déploiement en production : [`docs/DEPLOY.md`](./docs/DEPLOY.md).
+Contribuer en local : [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+## Fonctionnalités
+
+- **Deux niveaux d'interface** : mode **simple** (chef de projet — santé, risque,
+  à-faire, langage métier + glossaire) et mode **expert** (détails techniques).
+- **Onboarding guidé** en 3 étapes.
+- **Connecteurs** multi-sources : **GitHub, GitLab, Jira, Linear** (token chiffré
+  au repos, config par projet) → signaux normalisés.
+- **Agents autonomes** (Monitor · Analyst · Planner · Reporter) + boucle
+  d'apprentissage ; **décisions** avec approbation humaine réversible.
+- **Planning** : jalons, tâches, **date de livraison prévue** (fourchette),
+  chemin critique, détection des retards.
+- **Méthodologies** par projet (Kanban / Scrum / PRINCE2 / SAFe) : vocabulaire
+  et rapports adaptés, même moteur.
+- **Registre des risques** (probabilité × impact) et **rapports normés**.
+- **Notifications** e-mail + **Slack** (webhook par projet).
+- **Sécurité & RGPD** : JWT + RBAC, chiffrement au repos, audit, export/effacement.
 
 ## Documentation
 
@@ -40,7 +58,7 @@ Agents autonomes (Monitor · Analyst · Planner · Reporter) + learning loop
         │  lecture / écriture
 Données (PostgreSQL)
         ▲  signaux
-Connecteurs externes (GitHub API · webhooks)
+Connecteurs externes (GitHub · GitLab · Jira · Linear · webhooks)
 ```
 
 ## Structure du monorepo
@@ -83,8 +101,10 @@ npm run dev
 | --- | --- |
 | `npm run dev` | Lance backend + frontend en parallèle |
 | `npm run build` | Build des trois workspaces |
-| `npm run lint` | Lint de tous les workspaces |
-| `npm test` | Tests de tous les workspaces |
+| `npm run lint` | Lint du monorepo (ESLint) |
+| `npm run format` | Formatage Prettier |
+| `npm test` | Tests unitaires (backend + shared) |
+| `npm run e2e` | Tests end-to-end + accessibilité (Playwright + axe) |
 
 ## Sécurité & RGPD
 
@@ -95,7 +115,8 @@ portabilité). Détails dans [`docs/SECURITY.md`](./docs/SECURITY.md).
 
 ## Feuille de route
 
-Les 4 phases (24 semaines) sont décrites dans [`docs/ROADMAP.md`](./docs/ROADMAP.md).
-Ce dépôt couvre la **fondation** : chaque couche et chaque agent sont en place et
-démarrables ; la Phase 1 (connecteur GitHub + détection d'anomalies v1) est
-fonctionnelle.
+La feuille de route produit est décrite dans [`docs/ROADMAP.md`](./docs/ROADMAP.md).
+Avancement : fondation + simplicité d'usage (modes simple/expert), planning &
+date de livraison, méthodologies & risques, connecteurs multi-sources &
+notifications, puis qualité (E2E, accessibilité, doc) — livrés. Détail du
+refactoring de fondation : [`docs/AUDIT.md`](./docs/AUDIT.md).

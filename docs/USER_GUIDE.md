@@ -36,14 +36,15 @@ invité**, sans e-mail ni mot de passe.
 1. Ouvrez l'application et cliquez sur **Créer mon compte**.
 2. Renseignez email, nom et un mot de passe (**12 caractères minimum**, avec au
    moins une lettre et un chiffre).
-3. Le **premier compte créé** sur une instance devient **administrateur**.
+3. Le **premier compte créé** sur une instance devient **administrateur** ; les
+   suivants sont **manager** (chacun gère ses propres projets).
 
 ### Rôles
 
 | Rôle | Peut… |
 | --- | --- |
 | `viewer` | consulter projets, signaux, décisions |
-| `manager` | + créer des projets, lancer des synchronisations, donner du feedback |
+| `manager` | + créer des projets, lancer des synchronisations, donner du feedback (rôle par défaut à l'inscription) |
 | `admin` | + administration (premier inscrit) |
 
 ## 4. Premiers pas (onboarding guidé)
@@ -191,7 +192,9 @@ Le dépôt est peut-être volumineux, ou GitHub limite le débit. Elle se termin
 ou basculera en échec après les tentatives automatiques.
 
 **Je ne peux pas créer de projet.**
-Votre rôle est `viewer`. Demandez à un administrateur de vous passer `manager`.
+Les comptes créés par inscription sont `manager` et peuvent créer des projets.
+Un compte `viewer` (créé par un administrateur pour de la consultation) ne le
+peut pas : demandez à passer `manager`.
 
 **Un agent se trompe.**
 Rejetez sa décision : son niveau de confiance baisse et ses prochaines
