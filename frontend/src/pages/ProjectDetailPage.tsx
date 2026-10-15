@@ -9,6 +9,7 @@ import type {
   Report,
   ReportPeriod,
 } from "@projectmaster/shared";
+import { METHODOLOGIES, METHODOLOGY_VOCAB } from "@projectmaster/shared";
 import { api, RequestError, toErrorMessage } from "../api/client";
 import { Loading } from "../components/ui";
 import {
@@ -122,6 +123,15 @@ export function ProjectDetailPage() {
     await load();
   };
 
+  const changeMethodology = async (methodology: Project["methodology"]) => {
+    try {
+      const updated = await api.patch<Project>(`/projects/${id}`, { methodology });
+      setProject(updated);
+    } catch (err) {
+      setMessage(toErrorMessage(err, "Impossible de changer la méthodologie"));
+    }
+  };
+
   const generateReport = async (period: ReportPeriod) => {
     if (!id) return;
     setReporting(true);
@@ -142,13 +152,31 @@ export function ProjectDetailPage() {
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white">{project.name}</h1>
-          {project.repo && (
-            <p className="mt-1 font-mono text-sm text-slate-400">{project.repo}</p>
-          )}
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            {project.repo && <span className="font-mono text-sm text-slate-400">{project.repo}</span>}
+            <label className="flex items-center gap-1.5 text-xs text-slate-400">
+              Méthodologie :
+              <select
+                className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 text-xs text-slate-200"
+                value={project.methodology}
+                onChange={(e) => void changeMethodology(e.target.value as Project["methodology"])}
+                aria-label="Méthodologie du projet"
+              >
+                {METHODOLOGIES.map((m) => (
+                  <option key={m} value={m}>
+                    {METHODOLOGY_VOCAB[m].label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
         <div className="flex gap-2">
           <Link to={`/projects/${project.id}/planning`} className="pm-btn-ghost">
             Planning
+          </Link>
+          <Link to={`/projects/${project.id}/risks`} className="pm-btn-ghost">
+            Risques
           </Link>
           <button onClick={onSync} disabled={syncing || !project.repo} className="pm-btn-primary">
             {syncing ? "Synchronisation…" : "⚡ Synchroniser & analyser"}

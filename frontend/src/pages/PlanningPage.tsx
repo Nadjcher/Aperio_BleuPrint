@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
-import type { MilestonePlan, ProjectPlan, Task, TaskStatus } from "@projectmaster/shared";
+import type { MethodologyVocab, MilestonePlan, Project, ProjectPlan, Task, TaskStatus } from "@projectmaster/shared";
+import { vocabOf } from "@projectmaster/shared";
 import { api, toErrorMessage } from "../api/client";
 import { PageHeader, Loading, ErrorBanner } from "../components/ui";
 import { useAsync } from "../hooks/useAsync";
@@ -10,6 +11,8 @@ function fmtDate(iso?: string): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 }
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const taskStatusLabel: Record<TaskStatus, string> = {
   todo: "À faire",
@@ -24,6 +27,8 @@ export function PlanningPage() {
 
   const plan = useAsync<ProjectPlan>(() => api.get<ProjectPlan>(`/projects/${id}/plan`), [id]);
   const tasksState = useAsync<{ items: Task[] }>(() => api.get<{ items: Task[] }>(`/projects/${id}/tasks`), [id]);
+  const project = useAsync<Project>(() => api.get<Project>(`/projects/${id}`), [id]);
+  const vocab = vocabOf(project.data?.methodology ?? "kanban");
 
   const [error, setError] = useState<string | null>(null);
   const [msName, setMsName] = useState("");
@@ -67,8 +72,8 @@ export function PlanningPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Planning"
-        title="Jalons & date de livraison"
+        eyebrow={`Planning · ${vocab.label}`}
+        title={`${cap(vocab.milestonePlural)} & date de livraison`}
         subtitle={<Link to={`/projects/${id}`} className="text-brand hover:underline">← Retour à la fiche projet</Link>}
       />
 
@@ -101,7 +106,7 @@ export function PlanningPage() {
       {/* Ajout de jalon */}
       <form onSubmit={addMilestone} className="pm-card mb-6 flex flex-wrap items-end gap-3 p-5">
         <label className="flex min-w-[12rem] flex-1 flex-col">
-          <span className="pm-label">Nouveau jalon</span>
+          <span className="pm-label">Nouveau {vocab.milestone}</span>
           <input className="pm-input" value={msName} onChange={(e) => setMsName(e.target.value)} placeholder="ex. Livraison bêta" />
         </label>
         <label className="flex flex-col">
@@ -114,8 +119,8 @@ export function PlanningPage() {
       {/* Jalons */}
       {plan.data.milestones.length === 0 ? (
         <div className="pm-card p-8 text-center text-sm text-slate-400">
-          Aucun jalon. Ajoutez-en un ci-dessus, puis rattachez-y des tâches avec une estimation
-          pour obtenir une date de livraison.
+          Aucun {vocab.milestone}. Ajoutez-en un ci-dessus, puis rattachez-y des {vocab.taskPlural}{" "}
+          avec une estimation pour obtenir une date de livraison.
         </div>
       ) : (
         <ul className="space-y-4">
@@ -123,6 +128,7 @@ export function PlanningPage() {
             <MilestoneCard
               key={m.id}
               m={m}
+              vocab={vocab}
               tasks={tasksByMs(m.id)}
               expert={mode === "expert"}
               onAddTask={(title, effort) =>
@@ -140,7 +146,7 @@ export function PlanningPage() {
       {/* Tâches non rattachées */}
       {tasksByMs(undefined).length > 0 && (
         <section className="mt-6">
-          <h2 className="mb-3 text-sm font-semibold text-slate-300">Tâches non rattachées</h2>
+          <h2 className="mb-3 text-sm font-semibold text-slate-300">{cap(vocab.taskPlural)} non rattachées</h2>
           <ul className="space-y-1.5">
             {tasksByMs(undefined).map((t) => (
               <TaskRow
@@ -159,6 +165,7 @@ export function PlanningPage() {
 
 function MilestoneCard({
   m,
+  vocab,
   tasks,
   expert,
   onAddTask,
@@ -168,6 +175,7 @@ function MilestoneCard({
   onDeleteMs,
 }: {
   m: MilestonePlan;
+  vocab: MethodologyVocab;
   tasks: Task[];
   expert: boolean;
   onAddTask: (title: string, effort: number) => void;
@@ -229,8 +237,8 @@ function MilestoneCard({
         }}
       >
         <label className="flex min-w-[10rem] flex-1 flex-col">
-          <span className="sr-only">Tâche</span>
-          <input className="pm-input py-1.5 text-sm" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="+ Ajouter une tâche" />
+          <span className="sr-only">{cap(vocab.task)}</span>
+          <input className="pm-input py-1.5 text-sm" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`+ Ajouter une ${vocab.task}`} />
         </label>
         <label className="flex w-20 flex-col">
           <span className="sr-only">Effort (points)</span>
