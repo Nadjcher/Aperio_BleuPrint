@@ -8,16 +8,16 @@ import { useProjects } from "../hooks/ProjectsContext";
 import { useAppSelector } from "../store";
 
 const priorityStyle: Record<BriefingPriority, { chip: string; border: string; label: string }> = {
-  critical: { chip: "border-red-500/40 bg-red-500/10 text-red-300", border: "border-l-red-500/70", label: "Critique" },
-  important: { chip: "border-amber-500/40 bg-amber-500/10 text-amber-300", border: "border-l-amber-500/70", label: "À approuver" },
-  fyi: { chip: "border-slate-500/30 bg-slate-500/10 text-slate-300", border: "border-l-slate-500/50", label: "À surveiller" },
-  win: { chip: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300", border: "border-l-emerald-500/60", label: "OK" },
+  critical: { chip: "border-red-500/40 bg-red-500/10 text-danger", border: "border-l-red-500/70", label: "Critique" },
+  important: { chip: "border-amber-500/40 bg-amber-500/10 text-warning", border: "border-l-amber-500/70", label: "À approuver" },
+  fyi: { chip: "border-line bg-slate-500/10 text-fg", border: "border-l-slate-500/50", label: "À surveiller" },
+  win: { chip: "border-emerald-500/30 bg-emerald-500/10 text-success", border: "border-l-emerald-500/60", label: "OK" },
 };
 
 const riskTone: Record<RiskLevel, { text: string; label: string }> = {
-  faible: { text: "text-emerald-300", label: "Faible" },
-  moyen: { text: "text-amber-300", label: "Moyen" },
-  élevé: { text: "text-red-300", label: "Élevé" },
+  faible: { text: "text-success", label: "Faible" },
+  moyen: { text: "text-warning", label: "Moyen" },
+  élevé: { text: "text-danger", label: "Élevé" },
 };
 
 export function DashboardPage() {
@@ -66,13 +66,13 @@ function SimpleView({ briefing, projectCount }: { briefing: Briefing; projectCou
         />
       </div>
 
-      <h2 className="mt-10 mb-4 text-lg font-semibold text-white">À traiter aujourd'hui</h2>
+      <h2 className="mt-10 mb-4 text-lg font-semibold text-heading">À traiter aujourd'hui</h2>
       {todo.length === 0 ? (
-        <div className="pm-card p-8 text-center text-sm text-slate-400">
+        <div className="pm-card p-8 text-center text-sm text-muted">
           {projectCount === 0 ? (
             <>
               Reliez un premier projet pour démarrer.{" "}
-              <Link to="/onboarding" className="text-brand hover:underline">
+              <Link to="/onboarding" className="text-link hover:underline">
                 Démarrer en 3 étapes
               </Link>
             </>
@@ -108,9 +108,9 @@ function ExpertView({
           ))}
         </ul>
       ) : (
-        <div className="pm-card p-8 text-center text-sm text-slate-400">
+        <div className="pm-card p-8 text-center text-sm text-muted">
           Rien à signaler pour le moment.{" "}
-          <Link to="/projects" className="text-brand hover:underline">
+          <Link to="/projects" className="text-link hover:underline">
             Gérer les projets
           </Link>
         </div>
@@ -124,7 +124,7 @@ function ExpertView({
       </div>
 
       <div className="mt-8">
-        <Link to="/projects" className="text-sm font-medium text-brand hover:text-brand-400">
+        <Link to="/projects" className="text-sm font-medium text-link hover:text-link">
           Voir tous les projets →
         </Link>
       </div>
@@ -136,14 +136,14 @@ function HealthTile({ score, risk }: { score: number; risk: RiskLevel }) {
   const tone = riskTone[risk];
   return (
     <div className="pm-card p-6">
-      <div className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+      <div className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
         <InfoTip termKey="health">Santé globale</InfoTip>
       </div>
       <div className={`mt-2 font-mono text-4xl font-bold tracking-tight ${tone.text}`}>
         {score}
-        <span className="text-lg text-slate-500">/100</span>
+        <span className="text-lg text-faint">/100</span>
       </div>
-      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface2">
         <div
           className={risk === "faible" ? "h-full bg-emerald-400" : risk === "moyen" ? "h-full bg-amber-400" : "h-full bg-red-500"}
           style={{ width: `${score}%` }}
@@ -156,7 +156,7 @@ function HealthTile({ score, risk }: { score: number; risk: RiskLevel }) {
 function Tile({
   label,
   value,
-  valueClass = "text-slate-100",
+  valueClass = "text-heading",
   hint,
 }: {
   label: ReactNode;
@@ -166,11 +166,11 @@ function Tile({
 }) {
   return (
     <div className="pm-card p-6">
-      <div className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+      <div className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
         {label}
       </div>
       <div className={`mt-2 text-3xl font-bold tracking-tight ${valueClass}`}>{value}</div>
-      {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
+      {hint && <div className="mt-1 text-xs text-faint">{hint}</div>}
     </div>
   );
 }
@@ -182,11 +182,11 @@ function BriefingCard({ item }: { item: BriefingItem }) {
       <div className="flex flex-wrap items-center gap-2.5">
         <span className={`pm-chip ${s.chip}`}>{s.label}</span>
         {item.projectName && (
-          <span className="font-mono text-xs text-slate-400">{item.projectName}</span>
+          <span className="font-mono text-xs text-muted">{item.projectName}</span>
         )}
       </div>
-      <h3 className="mt-3 font-semibold text-slate-100">{item.title}</h3>
-      <p className="mt-1 text-sm text-slate-400">{item.detail}</p>
+      <h3 className="mt-3 font-semibold text-heading">{item.title}</h3>
+      <p className="mt-1 text-sm text-muted">{item.detail}</p>
       {item.actions.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {item.actions.map((a, i) => (
@@ -208,7 +208,7 @@ function Stat({ label, value, accent }: { label: string; value: number; accent: 
       <div className="pm-gradient-text font-mono text-4xl font-bold tracking-tight">
         {value.toString().padStart(2, "0")}
       </div>
-      <div className="mt-2 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+      <div className="mt-2 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-muted">
         {label}
       </div>
     </div>

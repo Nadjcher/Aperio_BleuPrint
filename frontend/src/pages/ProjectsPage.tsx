@@ -63,16 +63,16 @@ export function ProjectsPage() {
           />
         </label>
         <button className="pm-btn-primary">+ Créer</button>
-        {error && <p className="w-full text-sm text-red-300">{error}</p>}
+        {error && <p className="w-full text-sm text-danger">{error}</p>}
       </form>
 
       {projects.length === 0 ? (
         <div className="pm-card p-8">
           <div className="pm-eyebrow">01 · Premiers pas</div>
-          <h2 className="mt-2 text-lg font-semibold text-white">
+          <h2 className="mt-2 text-lg font-semibold text-heading">
             Bienvenue sur Aperio 👋
           </h2>
-          <p className="mt-1 max-w-2xl text-sm text-slate-400">
+          <p className="mt-1 max-w-2xl text-sm text-muted">
             Aperio surveille vos dépôts en continu, détecte les signaux faibles
             et laisse des agents diagnostiquer, planifier et rendre compte. Trois
             étapes pour démarrer :
@@ -83,12 +83,12 @@ export function ProjectsPage() {
               { n: "2", t: "Lancez une synchronisation", d: "Depuis la fiche projet : Aperio collecte commits, PRs et issues." },
               { n: "3", t: "Lisez les décisions", d: "Les agents remontent anomalies, plan correctif et rapports." },
             ].map((s) => (
-              <li key={s.n} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/15 font-mono text-sm text-brand">
+              <li key={s.n} className="rounded-xl border border-line bg-surface p-4">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/15 font-mono text-sm text-link">
                   {s.n}
                 </div>
-                <div className="mt-3 font-semibold text-slate-100">{s.t}</div>
-                <p className="mt-1 text-xs text-slate-400">{s.d}</p>
+                <div className="mt-3 font-semibold text-heading">{s.t}</div>
+                <p className="mt-1 text-xs text-muted">{s.d}</p>
               </li>
             ))}
           </ol>
@@ -107,7 +107,7 @@ export function ProjectsPage() {
               href="https://github.com/Nadjcher/ajc_10/blob/main/docs/USER_GUIDE.md"
               target="_blank"
               rel="noreferrer"
-              className="text-sm text-brand hover:underline"
+              className="text-sm text-link hover:underline"
             >
               Guide d'utilisation →
             </a>
@@ -122,16 +122,16 @@ export function ProjectsPage() {
                 className="pm-card group flex items-center justify-between p-5 transition hover:border-brand/40 hover:shadow-glow"
               >
                 <div>
-                  <div className="font-semibold text-slate-100 group-hover:text-white">
+                  <div className="font-semibold text-heading group-hover:text-heading">
                     {p.name}
                   </div>
                   {p.repo && (
-                    <div className="mt-1 font-mono text-xs text-slate-400">
+                    <div className="mt-1 font-mono text-xs text-muted">
                       {p.repo}
                     </div>
                   )}
                 </div>
-                <span className="text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-brand">
+                <span className="text-muted transition group-hover:translate-x-0.5 group-hover:text-link">
                   →
                 </span>
               </Link>

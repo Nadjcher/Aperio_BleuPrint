@@ -74,7 +74,7 @@ export function PlanningPage() {
       <PageHeader
         eyebrow={`Planning · ${vocab.label}`}
         title={`${cap(vocab.milestonePlural)} & date de livraison`}
-        subtitle={<Link to={`/projects/${id}`} className="text-brand hover:underline">← Retour à la fiche projet</Link>}
+        subtitle={<Link to={`/projects/${id}`} className="text-link hover:underline">← Retour à la fiche projet</Link>}
       />
 
       {error && <div className="mb-4"><ErrorBanner message={error} /></div>}
@@ -83,18 +83,18 @@ export function PlanningPage() {
       <section className="pm-card mb-6 p-5">
         <div className="pm-eyebrow">Date de livraison prévue</div>
         {d.weeks === null ? (
-          <p className="mt-2 text-sm text-slate-400">{d.note}</p>
+          <p className="mt-2 text-sm text-muted">{d.note}</p>
         ) : d.weeks === 0 ? (
-          <p className="mt-2 text-lg font-semibold text-emerald-300">{d.note ?? "Terminé"}</p>
+          <p className="mt-2 text-lg font-semibold text-success">{d.note ?? "Terminé"}</p>
         ) : (
           <>
             <div className="mt-2 flex flex-wrap items-baseline gap-3">
-              <span className="text-2xl font-bold text-white">{fmtDate(d.expected)}</span>
-              <span className="text-sm text-slate-400">
+              <span className="text-2xl font-bold text-heading">{fmtDate(d.expected)}</span>
+              <span className="text-sm text-muted">
                 (entre {fmtDate(d.optimistic)} et {fmtDate(d.pessimistic)})
               </span>
             </div>
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-faint">
               ≈ {d.weeks} sem. · {d.remainingEffort} pts restants · rythme {d.velocity} pts/sem ·
               confiance {Math.round(d.confidence * 100)}%
               {d.confidence < 0.5 && " (estimation indicative — peu d'historique)"}
@@ -118,7 +118,7 @@ export function PlanningPage() {
 
       {/* Jalons */}
       {plan.data.milestones.length === 0 ? (
-        <div className="pm-card p-8 text-center text-sm text-slate-400">
+        <div className="pm-card p-8 text-center text-sm text-muted">
           Aucun {vocab.milestone}. Ajoutez-en un ci-dessus, puis rattachez-y des {vocab.taskPlural}{" "}
           avec une estimation pour obtenir une date de livraison.
         </div>
@@ -146,7 +146,7 @@ export function PlanningPage() {
       {/* Tâches non rattachées */}
       {tasksByMs(undefined).length > 0 && (
         <section className="mt-6">
-          <h2 className="mb-3 text-sm font-semibold text-slate-300">{cap(vocab.taskPlural)} non rattachées</h2>
+          <h2 className="mb-3 text-sm font-semibold text-fg">{cap(vocab.taskPlural)} non rattachées</h2>
           <ul className="space-y-1.5">
             {tasksByMs(undefined).map((t) => (
               <TaskRow
@@ -193,16 +193,16 @@ function MilestoneCard({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className={`font-semibold ${done ? "text-slate-500 line-through" : "text-slate-100"}`}>{m.name}</h3>
+            <h3 className={`font-semibold ${done ? "text-faint line-through" : "text-heading"}`}>{m.name}</h3>
             {m.atRisk && (
-              <span className="pm-chip border-red-500/40 bg-red-500/10 text-red-300">En retard probable</span>
+              <span className="pm-chip border-red-500/40 bg-red-500/10 text-danger">En retard probable</span>
             )}
             {expert && m.onCriticalPath && (
-              <span className="pm-chip border-amber-500/40 bg-amber-500/10 text-amber-300">Chemin critique</span>
+              <span className="pm-chip border-amber-500/40 bg-amber-500/10 text-warning">Chemin critique</span>
             )}
-            {done && <span className="pm-chip border-emerald-500/30 bg-emerald-500/10 text-emerald-300">Terminé</span>}
+            {done && <span className="pm-chip border-emerald-500/30 bg-emerald-500/10 text-success">Terminé</span>}
           </div>
-          <div className="mt-1 flex flex-wrap gap-x-4 text-xs text-slate-500">
+          <div className="mt-1 flex flex-wrap gap-x-4 text-xs text-faint">
             <span>Échéance : {fmtDate(m.dueDate)}</span>
             {!done && m.projectedEnd && <span>Fin projetée : {fmtDate(m.projectedEnd)}</span>}
             <span>{m.remainingEffort} pts restants</span>
@@ -253,18 +253,18 @@ function MilestoneCard({
 function TaskRow({ t, onToggle, onDelete }: { t: Task; onToggle: () => void; onDelete: () => void }) {
   const tone =
     t.status === "done"
-      ? "text-slate-500 line-through"
+      ? "text-faint line-through"
       : t.status === "doing"
-        ? "text-brand-300"
-        : "text-slate-300";
+        ? "text-link"
+        : "text-fg";
   return (
-    <li className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-3 py-1.5 text-sm">
+    <li className="flex items-center justify-between rounded-lg border border-line bg-surface px-3 py-1.5 text-sm">
       <button onClick={onToggle} className="flex items-center gap-2 text-left" aria-label={`Changer le statut : ${t.title}`}>
         <span className={`h-2 w-2 rounded-full ${t.status === "done" ? "bg-emerald-400" : t.status === "doing" ? "bg-brand" : "bg-slate-500"}`} />
         <span className={tone}>{t.title}</span>
-        <span className="font-mono text-[10px] text-slate-500">{t.effortPoints} pts · {taskStatusLabel[t.status]}</span>
+        <span className="font-mono text-[10px] text-faint">{t.effortPoints} pts · {taskStatusLabel[t.status]}</span>
       </button>
-      <button onClick={onDelete} className="text-xs text-slate-500 hover:text-red-300" aria-label={`Supprimer la tâche ${t.title}`}>
+      <button onClick={onDelete} className="text-xs text-faint hover:text-danger" aria-label={`Supprimer la tâche ${t.title}`}>
         ✕
       </button>
     </li>

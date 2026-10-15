@@ -39,14 +39,14 @@ export function LoginPage() {
               Aperio
             </span>
           </div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-400">
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
             Plateforme IA autonome
           </p>
         </div>
 
         <div className="pm-card pm-ticks relative p-7">
           <div
-            className="mb-6 flex rounded-lg border border-blue-400/15 bg-white/[0.03] p-1 text-sm"
+            className="mb-6 flex rounded-lg border border-line bg-surface p-1 text-sm"
             role="tablist"
             aria-label="Connexion ou inscription"
           >
@@ -57,8 +57,8 @@ export function LoginPage() {
               onClick={() => setMode("login")}
               className={`flex-1 rounded-lg py-2 font-medium transition ${
                 mode === "login"
-                  ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-surface2 text-heading shadow-sm"
+                  : "text-muted hover:text-fg"
               }`}
             >
               Connexion
@@ -70,8 +70,8 @@ export function LoginPage() {
               onClick={() => setMode("register")}
               className={`flex-1 rounded-lg py-2 font-medium transition ${
                 mode === "register"
-                  ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-surface2 text-heading shadow-sm"
+                  : "text-muted hover:text-fg"
               }`}
             >
               Inscription
@@ -118,7 +118,7 @@ export function LoginPage() {
               />
             </div>
             {error && (
-              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-danger">
                 {error}
               </p>
             )}
@@ -132,7 +132,7 @@ export function LoginPage() {
             {mode === "login" && (
               <Link
                 to="/forgot-password"
-                className="block text-center text-xs text-slate-400 hover:text-slate-300"
+                className="block text-center text-xs text-muted hover:text-fg"
               >
                 Mot de passe oublié ?
               </Link>
@@ -140,7 +140,7 @@ export function LoginPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="mt-6 text-center text-xs text-muted">
           Signaux en temps réel · Détection d'anomalies · 4 agents autonomes
         </p>
       </div>

@@ -11,9 +11,9 @@ import type {
 
 // ─── Styles par statut (centralisés ici) ────────────────────────────────────
 const severityChip: Record<Anomaly["severity"], string> = {
-  info: "border-slate-500/30 bg-slate-500/10 text-slate-300",
-  warning: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-  critical: "border-red-500/40 bg-red-500/10 text-red-300",
+  info: "border-line bg-slate-500/10 text-fg",
+  warning: "border-amber-500/30 bg-amber-500/10 text-warning",
+  critical: "border-red-500/40 bg-red-500/10 text-danger",
 };
 const severityDot: Record<Anomaly["severity"], string> = {
   info: "bg-slate-400",
@@ -21,16 +21,16 @@ const severityDot: Record<Anomaly["severity"], string> = {
   critical: "bg-red-400 shadow-[0_0_10px_2px_rgba(248,113,113,0.7)]",
 };
 const agentChip: Record<AgentKind, string> = {
-  monitor: "border-red-500/30 bg-red-500/10 text-red-300",
-  analyst: "border-brand/30 bg-brand/10 text-brand-400",
-  planner: "border-accent/30 bg-accent/10 text-accent-500",
-  reporter: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+  monitor: "border-red-500/30 bg-red-500/10 text-danger",
+  analyst: "border-brand/30 bg-brand/10 text-link",
+  planner: "border-accent/30 bg-accent/10 text-link",
+  reporter: "border-emerald-500/30 bg-emerald-500/10 text-success",
 };
 const riskStyle: Record<ForecastRisk, { chip: string; label: string }> = {
-  ok: { chip: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300", label: "Sous contrôle" },
-  watch: { chip: "border-slate-400/30 bg-slate-400/10 text-slate-200", label: "À surveiller" },
-  high: { chip: "border-amber-500/40 bg-amber-500/10 text-amber-300", label: "Risque élevé" },
-  critical: { chip: "border-red-500/40 bg-red-500/10 text-red-300", label: "Critique" },
+  ok: { chip: "border-emerald-500/30 bg-emerald-500/10 text-success", label: "Sous contrôle" },
+  watch: { chip: "border-line bg-slate-400/10 text-fg", label: "À surveiller" },
+  high: { chip: "border-amber-500/40 bg-amber-500/10 text-warning", label: "Risque élevé" },
+  critical: { chip: "border-red-500/40 bg-red-500/10 text-danger", label: "Critique" },
 };
 const metricLabel: Record<string, string> = {
   commits: "Commits",
@@ -65,10 +65,10 @@ export function statusLabel(status: Decision["status"]): string {
 // ─── Blocs de mise en page ───────────────────────────────────────────────────
 export function SectionTitle({ title, count }: { title: string; count: number }) {
   return (
-    <h2 className="flex items-center gap-2.5 text-lg font-semibold text-white">
+    <h2 className="flex items-center gap-2.5 text-lg font-semibold text-heading">
       <span className="h-3.5 w-px bg-brand-400/70" />
       {title}
-      <span className="rounded-md border border-blue-400/20 bg-white/5 px-2 py-0.5 font-mono text-xs text-slate-400">
+      <span className="rounded-md border border-line bg-surface2 px-2 py-0.5 font-mono text-xs text-muted">
         {String(count).padStart(2, "0")}
       </span>
     </h2>
@@ -96,7 +96,7 @@ export function Section({
 
 export function Empty({ children }: { children: ReactNode }) {
   return (
-    <div className="pm-card p-8 text-center text-sm text-slate-400">{children}</div>
+    <div className="pm-card p-8 text-center text-sm text-muted">{children}</div>
   );
 }
 
@@ -115,11 +115,11 @@ export function AnomalyList({ anomalies }: { anomalies: Anomaly[] }) {
           <div className="flex items-center gap-2.5">
             <span className={`h-2 w-2 rounded-full ${severityDot[a.severity]}`} />
             <span className={`pm-chip ${severityChip[a.severity]}`}>{a.severity}</span>
-            <span className="font-mono text-xs text-slate-400">
+            <span className="font-mono text-xs text-muted">
               {a.metric} · z={a.zScore.toFixed(1)}
             </span>
           </div>
-          <p className="mt-3 text-sm text-slate-300">{a.explanation}</p>
+          <p className="mt-3 text-sm text-fg">{a.explanation}</p>
         </li>
       ))}
     </ul>
@@ -159,7 +159,7 @@ function DecisionExplain({ d }: { d: Decision }) {
     return null;
   }
   return (
-    <p className="mt-2 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 text-xs text-slate-400">
+    <p className="mt-2 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted">
       {text}
     </p>
   );
@@ -172,22 +172,22 @@ export function DecisionCard({ d, h }: { d: Decision; h: DecisionHandlers }) {
         <div className="flex flex-wrap items-center gap-2">
           <span className={`pm-chip ${agentChip[d.agent]}`}>{d.agent}</span>
           {d.autoApproved && (
-            <span className="pm-chip border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
+            <span className="pm-chip border-emerald-500/30 bg-emerald-500/10 text-success">
               Action sûre
             </span>
           )}
         </div>
-        <span className="font-mono text-xs text-slate-400">
+        <span className="font-mono text-xs text-muted">
           confiance {(d.confidence * 100).toFixed(0)}% · {statusLabel(d.status)}
         </span>
       </div>
-      <h3 className="mt-3 font-semibold text-slate-100">{d.title}</h3>
-      <p className="mt-1 text-sm text-slate-400">{d.rationale}</p>
+      <h3 className="mt-3 font-semibold text-heading">{d.title}</h3>
+      <p className="mt-1 text-sm text-muted">{d.rationale}</p>
       <DecisionExplain d={d} />
       {d.actions.length > 0 && (
         <ul className="mt-3 space-y-1.5">
           {d.actions.map((action, i) => (
-            <li key={i} className="flex gap-2 text-sm text-slate-300">
+            <li key={i} className="flex gap-2 text-sm text-fg">
               <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand" />
               {action}
             </li>
@@ -198,9 +198,9 @@ export function DecisionCard({ d, h }: { d: Decision; h: DecisionHandlers }) {
       {d.actionType && d.actionType !== "none" && (
         <div className="mt-4 space-y-3">
           {h.sims[d.id] && (
-            <div className="rounded-lg border border-brand/20 bg-brand/5 px-3 py-2 text-sm text-slate-300">
+            <div className="rounded-lg border border-brand/20 bg-brand/5 px-3 py-2 text-sm text-fg">
               Simulation — {h.sims[d.id].label} :{" "}
-              <span className="font-mono text-brand-300">
+              <span className="font-mono text-link">
                 {fmtState(h.sims[d.id].before)} → {fmtState(h.sims[d.id].after)}
               </span>
             </div>
@@ -212,13 +212,13 @@ export function DecisionCard({ d, h }: { d: Decision; h: DecisionHandlers }) {
               </button>
               <button
                 onClick={() => h.onAct(d.id, "approve")}
-                className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/20"
+                className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-sm font-medium text-success transition hover:bg-emerald-500/20"
               >
                 ✓ Approuver
               </button>
               <button
                 onClick={() => h.onAct(d.id, "reject")}
-                className="rounded-lg border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-sm font-medium text-red-300 transition hover:bg-red-500/20"
+                className="rounded-lg border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-sm font-medium text-danger transition hover:bg-red-500/20"
               >
                 ✕ Rejeter
               </button>
@@ -227,7 +227,7 @@ export function DecisionCard({ d, h }: { d: Decision; h: DecisionHandlers }) {
           {d.status === "executed" && (
             <button
               onClick={() => h.onAct(d.id, "undo")}
-              className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-1.5 text-sm font-medium text-amber-300 transition hover:bg-amber-500/20"
+              className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-1.5 text-sm font-medium text-warning transition hover:bg-amber-500/20"
             >
               ↩ Annuler (fenêtre 24 h)
             </button>
@@ -239,13 +239,13 @@ export function DecisionCard({ d, h }: { d: Decision; h: DecisionHandlers }) {
         <div className="mt-4 flex gap-2">
           <button
             onClick={() => h.onFeedback(d.id, true)}
-            className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/20"
+            className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-sm font-medium text-success transition hover:bg-emerald-500/20"
           >
             ✓ Valider
           </button>
           <button
             onClick={() => h.onFeedback(d.id, false)}
-            className="rounded-lg border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-sm font-medium text-red-300 transition hover:bg-red-500/20"
+            className="rounded-lg border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-sm font-medium text-danger transition hover:bg-red-500/20"
           >
             ✕ Rejeter
           </button>
@@ -262,21 +262,21 @@ export function ReportList({ reports }: { reports: Report[] }) {
     <ul className="space-y-3">
       {reports.map((r) => (
         <li key={r.id} className="pm-card p-5">
-          <div className="mb-3 flex items-center justify-between font-mono text-xs text-slate-400">
+          <div className="mb-3 flex items-center justify-between font-mono text-xs text-muted">
             <span>
               {r.period} · {r.periodStart.slice(0, 10)} → {r.periodEnd.slice(0, 10)}
             </span>
             <span
               className={`pm-chip ${
                 r.generatedBy === "llm"
-                  ? "border-accent/30 bg-accent/10 text-accent-500"
-                  : "border-slate-500/30 bg-slate-500/10 text-slate-400"
+                  ? "border-accent/30 bg-accent/10 text-link"
+                  : "border-line bg-slate-500/10 text-muted"
               }`}
             >
               {r.generatedBy === "llm" ? "généré par IA" : "heuristique"}
             </span>
           </div>
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-300">
+          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-fg">
             {r.summary}
           </pre>
         </li>
@@ -292,20 +292,20 @@ function TrendPill({ t }: { t: TrendMetric }) {
   const higherIsBetter = t.metric !== "issues";
   const favorable = t.direction === "up" ? higherIsBetter : !higherIsBetter;
   const color =
-    t.direction === "flat" ? "text-slate-400" : favorable ? "text-emerald-300" : "text-red-300";
+    t.direction === "flat" ? "text-muted" : favorable ? "text-success" : "text-danger";
   return (
-    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-      <div className="font-mono text-[11px] uppercase tracking-wider text-slate-400">
+    <div className="rounded-xl border border-line bg-surface p-3">
+      <div className="font-mono text-[11px] uppercase tracking-wider text-muted">
         {metricLabel[t.metric] ?? t.metric}
       </div>
       <div className="mt-1 flex items-baseline gap-2">
-        <span className="text-lg font-semibold text-slate-100">{t.current7d}</span>
+        <span className="text-lg font-semibold text-heading">{t.current7d}</span>
         <span className={`font-mono text-xs ${color}`}>
           {arrow} {t.changePct > 0 ? "+" : ""}
           {t.changePct}%
         </span>
       </div>
-      <div className="font-mono text-[10px] text-slate-500">7 j · préc. {t.previous7d}</div>
+      <div className="font-mono text-[10px] text-faint">7 j · préc. {t.previous7d}</div>
     </div>
   );
 }
@@ -319,12 +319,12 @@ export function ForecastSection({ forecast: f }: { forecast: Forecast }) {
           <div className="flex items-center gap-2.5">
             <span className={`pm-chip ${r.chip}`}>{r.label}</span>
             {f.horizonWeeks && (
-              <span className="font-mono text-xs text-slate-400">
+              <span className="font-mono text-xs text-muted">
                 fenêtre d'intervention ≈ {f.horizonWeeks} sem.
               </span>
             )}
           </div>
-          <span className="font-mono text-[11px] text-slate-500">
+          <span className="font-mono text-[11px] text-faint">
             confiance {(f.confidence * 100).toFixed(0)}% · {f.dataDays} j de données
           </span>
         </div>
@@ -338,7 +338,7 @@ export function ForecastSection({ forecast: f }: { forecast: Forecast }) {
         {f.signals.length > 0 && (
           <ul className="mt-4 space-y-1.5">
             {f.signals.map((s, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+              <li key={i} className="flex items-start gap-2 text-sm text-fg">
                 <span
                   className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
                     s.severity === "critical" ? "bg-red-400" : "bg-amber-400"
@@ -351,8 +351,8 @@ export function ForecastSection({ forecast: f }: { forecast: Forecast }) {
         )}
 
         {f.recommendations.length > 0 && (
-          <div className="mt-4 rounded-lg border border-brand/15 bg-brand/5 p-3 text-sm text-slate-300">
-            <div className="mb-1 font-mono text-[11px] uppercase tracking-wider text-brand-300">
+          <div className="mt-4 rounded-lg border border-brand/15 bg-brand/5 p-3 text-sm text-fg">
+            <div className="mb-1 font-mono text-[11px] uppercase tracking-wider text-link">
               Recommandations
             </div>
             <ul className="space-y-1">

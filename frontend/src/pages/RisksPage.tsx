@@ -6,9 +6,9 @@ import { PageHeader, Loading, ErrorBanner } from "../components/ui";
 import { useAsync } from "../hooks/useAsync";
 
 const sevStyle: Record<Risk["severity"], { chip: string; label: string }> = {
-  low: { chip: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300", label: "Faible" },
-  medium: { chip: "border-amber-500/40 bg-amber-500/10 text-amber-300", label: "Moyen" },
-  high: { chip: "border-red-500/40 bg-red-500/10 text-red-300", label: "Élevé" },
+  low: { chip: "border-emerald-500/30 bg-emerald-500/10 text-success", label: "Faible" },
+  medium: { chip: "border-amber-500/40 bg-amber-500/10 text-warning", label: "Moyen" },
+  high: { chip: "border-red-500/40 bg-red-500/10 text-danger", label: "Élevé" },
 };
 const statusLabel: Record<RiskStatus, string> = {
   open: "Ouvert",
@@ -65,7 +65,7 @@ export function RisksPage() {
       <PageHeader
         eyebrow="Gouvernance"
         title="Registre des risques"
-        subtitle={<Link to={`/projects/${id}`} className="text-brand hover:underline">← Retour à la fiche projet</Link>}
+        subtitle={<Link to={`/projects/${id}`} className="text-link hover:underline">← Retour à la fiche projet</Link>}
       />
 
       {error && <div className="mb-4"><ErrorBanner message={error} /></div>}
@@ -98,12 +98,12 @@ export function RisksPage() {
       {/* Depuis les anomalies */}
       {openAnomalies.length > 0 && (
         <section className="pm-card mb-6 p-5">
-          <h2 className="text-sm font-semibold text-slate-300">Créer un risque depuis une anomalie ouverte</h2>
+          <h2 className="text-sm font-semibold text-fg">Créer un risque depuis une anomalie ouverte</h2>
           <ul className="mt-3 space-y-2">
             {openAnomalies.slice(0, 6).map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 text-sm">
-                <span className="truncate text-slate-300">
-                  <span className="font-mono text-xs text-slate-500">{a.severity}</span> {a.explanation}
+              <li key={a.id} className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+                <span className="truncate text-fg">
+                  <span className="font-mono text-xs text-faint">{a.severity}</span> {a.explanation}
                 </span>
                 <button
                   className="pm-btn-ghost shrink-0 py-1 text-xs"
@@ -119,14 +119,14 @@ export function RisksPage() {
 
       {/* Registre */}
       {items.length === 0 ? (
-        <div className="pm-card p-8 text-center text-sm text-slate-400">
+        <div className="pm-card p-8 text-center text-sm text-muted">
           Aucun risque enregistré. Ajoutez-en un ci-dessus — le score (probabilité × impact)
           et le niveau sont calculés automatiquement.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/5">
+        <div className="overflow-hidden rounded-xl border border-line">
           <table className="w-full text-sm">
-            <thead className="bg-white/[0.03] text-left text-xs uppercase tracking-wide text-slate-400">
+            <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-2">Risque</th>
                 <th className="px-4 py-2">P</th>
@@ -139,10 +139,10 @@ export function RisksPage() {
             </thead>
             <tbody>
               {items.map((r) => (
-                <tr key={r.id} className="border-t border-white/5">
+                <tr key={r.id} className="border-t border-line">
                   <td className="px-4 py-2">
-                    <div className="text-slate-100">{r.title}</div>
-                    {r.owner && <div className="text-xs text-slate-500">{r.owner}</div>}
+                    <div className="text-heading">{r.title}</div>
+                    {r.owner && <div className="text-xs text-faint">{r.owner}</div>}
                   </td>
                   <td className="px-4 py-2">
                     <ScaleSelect value={r.probability} onChange={(v) => run(() => api.patch(`/projects/${id}/risks/${r.id}`, { probability: v }))} label="Probabilité" />
@@ -156,7 +156,7 @@ export function RisksPage() {
                   </td>
                   <td className="px-4 py-2">
                     <select
-                      className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 text-xs text-slate-200"
+                      className="rounded-md border border-line bg-surface px-2 py-0.5 text-xs text-fg"
                       value={r.status}
                       onChange={(e) => run(() => api.patch(`/projects/${id}/risks/${r.id}`, { status: e.target.value }))}
                       aria-label={`Statut du risque ${r.title}`}
@@ -167,7 +167,7 @@ export function RisksPage() {
                     </select>
                   </td>
                   <td className="px-4 py-2 text-right">
-                    <button className="text-xs text-slate-500 hover:text-red-300" onClick={() => run(() => api.del(`/projects/${id}/risks/${r.id}`))} aria-label={`Supprimer le risque ${r.title}`}>
+                    <button className="text-xs text-faint hover:text-danger" onClick={() => run(() => api.del(`/projects/${id}/risks/${r.id}`))} aria-label={`Supprimer le risque ${r.title}`}>
                       ✕
                     </button>
                   </td>
@@ -184,7 +184,7 @@ export function RisksPage() {
 function ScaleSelect({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
   return (
     <select
-      className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 text-xs text-slate-200"
+      className="rounded-md border border-line bg-surface px-2 py-0.5 text-xs text-fg"
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
       aria-label={label}

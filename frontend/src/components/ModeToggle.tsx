@@ -18,7 +18,7 @@ export function ModeToggle() {
 
   return (
     <div
-      className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-0.5"
+      className="inline-flex rounded-lg border border-line bg-surface p-0.5"
       role="group"
       aria-label="Niveau d'affichage"
     >
@@ -31,7 +31,7 @@ export function ModeToggle() {
             onClick={() => choose(o.value)}
             aria-pressed={active}
             className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
-              active ? "bg-brand/20 text-brand-300" : "text-slate-400 hover:text-slate-200"
+              active ? "bg-brand/20 text-link" : "text-muted hover:text-fg"
             }`}
           >
             {o.label}

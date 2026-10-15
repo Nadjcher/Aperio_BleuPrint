@@ -151,13 +151,13 @@ export function ProjectDetailPage() {
     <div>
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">{project.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-heading">{project.name}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-3">
-            {project.repo && <span className="font-mono text-sm text-slate-400">{project.repo}</span>}
-            <label className="flex items-center gap-1.5 text-xs text-slate-400">
+            {project.repo && <span className="font-mono text-sm text-muted">{project.repo}</span>}
+            <label className="flex items-center gap-1.5 text-xs text-muted">
               Méthodologie :
               <select
-                className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 text-xs text-slate-200"
+                className="rounded-md border border-line bg-surface px-2 py-0.5 text-xs text-fg"
                 value={project.methodology}
                 onChange={(e) => void changeMethodology(e.target.value as Project["methodology"])}
                 aria-label="Méthodologie du projet"
@@ -188,7 +188,7 @@ export function ProjectDetailPage() {
       </div>
 
       {message && (
-        <p className="mb-6 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-slate-300">
+        <p className="mb-6 rounded-xl border border-line bg-surface2 px-4 py-2.5 text-sm text-fg">
           {message}
         </p>
       )}
@@ -201,7 +201,7 @@ export function ProjectDetailPage() {
 
       <Section title="Décisions des agents" count={decisions.length}>
         {decisions.length === 0 ? (
-          <div className="pm-card p-8 text-center text-sm text-slate-400">
+          <div className="pm-card p-8 text-center text-sm text-muted">
             Aucune décision — lancez une synchronisation.
           </div>
         ) : (

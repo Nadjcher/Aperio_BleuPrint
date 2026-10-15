@@ -144,7 +144,7 @@ export function TeamPage() {
 
       {/* Membres */}
       <section className="pm-card mb-6 p-5">
-        <h2 className="text-lg font-semibold text-white">Membres</h2>
+        <h2 className="text-lg font-semibold text-heading">Membres</h2>
         <form onSubmit={onCreateMember} className="mt-4 flex flex-wrap items-end gap-4">
           <label className="flex min-w-[10rem] flex-1 flex-col">
             <span className="pm-label">Nom</span>
@@ -169,7 +169,7 @@ export function TeamPage() {
         </form>
 
         {members.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-4 text-sm text-muted">
             Aucun membre pour l'instant — ajoutez votre équipe ci-dessus.
           </p>
         ) : (
@@ -177,13 +177,13 @@ export function TeamPage() {
             {members.map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3"
               >
                 <div>
-                  <div className="font-semibold text-slate-100">{m.name}</div>
+                  <div className="font-semibold text-heading">{m.name}</div>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {m.skills.length === 0 ? (
-                      <span className="text-xs text-slate-500">—</span>
+                      <span className="text-xs text-faint">—</span>
                     ) : (
                       m.skills.map((s) => (
                         <span key={s} className="pm-chip text-xs">
@@ -208,7 +208,7 @@ export function TeamPage() {
 
       {/* Affectations */}
       <section className="pm-card mb-6 p-5">
-        <h2 className="text-lg font-semibold text-white">Affectations par projet</h2>
+        <h2 className="text-lg font-semibold text-heading">Affectations par projet</h2>
         <label className="mt-4 flex max-w-sm flex-col">
           <span className="pm-label">Projet</span>
           <select
@@ -227,9 +227,9 @@ export function TeamPage() {
 
         {projectId && resourcing && (
           <>
-            <div className="mt-4 overflow-hidden rounded-xl border border-white/5">
+            <div className="mt-4 overflow-hidden rounded-xl border border-line">
               <table className="w-full text-sm">
-                <thead className="bg-white/[0.03] text-left text-xs uppercase tracking-wide text-slate-400">
+                <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted">
                   <tr>
                     <th className="px-4 py-2">Membre</th>
                     <th className="px-4 py-2">Allocation</th>
@@ -240,16 +240,16 @@ export function TeamPage() {
                 <tbody>
                   {resourcing.members.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-3 text-slate-400">
+                      <td colSpan={4} className="px-4 py-3 text-muted">
                         Aucun membre affecté.
                       </td>
                     </tr>
                   ) : (
                     resourcing.members.map((m) => (
-                      <tr key={m.memberId} className="border-t border-white/5">
-                        <td className="px-4 py-2 text-slate-100">{m.name}</td>
-                        <td className="px-4 py-2 text-slate-300">{m.allocationPct}%</td>
-                        <td className="px-4 py-2 text-slate-300">{m.velocity}</td>
+                      <tr key={m.memberId} className="border-t border-line">
+                        <td className="px-4 py-2 text-heading">{m.name}</td>
+                        <td className="px-4 py-2 text-fg">{m.allocationPct}%</td>
+                        <td className="px-4 py-2 text-fg">{m.velocity}</td>
                         <td className="px-4 py-2 text-right">
                           <button
                             onClick={() => onUnassign(m.memberId)}
@@ -263,7 +263,7 @@ export function TeamPage() {
                   )}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t border-white/10 text-slate-200">
+                  <tr className="border-t border-line text-fg">
                     <td className="px-4 py-2 font-semibold">Vélocité totale</td>
                     <td />
                     <td className="px-4 py-2 font-mono">{resourcing.totalVelocity}</td>
@@ -319,10 +319,10 @@ export function TeamPage() {
 
       {/* Simulation de gravité */}
       <section className="pm-card p-5">
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold text-heading">
           Simuler un déplacement
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-muted">
           Estimez l'impact de retirer un membre d'un projet (et, en option, de
           l'affecter à un autre).
         </p>
@@ -392,7 +392,7 @@ export function TeamPage() {
         {analysis && <GravityResult analysis={analysis} />}
 
         {projects.length === 0 && (
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-4 text-sm text-muted">
             Créez d'abord un projet dans l'onglet « Projets », puis affectez-y des
             membres pour lancer une simulation.
           </p>

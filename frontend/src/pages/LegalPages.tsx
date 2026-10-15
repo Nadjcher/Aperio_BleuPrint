@@ -30,7 +30,7 @@ const legalLinks = [
 function LegalLayout({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
-      <header className="border-b border-white/10 bg-ink-950/70 backdrop-blur-xl">
+      <header className="border-b border-line bg-app/80 backdrop-blur-xl">
         <nav
           className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-5 py-4"
           aria-label="Navigation légale"
@@ -52,13 +52,13 @@ function LegalLayout({ title, children }: { title: string; children: React.React
         </nav>
       </header>
       <main className="mx-auto max-w-3xl px-5 py-12">
-        <h1 className="text-2xl font-bold tracking-tight text-white">{title}</h1>
-        <p className="mt-1 text-sm text-slate-400">Dernière mise à jour : {UPDATED}</p>
-        <div className="legal-prose mt-8 space-y-6 text-sm leading-relaxed text-slate-300">
+        <h1 className="text-2xl font-bold tracking-tight text-heading">{title}</h1>
+        <p className="mt-1 text-sm text-muted">Dernière mise à jour : {UPDATED}</p>
+        <div className="legal-prose mt-8 space-y-6 text-sm leading-relaxed text-fg">
           {children}
         </div>
         <p className="mt-12 text-sm">
-          <Link to="/" className="text-brand hover:underline">
+          <Link to="/" className="text-link hover:underline">
             ← Retour à l'accueil
           </Link>
         </p>
@@ -68,7 +68,7 @@ function LegalLayout({ title, children }: { title: string; children: React.React
 }
 
 function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="pt-2 text-lg font-semibold text-white">{children}</h2>;
+  return <h2 className="pt-2 text-lg font-semibold text-heading">{children}</h2>;
 }
 
 export function MentionsLegalesPage() {
@@ -182,7 +182,7 @@ export function ConfidentialitePage() {
       </ul>
       <p>
         Vous pouvez introduire une réclamation auprès de la CNIL (
-        <a href="https://www.cnil.fr" className="text-brand hover:underline" target="_blank" rel="noreferrer">
+        <a href="https://www.cnil.fr" className="text-link hover:underline" target="_blank" rel="noreferrer">
           cnil.fr
         </a>
         ).

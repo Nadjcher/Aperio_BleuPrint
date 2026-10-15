@@ -81,10 +81,10 @@ export function OnboardingPage() {
         {STEPS.map((label, i) => (
           <li key={label} className="flex flex-1 flex-col gap-1.5">
             <div
-              className={`h-1.5 rounded-full ${i <= step ? "bg-brand" : "bg-white/10"}`}
+              className={`h-1.5 rounded-full ${i <= step ? "bg-brand" : "bg-surface2"}`}
               aria-hidden
             />
-            <span className={`text-xs ${i === step ? "text-brand-300" : "text-slate-500"}`}>
+            <span className={`text-xs ${i === step ? "text-link" : "text-faint"}`}>
               {i + 1}. {label}
             </span>
           </li>
@@ -100,8 +100,8 @@ export function OnboardingPage() {
 
         {step === 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-white">Comment s'appelle votre projet ?</h2>
-            <p className="mt-1 text-sm text-slate-400">Un nom clair, par exemple « Refonte du site ».</p>
+            <h2 className="text-lg font-semibold text-heading">Comment s'appelle votre projet ?</h2>
+            <p className="mt-1 text-sm text-muted">Un nom clair, par exemple « Refonte du site ».</p>
             <label className="mt-4 block">
               <span className="pm-label">Nom du projet</span>
               <input
@@ -129,8 +129,8 @@ export function OnboardingPage() {
 
         {step === 1 && (
           <div>
-            <h2 className="text-lg font-semibold text-white">Connectez un dépôt de code</h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <h2 className="text-lg font-semibold text-heading">Connectez un dépôt de code</h2>
+            <p className="mt-1 text-sm text-muted">
               Format <span className="font-mono">propriétaire/dépôt</span> (ex.{" "}
               <span className="font-mono">facebook/react</span>). Aperio y lira l'activité
               (commits, relectures, tickets). Vous pouvez aussi sauter cette étape.
@@ -157,14 +157,14 @@ export function OnboardingPage() {
 
         {step === 2 && (
           <div>
-            <h2 className="text-lg font-semibold text-white">Lancez la première analyse</h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <h2 className="text-lg font-semibold text-heading">Lancez la première analyse</h2>
+            <p className="mt-1 text-sm text-muted">
               {project?.repo
                 ? "Aperio va collecter l'activité du dépôt et faire travailler ses agents."
                 : "Aucun dépôt relié : vous pourrez en ajouter un plus tard depuis la fiche projet."}
             </p>
 
-            {status && <p className="mt-4 text-sm text-slate-300">{status}</p>}
+            {status && <p className="mt-4 text-sm text-fg">{status}</p>}
 
             <div className="mt-6 flex flex-wrap justify-between gap-2">
               {project && (

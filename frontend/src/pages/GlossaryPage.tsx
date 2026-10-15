@@ -15,12 +15,12 @@ export function GlossaryPage() {
         {GLOSSARY.map((t) => (
           <div key={t.key} className="pm-card p-5">
             <dt className="flex flex-wrap items-baseline gap-2">
-              <span className="font-semibold text-white">{t.plain}</span>
+              <span className="font-semibold text-heading">{t.plain}</span>
               {t.plain !== t.technical && (
-                <span className="font-mono text-xs text-slate-500">({t.technical})</span>
+                <span className="font-mono text-xs text-faint">({t.technical})</span>
               )}
             </dt>
-            <dd className="mt-1 text-sm text-slate-400">{t.definition}</dd>
+            <dd className="mt-1 text-sm text-muted">{t.definition}</dd>
           </div>
         ))}
       </dl>

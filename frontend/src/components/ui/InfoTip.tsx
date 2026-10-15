@@ -32,7 +32,7 @@ export function InfoTip({
         onClick={() => setOpen((o) => !o)}
       >
         {label}
-        <span aria-hidden className="text-[10px] text-slate-500">
+        <span aria-hidden className="text-[10px] text-faint">
           ⓘ
         </span>
       </button>
@@ -40,9 +40,9 @@ export function InfoTip({
         <span
           id={id}
           role="tooltip"
-          className="absolute left-0 top-full z-20 mt-1.5 w-64 rounded-lg border border-white/10 bg-ink-900 p-3 text-xs font-normal leading-relaxed text-slate-300 shadow-xl"
+          className="absolute left-0 top-full z-20 mt-1.5 w-64 rounded-lg border border-line bg-surface p-3 text-xs font-normal leading-relaxed text-fg shadow-xl"
         >
-          <span className="mb-0.5 block font-semibold text-slate-100">{t.plain}</span>
+          <span className="mb-0.5 block font-semibold text-heading">{t.plain}</span>
           {t.definition}
         </span>
       )}

@@ -50,7 +50,7 @@ function IconBox({ icon, size = "md" }: { icon: IconName; size?: "sm" | "md" }) 
   const box = size === "sm" ? "h-9 w-9" : "h-11 w-11";
   const ic = size === "sm" ? "h-4 w-4" : "h-5 w-5";
   return (
-    <div className={`flex ${box} items-center justify-center rounded-lg bg-gradient-to-br ${BLUE} text-white shadow-glow`}>
+    <div className={`flex ${box} items-center justify-center rounded-lg bg-gradient-to-br ${BLUE} text-heading shadow-glow`}>
       <Icon name={icon} className={ic} />
     </div>
   );
@@ -60,10 +60,10 @@ function SectionHead({ num, eyebrow, title, grad, sub }: { num: string; eyebrow:
   return (
     <div className="mb-12 text-center">
       <span className="pm-eyebrow justify-center">{num} — {eyebrow}</span>
-      <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+      <h2 className="mt-4 text-3xl font-bold tracking-tight text-heading sm:text-4xl">
         {title} <span className="pm-gradient-text">{grad}</span>
       </h2>
-      <p className="mt-3 text-slate-400">{sub}</p>
+      <p className="mt-3 text-muted">{sub}</p>
     </div>
   );
 }
@@ -86,7 +86,7 @@ export function LandingPage() {
       </div>
 
       {/* Nav */}
-      <header className="sticky top-0 z-20 border-b border-blue-400/10 bg-ink-950/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-blue-400/10 bg-app/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-brand-500 to-accent-600 shadow-glow">
@@ -109,11 +109,11 @@ export function LandingPage() {
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-16 lg:grid-cols-2 lg:pt-24">
         <div>
           <span className="pm-eyebrow mb-6">Plateforme IA autonome</span>
-          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl">
+          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-heading sm:text-6xl">
             Vos projets,{" "}
             <span className="pm-gradient-text">pilotés par l'IA.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-slate-400">
+          <p className="mt-6 max-w-xl text-lg text-muted">
             Aperio détecte les signaux faibles en continu et déploie des
             agents autonomes qui diagnostiquent, planifient et rendent compte —
             avant que le retard n'arrive.
@@ -132,11 +132,11 @@ export function LandingPage() {
             </a>
           </div>
           {!authed && (
-            <p className="mt-3 font-mono text-xs text-slate-400">
+            <p className="mt-3 font-mono text-xs text-muted">
               Essai immédiat · 1 projet · sans e-mail — créez un compte ensuite pour continuer
             </p>
           )}
-          <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-slate-400">
+          <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-muted">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 animate-pulseGlow rounded-full bg-brand-400 shadow-[0_0_8px_2px_rgba(56,189,248,0.6)]" />
               Sans carte bancaire
@@ -152,18 +152,18 @@ export function LandingPage() {
               <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-gradient-to-br from-brand-500 to-accent-600">
                 <span className="h-1.5 w-1.5 rounded-[2px] bg-white/90" />
               </span>
-              <span className="text-sm font-semibold text-slate-200">Aperio</span>
+              <span className="text-sm font-semibold text-fg">Aperio</span>
             </div>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-slate-400">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
               live
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {previewCards.map((c) => (
-              <div key={c.title} className="rounded-lg border border-blue-400/10 bg-white/[0.02] p-4">
+              <div key={c.title} className="rounded-lg border border-blue-400/10 bg-surface p-4">
                 <IconBox icon={c.icon} size="sm" />
-                <div className="mt-3 text-sm font-semibold text-white">{c.title}</div>
-                <div className="mt-0.5 text-xs text-slate-400">{c.desc}</div>
+                <div className="mt-3 text-sm font-semibold text-heading">{c.title}</div>
+                <div className="mt-0.5 text-xs text-muted">{c.desc}</div>
               </div>
             ))}
           </div>
@@ -171,7 +171,7 @@ export function LandingPage() {
             {stats.map((s) => (
               <div key={s.label}>
                 <div className="pm-gradient-text font-mono text-base font-bold">{s.value}</div>
-                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-muted">
                   {s.label}
                 </div>
               </div>
@@ -195,12 +195,12 @@ export function LandingPage() {
             <div key={s.title} className="pm-card relative p-6">
               <div className="flex items-center justify-between">
                 <IconBox icon={s.icon} />
-                <span className="font-mono text-4xl font-bold text-white/[0.07]">
+                <span className="font-mono text-4xl font-bold text-heading/[0.07]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
-              <h3 className="mt-4 font-semibold text-white">{s.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{s.desc}</p>
+              <h3 className="mt-4 font-semibold text-heading">{s.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{s.desc}</p>
             </div>
           ))}
         </div>
@@ -222,8 +222,8 @@ export function LandingPage() {
               className="pm-card group p-6 transition hover:border-blue-400/35 hover:shadow-glow"
             >
               <IconBox icon={f.icon} />
-              <h3 className="mt-4 font-semibold text-white">{f.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{f.desc}</p>
+              <h3 className="mt-4 font-semibold text-heading">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -234,10 +234,10 @@ export function LandingPage() {
         <div className="pm-card pm-ticks relative flex flex-col items-center gap-6 p-10 text-center sm:flex-row sm:justify-between sm:text-left">
           <div className="max-w-xl">
             <span className="pm-eyebrow mb-3">03 — Sécurité &amp; conformité</span>
-            <h2 className="mt-3 text-2xl font-bold text-white">
+            <h2 className="mt-3 text-2xl font-bold text-heading">
               Vos données restent protégées.
             </h2>
-            <p className="mt-2 text-slate-400">
+            <p className="mt-2 text-muted">
               Authentification JWT, chiffrement au repos, journal d'audit, et
               conformité RGPD native (accès, portabilité, effacement).
             </p>

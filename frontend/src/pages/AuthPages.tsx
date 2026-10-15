@@ -14,7 +14,7 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
           </Link>
         </div>
         <div className="pm-card pm-ticks relative p-7">
-          <h1 className="mb-5 text-lg font-semibold text-white">{title}</h1>
+          <h1 className="mb-5 text-lg font-semibold text-heading">{title}</h1>
           {children}
         </div>
       </div>
@@ -40,18 +40,18 @@ export function ForgotPasswordPage() {
   return (
     <Shell title="Mot de passe oublié">
       {sent ? (
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-fg">
           Si un compte existe pour <span className="font-mono">{email}</span>, un
           e-mail avec un lien de réinitialisation vient d'être envoyé. Pensez à
           vérifier vos spams.
           <br />
-          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+          <Link to="/login" className="mt-4 inline-block text-link hover:underline">
             ← Retour à la connexion
           </Link>
         </p>
       ) : (
         <form onSubmit={onSubmit} className="space-y-4">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted">
             Entrez votre e-mail : nous vous enverrons un lien pour choisir un
             nouveau mot de passe.
           </p>
@@ -67,7 +67,7 @@ export function ForgotPasswordPage() {
             />
           </div>
           <button className="pm-btn-primary w-full">Envoyer le lien</button>
-          <Link to="/login" className="block text-center text-sm text-slate-400 hover:text-white">
+          <Link to="/login" className="block text-center text-sm text-muted hover:text-heading">
             Retour à la connexion
           </Link>
         </form>
@@ -100,9 +100,9 @@ export function ResetPasswordPage() {
   if (!token) {
     return (
       <Shell title="Lien invalide">
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-fg">
           Ce lien de réinitialisation est incomplet.{" "}
-          <Link to="/forgot-password" className="text-brand hover:underline">
+          <Link to="/forgot-password" className="text-link hover:underline">
             Redemander un lien
           </Link>
         </p>
@@ -113,7 +113,7 @@ export function ResetPasswordPage() {
   return (
     <Shell title="Nouveau mot de passe">
       {done ? (
-        <p className="text-sm text-emerald-300">
+        <p className="text-sm text-success">
           Mot de passe mis à jour ✓ Redirection vers la connexion…
         </p>
       ) : (
@@ -131,7 +131,7 @@ export function ResetPasswordPage() {
               required
             />
           </div>
-          {error && <p className="text-sm text-red-300">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
           <button className="pm-btn-primary w-full">Réinitialiser</button>
         </form>
       )}
@@ -156,7 +156,7 @@ export function UpgradePage() {
 
   return (
     <Shell title="Créez votre compte">
-      <p className="mb-5 text-sm text-slate-400">
+      <p className="mb-5 text-sm text-muted">
         Vous êtes en mode invité. Créez un compte pour <b>conserver votre projet</b>
         {" "}et continuer sans limite.
       </p>
@@ -182,7 +182,7 @@ export function UpgradePage() {
             required
           />
         </div>
-        {error && <p className="text-sm text-red-300">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
         <button className="pm-btn-primary w-full">Créer mon compte</button>
       </form>
     </Shell>
@@ -208,21 +208,21 @@ export function VerifyEmailPage() {
 
   return (
     <Shell title="Vérification de l'e-mail">
-      {state === "loading" && <p className="text-sm text-slate-400">Vérification en cours…</p>}
+      {state === "loading" && <p className="text-sm text-muted">Vérification en cours…</p>}
       {state === "ok" && (
-        <p className="text-sm text-emerald-300">
+        <p className="text-sm text-success">
           Votre adresse e-mail est confirmée ✓
           <br />
-          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+          <Link to="/login" className="mt-4 inline-block text-link hover:underline">
             Se connecter
           </Link>
         </p>
       )}
       {state === "error" && (
-        <p className="text-sm text-red-300">
+        <p className="text-sm text-danger">
           Lien invalide ou expiré.
           <br />
-          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+          <Link to="/login" className="mt-4 inline-block text-link hover:underline">
             Retour à la connexion
           </Link>
         </p>

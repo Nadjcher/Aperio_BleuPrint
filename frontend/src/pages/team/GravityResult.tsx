@@ -8,12 +8,12 @@ export function GravityGauge({ score }: { score: number }) {
     <div>
       <div className="flex items-baseline justify-between">
         <span className="pm-label">Score de gravité</span>
-        <span className="font-mono text-sm text-slate-200">
+        <span className="font-mono text-sm text-fg">
           {score}/100 · {label}
         </span>
       </div>
       <div
-        className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-white/10"
+        className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-surface2"
         role="meter"
         aria-valuenow={score}
         aria-valuemin={0}
@@ -27,9 +27,9 @@ export function GravityGauge({ score }: { score: number }) {
 }
 
 const impactColor: Record<ResourceMoveAnalysis["netImpact"], string> = {
-  positive: "text-emerald-300",
-  neutral: "text-slate-300",
-  negative: "text-red-300",
+  positive: "text-success",
+  neutral: "text-fg",
+  negative: "text-danger",
 };
 
 const impactLabel: Record<ResourceMoveAnalysis["netImpact"], string> = {
@@ -41,10 +41,10 @@ const impactLabel: Record<ResourceMoveAnalysis["netImpact"], string> = {
 /** Panneau de résultat d'une simulation de déplacement de ressource. */
 export function GravityResult({ analysis }: { analysis: ResourceMoveAnalysis }) {
   return (
-    <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-5">
+    <div className="mt-6 rounded-xl border border-line bg-surface p-5">
       <GravityGauge score={analysis.gravityScore} />
 
-      <p className="mt-4 text-sm text-slate-200">
+      <p className="mt-4 text-sm text-fg">
         <span className="font-semibold">{analysis.member}</span> —{" "}
         <span className={impactColor[analysis.netImpact]}>
           impact net {impactLabel[analysis.netImpact]}
@@ -52,12 +52,12 @@ export function GravityResult({ analysis }: { analysis: ResourceMoveAnalysis }) 
       </p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-white/5 p-4">
+        <div className="rounded-lg border border-line p-4">
           <div className="pm-eyebrow">Projet source · {analysis.from.projectName}</div>
-          <ul className="mt-2 space-y-1 text-sm text-slate-300">
+          <ul className="mt-2 space-y-1 text-sm text-fg">
             <li>
               Vélocité : {analysis.from.velocityBefore} →{" "}
-              <span className="text-red-300">{analysis.from.velocityAfter}</span> (−
+              <span className="text-danger">{analysis.from.velocityAfter}</span> (−
               {analysis.from.velocityLossPct}%)
             </li>
             <li>Durée estimée : +{analysis.from.durationIncreasePct}%</li>
@@ -75,12 +75,12 @@ export function GravityResult({ analysis }: { analysis: ResourceMoveAnalysis }) 
         </div>
 
         {analysis.to && (
-          <div className="rounded-lg border border-white/5 p-4">
+          <div className="rounded-lg border border-line p-4">
             <div className="pm-eyebrow">Projet cible · {analysis.to.projectName}</div>
-            <ul className="mt-2 space-y-1 text-sm text-slate-300">
+            <ul className="mt-2 space-y-1 text-sm text-fg">
               <li>
                 Vélocité : {analysis.to.velocityBefore} →{" "}
-                <span className="text-emerald-300">{analysis.to.velocityAfter}</span> (+
+                <span className="text-success">{analysis.to.velocityAfter}</span> (+
                 {analysis.to.velocityGainPct}%)
               </li>
               <li>Pleinement effectif après ~{analysis.to.effectiveAfterWeeks} sem.</li>
@@ -91,8 +91,8 @@ export function GravityResult({ analysis }: { analysis: ResourceMoveAnalysis }) 
 
       <div className="mt-4 rounded-lg border border-brand/20 bg-brand/5 p-4">
         <div className="pm-eyebrow">Recommandation</div>
-        <p className="mt-1 text-sm text-slate-100">{analysis.recommendation}</p>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-1 text-sm text-heading">{analysis.recommendation}</p>
+        <p className="mt-2 text-xs text-faint">
           Confiance : {Math.round(analysis.confidence * 100)}% ·{" "}
           {analysis.confidence < 0.5
             ? "données de vélocité insuffisantes, estimation indicative"

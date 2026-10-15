@@ -18,7 +18,7 @@ export function IntegrationsPage() {
       <PageHeader
         eyebrow="Intégrations"
         title="Connecteur & notifications"
-        subtitle={<Link to={`/projects/${id}`} className="text-brand hover:underline">← Retour à la fiche projet</Link>}
+        subtitle={<Link to={`/projects/${id}`} className="text-link hover:underline">← Retour à la fiche projet</Link>}
       />
       <ConnectorSection projectId={id!} initial={cfg.data} onSaved={() => void cfg.reload()} />
       <NotificationSection projectId={id!} initial={notif.data!} onSaved={() => void notif.reload()} />
@@ -80,10 +80,10 @@ function ConnectorSection({
 
   return (
     <section className="pm-card mb-6 p-5">
-      <h2 className="text-lg font-semibold text-white">Source de données</h2>
-      <p className="mt-1 text-sm text-slate-400">{meta.hint}</p>
+      <h2 className="text-lg font-semibold text-heading">Source de données</h2>
+      <p className="mt-1 text-sm text-muted">{meta.hint}</p>
       {error && <div className="mt-3"><ErrorBanner message={error} /></div>}
-      {ok && <p className="mt-3 text-sm text-emerald-300">{ok}</p>}
+      {ok && <p className="mt-3 text-sm text-success">{ok}</p>}
 
       <label className="mt-4 block max-w-xs">
         <span className="pm-label">Fournisseur</span>
@@ -123,7 +123,7 @@ function ConnectorSection({
         )}
       </div>
 
-      <p className="mt-3 text-xs text-slate-500">
+      <p className="mt-3 text-xs text-faint">
         Le token est chiffré au repos (AES-256-GCM) et n'est jamais réaffiché.
       </p>
 
@@ -169,13 +169,13 @@ function NotificationSection({
 
   return (
     <section className="pm-card p-5">
-      <h2 className="text-lg font-semibold text-white">Notifications</h2>
-      <p className="mt-1 text-sm text-slate-400">
+      <h2 className="text-lg font-semibold text-heading">Notifications</h2>
+      <p className="mt-1 text-sm text-muted">
         Les e-mails d'alerte sont gérés dans votre profil. Ici, le webhook Slack
         et ce que ce projet notifie.
       </p>
       {error && <div className="mt-3"><ErrorBanner message={error} /></div>}
-      {ok && <p className="mt-3 text-sm text-emerald-300">{ok}</p>}
+      {ok && <p className="mt-3 text-sm text-success">{ok}</p>}
 
       <label className="mt-4 block max-w-xl">
         <span className="pm-label">
@@ -192,11 +192,11 @@ function NotificationSection({
       </label>
 
       <div className="mt-4 space-y-2">
-        <label className="flex items-center gap-2 text-sm text-slate-300">
+        <label className="flex items-center gap-2 text-sm text-fg">
           <input type="checkbox" checked={onAnomaly} onChange={(e) => setOnAnomaly(e.target.checked)} />
           Notifier les anomalies critiques
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-300">
+        <label className="flex items-center gap-2 text-sm text-fg">
           <input type="checkbox" checked={onPendingDecision} onChange={(e) => setOnPendingDecision(e.target.checked)} />
           Notifier les décisions en attente d'approbation
         </label>
