@@ -96,6 +96,21 @@ attendent leurs I/O. `FOR UPDATE SKIP LOCKED` garantit qu'un job n'est jamais
 pris deux fois quel que soit le nombre de workers (déjà vérifié : 6 jobs ×
 3 tentatives = 18 traitements exacts, aucun double-claim).
 
+## Qualité & performance (Phase 5)
+
+- **N+1 corrigés** : le briefing agrégeait 2 requêtes **par projet** → désormais
+  2 requêtes groupées (`IN`) ; index `(projectId, type, occurredAt)` sur les
+  signaux. Les routes par requête (`/plan`, `/risks`, détail projet) émettent un
+  nombre **borné** de requêtes (pas de N+1) : `getPlan` charge jalons + tâches +
+  affectations en parallèle puis calcule en mémoire.
+- **Instrumentation** : le middleware Prometheus est monté **avant** tous les
+  routers, donc chaque nouveau parcours (planning, risques, connecteurs,
+  notifications) est automatiquement mesuré (latence, débit, codes).
+- **Tests E2E + accessibilité** : `npm run e2e` (Playwright + axe-core) couvre
+  inscription→onboarding→projet, planning, risques, intégrations, export RGPD,
+  et audite l'accessibilité (WCAG A/AA) des pages clés — 7/7 verts, aucune
+  violation grave.
+
 ## Pistes d'optimisation (si la charge l'exige)
 
 - **API** : clusteriser (PM2 / plusieurs répliques derrière le LB) — l'app est
