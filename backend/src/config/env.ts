@@ -94,6 +94,9 @@ const schema = z.object({
   // l'état des jobs ; 1000/15min (~66/min) borne l'abus sans gêner l'usage
   // normal. Les routes d'auth gardent leur limiteur strict (10/15min).
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(1000),
+  // Limite stricte des routes d'authentification (anti brute-force). Défaut
+  // 10/15min en prod ; relevable pour les tests E2E / de charge.
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
 
   // Taille max du pool de connexions PostgreSQL par process. Le défaut du
   // driver (10) sature sous rafales de requêtes analytiques concurrentes

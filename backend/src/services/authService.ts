@@ -67,8 +67,10 @@ export async function register(
     throw new AppError(409, "email_taken", "Cet email est déjà utilisé");
   }
   // Le premier utilisateur RÉEL (hors invités) devient admin (et auto-vérifié).
+  // Les suivants sont `manager` : dans Aperio chacun gère ses propres projets,
+  // un simple `viewer` ne pourrait ni créer ni synchroniser un projet.
   const count = await users().count({ where: { isGuest: false } });
-  const role: Role = count === 0 ? "admin" : "viewer";
+  const role: Role = count === 0 ? "admin" : "manager";
   const emailVerified = count === 0;
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const user = await users().save(

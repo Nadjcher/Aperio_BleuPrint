@@ -17,9 +17,12 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm run -w shared test --if-present && npm run -w backend test --if-present && npm run -w frontend test --if-present"
+    "test": "npm run -w shared test --if-present && npm run -w backend test --if-present && npm run -w frontend test --if-present",
+    "e2e": "bash scripts/e2e.sh"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.56.1",
     "concurrently": "^8.2.2",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
