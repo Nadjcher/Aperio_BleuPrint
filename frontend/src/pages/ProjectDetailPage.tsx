@@ -178,6 +178,9 @@ export function ProjectDetailPage() {
           <Link to={`/projects/${project.id}/risks`} className="pm-btn-ghost">
             Risques
           </Link>
+          <Link to={`/projects/${project.id}/minutes`} className="pm-btn-ghost">
+            Comptes rendus
+          </Link>
           <Link to={`/projects/${project.id}/integrations`} className="pm-btn-ghost">
             Intégrations
           </Link>

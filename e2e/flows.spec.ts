@@ -161,6 +161,45 @@ test.describe("Parcours principaux", () => {
     expect(sync.status()).toBe(202);
   });
 
+  test("compte rendu de réunion : extraction décisions / actions / risques", async ({ page }) => {
+    const user = await registerUser(page);
+    const proj = await (
+      await page.request.post(`${API}/api/v1/projects`, {
+        headers: { authorization: `Bearer ${user.access}` },
+        data: { name: "Projet CR" },
+      })
+    ).json();
+
+    const notes = [
+      "Comité de suivi.",
+      "- Décision : on valide la mise en ligne en novembre.",
+      "- Action : préparer la maquette, responsable: Alice, avant le 2026-10-25",
+      "- Risque : le prestataire data est en retard.",
+      "- À clarifier : le budget hébergement ?",
+    ].join("\n");
+
+    const res = await page.request.post(`${API}/api/v1/projects/${proj.id}/minutes`, {
+      headers: { authorization: `Bearer ${user.access}` },
+      data: { title: "Comité de suivi", text: notes },
+    });
+    expect(res.status()).toBe(201);
+    const m = await res.json();
+    expect(m.summary.length).toBeGreaterThan(0);
+    expect(m.decisions.length).toBeGreaterThan(0);
+    expect(m.actions.length).toBeGreaterThan(0);
+    expect(m.risks.length).toBeGreaterThan(0);
+    expect(m.openQuestions.length).toBeGreaterThan(0);
+
+    // Persisté et listé.
+    const list = await (
+      await page.request.get(`${API}/api/v1/projects/${proj.id}/minutes`, {
+        headers: { authorization: `Bearer ${user.access}` },
+      })
+    ).json();
+    expect(list.items.length).toBe(1);
+    expect(list.items[0].title).toBe("Comité de suivi");
+  });
+
   test("RGPD : export des données de l'utilisateur", async ({ page }) => {
     const user = await registerUser(page);
     const res = await page.request.get(`${API}/api/v1/gdpr/export`, {
