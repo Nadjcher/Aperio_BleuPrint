@@ -4,6 +4,7 @@ import type { MeetingMinutes } from "@projectmaster/shared";
 import { api, toErrorMessage } from "../api/client";
 import { PageHeader, Loading, ErrorBanner } from "../components/ui";
 import { useAsync } from "../hooks/useAsync";
+import { useDictation } from "../hooks/useDictation";
 
 export function MinutesPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,43 @@ export function MinutesPage() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Dictée vocale : chaque segment reconnu est ajouté aux notes.
+  const dictation = useDictation((segment) =>
+    setText((prev) => (prev ? `${prev} ${segment}` : segment)),
+  );
+
+  const importFromDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const lower = file.name.toLowerCase();
+    const kind = lower.endsWith(".pdf") ? "pdf" : lower.endsWith(".docx") ? "docx" : null;
+    if (!kind) {
+      setError("Format non pris en charge. Choisissez un fichier .pdf ou .docx.");
+      return;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      setError("Fichier trop volumineux (max 6 Mo).");
+      return;
+    }
+    setError(null);
+    setBusy(true);
+    try {
+      const contentBase64 = await fileToBase64(file);
+      await api.post<MeetingMinutes>(`/projects/${id}/minutes/from-document`, {
+        filename: file.name,
+        kind,
+        contentBase64,
+        title: title.trim() || undefined,
+      });
+      await list.reload();
+    } catch (err) {
+      setError(toErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const generate = async (e: FormEvent) => {
     e.preventDefault();
@@ -76,16 +114,45 @@ export function MinutesPage() {
           />
         </label>
 
-        <label className="mt-4 block">
-          <span className="pm-label">Notes</span>
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="pm-label mb-0">Notes</span>
+            <div className="flex items-center gap-2">
+              {dictation.supported && (
+                <button
+                  type="button"
+                  onClick={dictation.listening ? dictation.stop : dictation.start}
+                  className={`pm-btn-ghost py-1 text-xs ${dictation.listening ? "ring-1 ring-inset ring-danger/50 text-danger" : ""}`}
+                  title={dictation.listening ? "Arrêter la dictée" : "Dicter les notes au micro"}
+                >
+                  {dictation.listening ? "⏹ Arrêter la dictée" : "🎤 Dicter"}
+                </button>
+              )}
+              <label className="pm-btn-ghost cursor-pointer py-1 text-xs">
+                📄 Depuis un document
+                <input
+                  type="file"
+                  accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  className="sr-only"
+                  onChange={importFromDocument}
+                  disabled={busy}
+                />
+              </label>
+            </div>
+          </div>
           <textarea
             className="pm-input min-h-[12rem] font-mono text-xs leading-relaxed"
-            placeholder={"Collez ici vos notes brutes…\n- Décision : …\n- Action : … (responsable, échéance)\n- Risque : …\n- À clarifier : … ?"}
+            placeholder={"Collez, dictez (🎤) ou importez un document (📄)…\n- Décision : …\n- Action : … (responsable, échéance)\n- Risque : …\n- À clarifier : … ?"}
             value={text}
             onChange={(e) => setText(e.target.value)}
             required
           />
-        </label>
+          {dictation.listening && (
+            <p className="mt-1.5 text-xs text-danger">
+              ● Dictée en cours… (selon le navigateur, l'audio peut être transmis à un service de reconnaissance tiers)
+            </p>
+          )}
+        </div>
 
         <div className="mt-4 flex items-center gap-3">
           <button className="pm-btn-primary" disabled={busy}>
@@ -111,6 +178,20 @@ export function MinutesPage() {
       )}
     </div>
   );
+}
+
+/** Lit un fichier et renvoie son contenu base64 (sans préfixe data:). */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error("Lecture du fichier impossible"));
+    reader.readAsDataURL(file);
+  });
 }
 
 function MinutesCard({ m, onDelete }: { m: MeetingMinutes; onDelete: () => void }) {

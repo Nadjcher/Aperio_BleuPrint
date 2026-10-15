@@ -200,6 +200,26 @@ test.describe("Parcours principaux", () => {
     expect(list.items[0].title).toBe("Comité de suivi");
   });
 
+  test("compte rendu depuis un document (PDF) importé", async ({ page }) => {
+    const user = await registerUser(page);
+    const proj = await (
+      await page.request.post(`${API}/api/v1/projects`, {
+        headers: { authorization: `Bearer ${user.access}` },
+        data: { name: "Projet CR doc" },
+      })
+    ).json();
+
+    const pdf = readFileSync("e2e/fixtures/sample.pdf");
+    const res = await page.request.post(`${API}/api/v1/projects/${proj.id}/minutes/from-document`, {
+      headers: { authorization: `Bearer ${user.access}` },
+      data: { filename: "reunion.pdf", kind: "pdf", contentBase64: pdf.toString("base64") },
+    });
+    expect(res.status()).toBe(201);
+    const m = await res.json();
+    expect(m.title).toBe("reunion");
+    expect(m.summary.length).toBeGreaterThan(0);
+  });
+
   test("RGPD : export des données de l'utilisateur", async ({ page }) => {
     const user = await registerUser(page);
     const res = await page.request.get(`${API}/api/v1/gdpr/export`, {
