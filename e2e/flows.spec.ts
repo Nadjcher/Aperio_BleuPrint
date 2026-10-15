@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 import { API, authenticate, registerUser } from "./helpers";
 
@@ -111,6 +112,53 @@ test.describe("Parcours principaux", () => {
     ).json();
     expect(cfg.provider).toBe("gitlab");
     expect(JSON.stringify(cfg)).not.toContain("glpat");
+  });
+
+  test("import d'un document PDF : extraction du texte → signal", async ({ page }) => {
+    const user = await registerUser(page);
+    const proj = await (
+      await page.request.post(`${API}/api/v1/projects`, {
+        headers: { authorization: `Bearer ${user.access}` },
+        data: { name: "Projet Documents" },
+      })
+    ).json();
+
+    // Chemin relatif à la racine du dépôt (cwd d'exécution de Playwright).
+    const pdf = readFileSync("e2e/fixtures/sample.pdf");
+    const res = await page.request.post(`${API}/api/v1/projects/${proj.id}/documents`, {
+      headers: { authorization: `Bearer ${user.access}` },
+      data: { filename: "cahier.pdf", kind: "pdf", contentBase64: pdf.toString("base64") },
+    });
+    expect(res.status()).toBe(201);
+    const body = await res.json();
+    expect(body.title).toBe("cahier.pdf");
+    expect(body.chars).toBeGreaterThan(0);
+
+    // Le texte extrait est stocké sous forme de signal « document ».
+    const sig = await (
+      await page.request.get(`${API}/api/v1/projects/${proj.id}/signals`, {
+        headers: { authorization: `Bearer ${user.access}` },
+      })
+    ).json();
+    const doc = sig.items.find((s: { source: string }) => s.source === "document");
+    expect(doc).toBeTruthy();
+    expect(doc.payload.kind).toBe("pdf");
+    expect(String(doc.payload.excerpt)).toContain("Aperio");
+
+    // Un projet sans dépôt mais avec un connecteur peut être synchronisé
+    // (régression : la route /sync n'exige plus un dépôt GitHub).
+    await page.request.put(`${API}/api/v1/projects/${proj.id}/connector`, {
+      headers: { authorization: `Bearer ${user.access}` },
+      data: {
+        provider: "confluence",
+        settings: { host: "https://exemple.invalid", email: "pm@exemple.com", spaceKey: "PROJ" },
+        token: "dummy-token",
+      },
+    });
+    const sync = await page.request.post(`${API}/api/v1/projects/${proj.id}/sync`, {
+      headers: { authorization: `Bearer ${user.access}` },
+    });
+    expect(sync.status()).toBe(202);
   });
 
   test("RGPD : export des données de l'utilisateur", async ({ page }) => {

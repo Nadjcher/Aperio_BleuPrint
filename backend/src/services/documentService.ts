@@ -1,9 +1,6 @@
 import mammoth from "mammoth";
-// On importe le cœur de pdf-parse (et non son index.js) pour éviter le
-// harnais de debug qui tente de lire un fichier de test au chargement.
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import { extractText as pdfExtract, getDocumentProxy } from "unpdf";
 import { AppError } from "../errors/index.js";
-import * as signalService from "./signalService.js";
 import type { IngestSignal } from "./signalService.js";
 
 export type DocumentKind = "pdf" | "docx";
@@ -46,8 +43,10 @@ export function mapDocument(
 export async function extractText(kind: DocumentKind, buffer: Buffer): Promise<string> {
   try {
     if (kind === "pdf") {
-      const parsed = await pdfParse(buffer);
-      return parsed.text ?? "";
+      // unpdf embarque un pdfjs moderne, fiable et sans dépendance native.
+      const pdf = await getDocumentProxy(new Uint8Array(buffer));
+      const { text } = await pdfExtract(pdf, { mergePages: true });
+      return text ?? "";
     }
     const { value } = await mammoth.extractRawText({ buffer });
     return value ?? "";
@@ -66,7 +65,10 @@ export async function importDocument(
     throw new AppError(422, "empty_document", "Le document ne contient pas de texte exploitable");
   }
   const signal = mapDocument(projectId, { filename: doc.filename, kind: doc.kind, text });
-  await signalService.ingest([signal]);
+  // Import paresseux : évite de charger la source de données (et sa config)
+  // au simple chargement du module (mappers testables en isolation).
+  const { ingest } = await import("./signalService.js");
+  await ingest([signal]);
   const payload = signal.payload as { chars: number; truncated: boolean };
   return { title: doc.filename, chars: payload.chars, truncated: payload.truncated };
 }

@@ -5,6 +5,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/rbac.js";
 import { AppError } from "../middleware/errorHandler.js";
 import * as jobService from "../services/jobService.js";
+import { getConfig } from "../services/connectorConfigService.js";
 import { getOwnedProject } from "../services/projectService.js";
 import { audit, anonymizeIp } from "../services/auditService.js";
 
@@ -22,8 +23,10 @@ signalsRouter.post(
   requireRole("manager"),
   async (req, res) => {
     const project = await getOwnedProject(req.user!.sub, req.params.id);
-    if (!project.repo) {
-      throw new AppError(400, "no_repo", "Aucun dépôt associé à ce projet");
+    // Une source est requise : un dépôt GitHub (rétro-compatibilité) OU un
+    // connecteur configuré (GitLab, Jira, Linear, Confluence, Notion…).
+    if (!project.repo && !(await getConfig(project.id))) {
+      throw new AppError(400, "no_source", "Aucune source de données (dépôt ou connecteur)");
     }
 
     const job = await jobService.enqueue("project_sync", project.id);
