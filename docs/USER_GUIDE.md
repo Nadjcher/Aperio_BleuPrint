@@ -107,7 +107,28 @@ Depuis une fiche projet, le bouton **Planning** ouvre la vue de planification.
 > Sans vélocité (aucune affectation d'équipe), la date n'est pas calculée : un
 > message invite à renseigner l'équipe. Rien n'est inventé.
 
-## 8. Synchronisation : que se passe-t-il ?
+## 8. Méthodologie & registre des risques
+
+Chaque projet a une **méthodologie** (sélecteur sur la fiche projet) :
+
+| Méthodologie | Vocabulaire | Rapport |
+| --- | --- | --- |
+| **Kanban** (défaut) | étapes, cartes | Rapport de flux |
+| **Scrum** | sprints, stories | Burndown / revue de sprint |
+| **PRINCE2** | étapes (stages), lots de travail | Highlight Report |
+| **SAFe** | PI, stories | Rapport de PI |
+
+Le **moteur est le même** : seuls le vocabulaire (dans le planning) et le
+format des rapports s'adaptent.
+
+**Registre des risques** (bouton **Risques** sur la fiche projet) : chaque
+risque porte une **probabilité (1–5)** et un **impact (1–5)** ; le **score**
+(probabilité × impact) et le **niveau** (faible / moyen / élevé) sont calculés
+automatiquement, et la liste est triée par gravité. On peut aussi **créer un
+risque depuis une anomalie ouverte** en un clic. Les risques majeurs ouverts
+apparaissent dans les rapports.
+
+## 9. Synchronisation : que se passe-t-il ?
 
 1. Vous cliquez sur **Synchroniser** → l'API répond immédiatement avec un
    identifiant de tâche (`jobId`).
@@ -121,7 +142,7 @@ Depuis une fiche projet, le bouton **Planning** ouvre la vue de planification.
 > Un jeton GitHub en lecture seule (`GITHUB_TOKEN`) augmente les quotas d'API
 > et permet d'accéder aux dépôts privés. Côté hébergeur.
 
-## 9. Notifications par e-mail
+## 10. Notifications par e-mail
 
 Si l'administrateur a configuré l'envoi d'e-mails (Resend), Aperio vous prévient :
 
@@ -136,7 +157,7 @@ Vous pouvez couper les notifications (`notifyByEmail`) via votre profil. Sans
 fournisseur d'e-mail configuré, aucun e-mail n'est envoyé — l'app reste
 pleinement utilisable.
 
-## 10. Vos données & vos droits (RGPD)
+## 11. Vos données & vos droits (RGPD)
 
 Aperio applique la **minimisation** (pas d'email brut dans les signaux, IP
 tronquées dans l'audit) et la **conservation limitée**.
@@ -147,7 +168,7 @@ tronquées dans l'audit) et la **conservation limitée**.
 | **Rectification** | Modifiez votre profil : `PATCH /api/v1/auth/me` |
 | **Effacement** | Supprimez votre compte et vos données : `DELETE /api/v1/gdpr/me` |
 
-## 11. Questions fréquentes
+## 12. Questions fréquentes
 
 **Ma synchro reste « en cours » longtemps.**
 Le dépôt est peut-être volumineux, ou GitHub limite le débit. Elle se terminera

@@ -79,6 +79,12 @@ méthodologies.
   expliqué dans l'interface — l'utilisateur monte en compétence sans quitter
   l'app.
 
-> Statut actuel (fin Phase 1) : mode simple/expert, glossaire et vocabulaire
-> métier **livrés**. Les objets de planning (Phase 2) et le sélecteur de
-> méthodologie (Phase 3) restent à construire.
+> **Statut (fin Phase 3) :**
+> - Mode simple/expert, glossaire, vocabulaire métier — **livrés** (Phase 1).
+> - Jalons, tâches, date de livraison, chemin critique — **livrés** (Phase 2).
+> - Sélecteur de méthodologie par projet (Kanban/Scrum/PRINCE2/SAFe) pilotant
+>   le **vocabulaire** et le **format de rapport** — **livré** (Phase 3).
+> - Registre des risques (probabilité × impact, « créer depuis une anomalie ») —
+>   **livré** (Phase 3).
+> - À venir si besoin : vues distinctes par méthodologie (boards Kanban/Scrum,
+>   burndown graphique), tolérances PRINCE2 formelles, WSJF/EVM.
