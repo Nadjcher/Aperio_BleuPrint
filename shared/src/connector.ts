@@ -1,8 +1,21 @@
 /** Connecteurs de sources de données (abstraction multi-providers). */
 
-export type ConnectorProvider = "github" | "gitlab" | "jira" | "linear";
+export type ConnectorProvider =
+  | "github"
+  | "gitlab"
+  | "jira"
+  | "linear"
+  | "confluence"
+  | "notion";
 
-export const CONNECTOR_PROVIDERS: ConnectorProvider[] = ["github", "gitlab", "jira", "linear"];
+export const CONNECTOR_PROVIDERS: ConnectorProvider[] = [
+  "github",
+  "gitlab",
+  "jira",
+  "linear",
+  "confluence",
+  "notion",
+];
 
 /** Métadonnées d'un provider pour l'UI (champs de config requis). */
 export interface ConnectorMeta {
@@ -50,6 +63,24 @@ export const CONNECTOR_META: Record<ConnectorProvider, ConnectorMeta> = {
     settings: [{ key: "teamId", label: "ID d'équipe", placeholder: "TEAM-UUID", required: true }],
     needsToken: true,
     hint: "Tickets (issues) d'une équipe Linear.",
+  },
+  confluence: {
+    provider: "confluence",
+    label: "Confluence",
+    settings: [
+      { key: "host", label: "Hôte", placeholder: "https://votresite.atlassian.net/wiki", required: true },
+      { key: "email", label: "E-mail du compte", placeholder: "vous@exemple.com", required: true },
+      { key: "spaceKey", label: "Clé d'espace", placeholder: "PROJ", required: true },
+    ],
+    needsToken: true,
+    hint: "Pages récentes d'un espace Confluence Cloud (spécifications, comptes-rendus).",
+  },
+  notion: {
+    provider: "notion",
+    label: "Notion",
+    settings: [],
+    needsToken: true,
+    hint: "Pages récemment modifiées accessibles à votre intégration Notion.",
   },
 };
 

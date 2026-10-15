@@ -17,7 +17,7 @@ export const connectorsRouter = Router();
 connectorsRouter.use(requireAuth);
 
 const upsertSchema = z.object({
-  provider: z.enum(["github", "gitlab", "jira", "linear"]),
+  provider: z.enum(["github", "gitlab", "jira", "linear", "confluence", "notion"]),
   settings: z.record(z.string().max(300)).default({}),
   // Token optionnel : s'il est absent, on conserve celui déjà enregistré.
   token: z.string().min(1).max(500).optional(),

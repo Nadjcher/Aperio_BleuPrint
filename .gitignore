@@ -34,3 +34,7 @@ Thumbs.db
 # Misc
 tmp/
 .cache/
+
+# Playwright E2E artefacts
+test-results/
+playwright-report/

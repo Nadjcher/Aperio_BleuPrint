@@ -5,6 +5,9 @@ export type SignalSource =
   | "gitlab"
   | "jira"
   | "linear"
+  | "confluence"
+  | "notion"
+  | "document"
   | "webhook"
   | "manual";
 
@@ -14,7 +17,8 @@ export type SignalType =
   | "issue"
   | "review"
   | "ci_run"
-  | "deployment";
+  | "deployment"
+  | "document";
 
 /** Un signal normalisé, prêt à être stocké et analysé. */
 export interface Signal {

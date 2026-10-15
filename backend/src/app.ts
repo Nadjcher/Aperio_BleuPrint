@@ -24,12 +24,19 @@ import { resourcesRouter } from "./routes/resources.js";
 import { planningRouter } from "./routes/planning.js";
 import { risksRouter } from "./routes/risks.js";
 import { connectorsRouter } from "./routes/connectors.js";
+import { documentsRouter } from "./routes/documents.js";
 
 export function createApp(): Express {
   const app = express();
 
   applySecurity(app);
   app.use(pinoHttp({ logger }));
+
+  // Import de documents : monté avant le parser JSON global (limite 1 Mo) afin
+  // d'autoriser des fichiers plus volumineux sur cette seule route, sans élargir
+  // la limite des autres endpoints. Le routeur applique son propre parser 8 Mo.
+  app.use("/api/v1", globalRateLimiter, documentsRouter);
+
   app.use(express.json({ limit: "1mb" }));
 
   // Instrumentation Prometheus de toutes les requêtes.

@@ -21,6 +21,7 @@ export function IntegrationsPage() {
         subtitle={<Link to={`/projects/${id}`} className="text-link hover:underline">← Retour à la fiche projet</Link>}
       />
       <ConnectorSection projectId={id!} initial={cfg.data} onSaved={() => void cfg.reload()} />
+      <DocumentSection projectId={id!} />
       <NotificationSection projectId={id!} initial={notif.data!} onSaved={() => void notif.reload()} />
     </div>
   );
@@ -133,6 +134,92 @@ function ConnectorSection({
       </div>
     </section>
   );
+}
+
+/** Import de documents (PDF, Word) : le texte est extrait et versé en signal. */
+function DocumentSection({ projectId }: { projectId: string }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // permet de ré-importer le même fichier
+    if (!file) return;
+    setError(null);
+    setOk(null);
+
+    const lower = file.name.toLowerCase();
+    const kind = lower.endsWith(".pdf") ? "pdf" : lower.endsWith(".docx") ? "docx" : null;
+    if (!kind) {
+      setError("Format non pris en charge. Choisissez un fichier .pdf ou .docx.");
+      return;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      setError("Fichier trop volumineux (max 6 Mo).");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const contentBase64 = await fileToBase64(file);
+      const res = await api.post<{ title: string; chars: number; truncated: boolean }>(
+        `/projects/${projectId}/documents`,
+        { filename: file.name, kind, contentBase64 },
+      );
+      setOk(
+        `« ${res.title} » importé — ${res.chars} caractères analysés` +
+          (res.truncated ? " (extrait tronqué)." : "."),
+      );
+    } catch (err) {
+      setError(toErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="pm-card mb-6 p-5">
+      <h2 className="text-lg font-semibold text-heading">Importer un document</h2>
+      <p className="mt-1 text-sm text-muted">
+        Cahier des charges, spécifications, compte-rendu… Le texte est extrait
+        puis analysé. Formats : PDF et Word (.docx).
+      </p>
+      {error && <div className="mt-3"><ErrorBanner message={error} /></div>}
+      {ok && <p className="mt-3 text-sm text-success">{ok}</p>}
+
+      <label className="mt-4 inline-flex cursor-pointer items-center gap-2">
+        <span className={`pm-btn-primary ${busy ? "pointer-events-none opacity-60" : ""}`}>
+          {busy ? "Import en cours…" : "Choisir un fichier (.pdf, .docx)"}
+        </span>
+        <input
+          type="file"
+          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          className="sr-only"
+          onChange={onFile}
+          disabled={busy}
+        />
+      </label>
+
+      <p className="mt-3 text-xs text-faint">
+        Seul un extrait borné du texte est conservé — le fichier d'origine n'est pas stocké.
+      </p>
+    </section>
+  );
+}
+
+/** Lit un fichier et renvoie son contenu encodé en base64 (sans préfixe data:). */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error("Lecture du fichier impossible"));
+    reader.readAsDataURL(file);
+  });
 }
 
 function NotificationSection({
