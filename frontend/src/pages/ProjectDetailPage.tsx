@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import type {
   Anomaly,
   Decision,
@@ -146,9 +146,14 @@ export function ProjectDetailPage() {
             <p className="mt-1 font-mono text-sm text-slate-400">{project.repo}</p>
           )}
         </div>
-        <button onClick={onSync} disabled={syncing || !project.repo} className="pm-btn-primary">
-          {syncing ? "Synchronisation…" : "⚡ Synchroniser & analyser"}
-        </button>
+        <div className="flex gap-2">
+          <Link to={`/projects/${project.id}/planning`} className="pm-btn-ghost">
+            Planning
+          </Link>
+          <button onClick={onSync} disabled={syncing || !project.repo} className="pm-btn-primary">
+            {syncing ? "Synchronisation…" : "⚡ Synchroniser & analyser"}
+          </button>
+        </div>
       </div>
 
       {message && (

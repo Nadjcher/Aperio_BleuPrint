@@ -11,6 +11,7 @@ import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { TeamPage } from "./pages/TeamPage";
 import { GlossaryPage } from "./pages/GlossaryPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
+import { PlanningPage } from "./pages/PlanningPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
           { path: "/dashboard", element: <DashboardPage /> },
           { path: "/projects", element: <ProjectsPage /> },
           { path: "/projects/:id", element: <ProjectDetailPage /> },
+          { path: "/projects/:id/planning", element: <PlanningPage /> },
           { path: "/team", element: <TeamPage /> },
           { path: "/glossaire", element: <GlossaryPage /> },
           { path: "/onboarding", element: <OnboardingPage /> },
