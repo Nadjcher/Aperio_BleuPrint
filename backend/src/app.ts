@@ -22,6 +22,7 @@ import { forecastRouter } from "./routes/forecast.js";
 import { gdprRouter } from "./routes/gdpr.js";
 import { resourcesRouter } from "./routes/resources.js";
 import { planningRouter } from "./routes/planning.js";
+import { risksRouter } from "./routes/risks.js";
 
 export function createApp(): Express {
   const app = express();
@@ -54,6 +55,7 @@ export function createApp(): Express {
   api.use(gdprRouter);
   api.use(resourcesRouter);
   api.use(planningRouter);
+  api.use(risksRouter);
   app.use("/api/v1", api);
 
   app.use(notFound);

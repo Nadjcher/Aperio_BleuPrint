@@ -19,6 +19,7 @@ import { Member } from "../entities/Member.js";
 import { Assignment } from "../entities/Assignment.js";
 import { Milestone } from "../entities/Milestone.js";
 import { Task } from "../entities/Task.js";
+import { Risk } from "../entities/Risk.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -53,6 +54,7 @@ export const AppDataSource = new DataSource({
     Assignment,
     Milestone,
     Task,
+    Risk,
   ],
   // Chemin résolu depuis ce module (et non le cwd) : robuste quel que soit le
   // répertoire de lancement. En prod → dist/migrations/*.js, en dev → *.ts.

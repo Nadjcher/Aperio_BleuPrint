@@ -9,6 +9,7 @@ import {
   getOwnedProject,
   listProjects,
   projectToDTO,
+  updateProject,
 } from "../services/projectService.js";
 
 export const projectsRouter = Router();
@@ -49,3 +50,29 @@ projectsRouter.get("/projects/:id", async (req, res) => {
   const p = await getOwnedProject(req.user!.sub, req.params.id);
   res.json(projectToDTO(p));
 });
+
+const updateSchema = z.object({
+  name: z.string().min(1).max(160).optional(),
+  repo: z
+    .string()
+    .regex(/^[\w.-]+\/[\w.-]+$/, "Format attendu : owner/repo")
+    .nullable()
+    .optional(),
+  methodology: z.enum(["kanban", "scrum", "prince2", "safe"]).optional(),
+});
+
+projectsRouter.patch(
+  "/projects/:id",
+  requireRole("manager"),
+  validateBody(updateSchema),
+  async (req, res) => {
+    const saved = await updateProject(req.user!.sub, req.params.id, req.body);
+    await audit({
+      actorId: req.user!.sub,
+      action: "project.update",
+      target: `project:${saved.id}`,
+      ip: anonymizeIp(req.ip),
+    });
+    res.json(projectToDTO(saved));
+  },
+);

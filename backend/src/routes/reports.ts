@@ -31,6 +31,7 @@ reportsRouter.post(
       project.id,
       project.name,
       req.body.period,
+      project.methodology,
     );
     await audit({
       actorId: req.user!.sub,

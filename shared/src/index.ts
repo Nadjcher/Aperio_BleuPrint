@@ -14,3 +14,5 @@ export * from "./briefing.js";
 export * from "./forecast.js";
 export * from "./resources.js";
 export * from "./planning.js";
+export * from "./methodology.js";
+export * from "./risk.js";

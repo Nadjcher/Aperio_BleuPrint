@@ -1,4 +1,4 @@
-import type { Project as ProjectDTO } from "@projectmaster/shared";
+import type { Methodology, Project as ProjectDTO } from "@projectmaster/shared";
 import { AppDataSource } from "../db/data-source.js";
 import { Project } from "../entities/Project.js";
 import { AppError } from "../errors/index.js";
@@ -13,6 +13,7 @@ export function projectToDTO(p: Project): ProjectDTO {
     id: p.id,
     name: p.name,
     repo: p.repo ?? undefined,
+    methodology: p.methodology,
     createdAt: p.createdAt.toISOString(),
   };
 }
@@ -44,6 +45,19 @@ export async function createProject(
   return projects().save(
     projects().create({ name: data.name, repo: data.repo ?? null, ownerId }),
   );
+}
+
+/** Met à jour un projet (nom, dépôt, méthodologie) après contrôle de propriété. */
+export async function updateProject(
+  ownerId: string,
+  projectId: string,
+  changes: { name?: string; repo?: string | null; methodology?: Methodology },
+): Promise<Project> {
+  const p = await getOwnedProject(ownerId, projectId);
+  if (changes.name !== undefined) p.name = changes.name;
+  if (changes.repo !== undefined) p.repo = changes.repo;
+  if (changes.methodology !== undefined) p.methodology = changes.methodology;
+  return projects().save(p);
 }
 
 /** Projet appartenant au propriétaire, ou null. */
