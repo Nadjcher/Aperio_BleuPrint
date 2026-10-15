@@ -195,7 +195,10 @@ export function LandingPage() {
             <div key={s.title} className="pm-card relative p-6">
               <div className="flex items-center justify-between">
                 <IconBox icon={s.icon} />
-                <span className="font-mono text-4xl font-bold text-heading/[0.07]">
+                <span
+                  aria-hidden="true"
+                  className="font-mono text-4xl font-bold text-[#828997]"
+                >
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>

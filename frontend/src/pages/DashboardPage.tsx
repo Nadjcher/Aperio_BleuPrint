@@ -72,7 +72,7 @@ function SimpleView({ briefing, projectCount }: { briefing: Briefing; projectCou
           {projectCount === 0 ? (
             <>
               Reliez un premier projet pour démarrer.{" "}
-              <Link to="/onboarding" className="text-link hover:underline">
+              <Link to="/onboarding" className="pm-link">
                 Démarrer en 3 étapes
               </Link>
             </>
@@ -110,7 +110,7 @@ function ExpertView({
       ) : (
         <div className="pm-card p-8 text-center text-sm text-muted">
           Rien à signaler pour le moment.{" "}
-          <Link to="/projects" className="text-link hover:underline">
+          <Link to="/projects" className="pm-link">
             Gérer les projets
           </Link>
         </div>

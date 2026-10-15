@@ -18,6 +18,9 @@ test.describe("Accessibilité (axe-core)", () => {
   test("pages publiques sans violation grave", async ({ page }) => {
     for (const path of ["/", "/login", "/legal/confidentialite", "/legal/cgu"]) {
       await page.goto(path);
+      // Attendre que l'app React soit montée (évite d'auditer une coquille vide).
+      await page.waitForLoadState("networkidle");
+      await page.waitForSelector("#root > *", { timeout: 5000 });
       const blocking = await scan(page);
       expect(blocking, `${path} : ${blocking.map((b) => b.id).join(", ")}`).toEqual([]);
     }

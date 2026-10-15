@@ -18,7 +18,7 @@ export function IntegrationsPage() {
       <PageHeader
         eyebrow="Intégrations"
         title="Connecteur & notifications"
-        subtitle={<Link to={`/projects/${id}`} className="text-link hover:underline">← Retour à la fiche projet</Link>}
+        subtitle={<Link to={`/projects/${id}`} className="pm-link">← Retour à la fiche projet</Link>}
       />
       <ConnectorSection projectId={id!} initial={cfg.data} onSaved={() => void cfg.reload()} />
       <DocumentSection projectId={id!} />

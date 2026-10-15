@@ -58,7 +58,7 @@ function LegalLayout({ title, children }: { title: string; children: React.React
           {children}
         </div>
         <p className="mt-12 text-sm">
-          <Link to="/" className="text-link hover:underline">
+          <Link to="/" className="pm-link">
             ← Retour à l'accueil
           </Link>
         </p>
@@ -182,7 +182,7 @@ export function ConfidentialitePage() {
       </ul>
       <p>
         Vous pouvez introduire une réclamation auprès de la CNIL (
-        <a href="https://www.cnil.fr" className="text-link hover:underline" target="_blank" rel="noreferrer">
+        <a href="https://www.cnil.fr" className="pm-link" target="_blank" rel="noreferrer">
           cnil.fr
         </a>
         ).

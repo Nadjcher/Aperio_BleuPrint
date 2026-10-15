@@ -74,7 +74,7 @@ export function PlanningPage() {
       <PageHeader
         eyebrow={`Planning · ${vocab.label}`}
         title={`${cap(vocab.milestonePlural)} & date de livraison`}
-        subtitle={<Link to={`/projects/${id}`} className="text-link hover:underline">← Retour à la fiche projet</Link>}
+        subtitle={<Link to={`/projects/${id}`} className="pm-link">← Retour à la fiche projet</Link>}
       />
 
       {error && <div className="mb-4"><ErrorBanner message={error} /></div>}

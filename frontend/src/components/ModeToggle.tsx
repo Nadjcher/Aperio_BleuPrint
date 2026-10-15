@@ -31,7 +31,9 @@ export function ModeToggle() {
             onClick={() => choose(o.value)}
             aria-pressed={active}
             className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
-              active ? "bg-brand/20 text-link" : "text-muted hover:text-fg"
+              active
+                ? "bg-brand/20 text-heading ring-1 ring-inset ring-link/30"
+                : "text-muted hover:text-fg"
             }`}
           >
             {o.label}

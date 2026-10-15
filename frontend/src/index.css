@@ -11,8 +11,8 @@
   --c-line: 226 230 236; /* bordures */
   --c-heading: 15 23 42; /* titres (slate-900) */
   --c-fg: 51 65 85; /* texte courant (slate-700) */
-  --c-muted: 100 116 139; /* texte secondaire (slate-500) */
-  --c-faint: 148 163 184; /* texte tertiaire (slate-400) */
+  --c-muted: 95 107 122; /* texte secondaire (slate-500 assombri → AA 4.5:1 sur fond clair) */
+  --c-faint: 102 112 126; /* texte tertiaire (assombri → AA 4.5:1 sur fond clair) */
   --c-link: 37 99 235; /* liens / accent texte (blue-600) */
   --c-success: 21 128 61; /* green-700 */
   --c-warning: 180 83 9; /* amber-700 */
@@ -136,6 +136,12 @@ body {
 
   .pm-chip {
     @apply inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  /* Lien textuel dans un bloc de texte : souligné par défaut pour être
+     distinguable autrement que par la couleur (WCAG 1.4.1). */
+  .pm-link {
+    @apply text-link underline underline-offset-2 hover:text-heading;
   }
 
   .pm-nav-link {

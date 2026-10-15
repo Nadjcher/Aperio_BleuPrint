@@ -107,7 +107,7 @@ export function ProjectsPage() {
               href="https://github.com/Nadjcher/ajc_10/blob/main/docs/USER_GUIDE.md"
               target="_blank"
               rel="noreferrer"
-              className="text-sm text-link hover:underline"
+              className="text-sm pm-link"
             >
               Guide d'utilisation →
             </a>

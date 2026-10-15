@@ -65,7 +65,7 @@ export function RisksPage() {
       <PageHeader
         eyebrow="Gouvernance"
         title="Registre des risques"
-        subtitle={<Link to={`/projects/${id}`} className="text-link hover:underline">← Retour à la fiche projet</Link>}
+        subtitle={<Link to={`/projects/${id}`} className="pm-link">← Retour à la fiche projet</Link>}
       />
 
       {error && <div className="mb-4"><ErrorBanner message={error} /></div>}

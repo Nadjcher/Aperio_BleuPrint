@@ -45,7 +45,7 @@ export function ForgotPasswordPage() {
           e-mail avec un lien de réinitialisation vient d'être envoyé. Pensez à
           vérifier vos spams.
           <br />
-          <Link to="/login" className="mt-4 inline-block text-link hover:underline">
+          <Link to="/login" className="mt-4 inline-block pm-link">
             ← Retour à la connexion
           </Link>
         </p>
@@ -102,7 +102,7 @@ export function ResetPasswordPage() {
       <Shell title="Lien invalide">
         <p className="text-sm text-fg">
           Ce lien de réinitialisation est incomplet.{" "}
-          <Link to="/forgot-password" className="text-link hover:underline">
+          <Link to="/forgot-password" className="pm-link">
             Redemander un lien
           </Link>
         </p>
@@ -213,7 +213,7 @@ export function VerifyEmailPage() {
         <p className="text-sm text-success">
           Votre adresse e-mail est confirmée ✓
           <br />
-          <Link to="/login" className="mt-4 inline-block text-link hover:underline">
+          <Link to="/login" className="mt-4 inline-block pm-link">
             Se connecter
           </Link>
         </p>
@@ -222,7 +222,7 @@ export function VerifyEmailPage() {
         <p className="text-sm text-danger">
           Lien invalide ou expiré.
           <br />
-          <Link to="/login" className="mt-4 inline-block text-link hover:underline">
+          <Link to="/login" className="mt-4 inline-block pm-link">
             Retour à la connexion
           </Link>
         </p>
