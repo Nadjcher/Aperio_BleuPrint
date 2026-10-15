@@ -5,7 +5,7 @@ import {
   Index,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import type { Role } from "@projectmaster/shared";
+import type { Role, UiMode } from "@projectmaster/shared";
 
 @Entity({ name: "users" })
 export class User {
@@ -37,6 +37,10 @@ export class User {
   /** Reçoit les notifications par e-mail (alertes d'anomalies, digest). */
   @Column({ type: "boolean", default: true })
   notifyByEmail!: boolean;
+
+  /** Préférence d'affichage : « simple » (défaut) ou « expert ». */
+  @Column({ type: "varchar", length: 10, default: "simple" })
+  uiMode!: UiMode;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;

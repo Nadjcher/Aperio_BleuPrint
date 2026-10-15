@@ -1,23 +1,17 @@
 import { Router } from "express";
 import { AppDataSource } from "../db/data-source.js";
-import { Project } from "../entities/Project.js";
 import { Signal } from "../entities/Signal.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/rbac.js";
 import { AppError } from "../middleware/errorHandler.js";
 import * as jobService from "../services/jobService.js";
+import { getConfig } from "../services/connectorConfigService.js";
+import { getOwnedProject } from "../services/projectService.js";
 import { audit, anonymizeIp } from "../services/auditService.js";
 
 export const signalsRouter = Router();
-const projects = () => AppDataSource.getRepository(Project);
 
 signalsRouter.use(requireAuth);
-
-async function ownedProject(id: string, ownerId: string): Promise<Project> {
-  const p = await projects().findOne({ where: { id, ownerId } });
-  if (!p) throw new AppError(404, "not_found", "Projet introuvable");
-  return p;
-}
 
 /**
  * Enfile une synchronisation de projet (exécution asynchrone par le worker).
@@ -28,9 +22,11 @@ signalsRouter.post(
   "/projects/:id/sync",
   requireRole("manager"),
   async (req, res) => {
-    const project = await ownedProject(req.params.id, req.user!.sub);
-    if (!project.repo) {
-      throw new AppError(400, "no_repo", "Aucun dépôt associé à ce projet");
+    const project = await getOwnedProject(req.user!.sub, req.params.id);
+    // Une source est requise : un dépôt GitHub (rétro-compatibilité) OU un
+    // connecteur configuré (GitLab, Jira, Linear, Confluence, Notion…).
+    if (!project.repo && !(await getConfig(project.id))) {
+      throw new AppError(400, "no_source", "Aucune source de données (dépôt ou connecteur)");
     }
 
     const job = await jobService.enqueue("project_sync", project.id);
@@ -48,7 +44,7 @@ signalsRouter.post(
 );
 
 signalsRouter.get("/projects/:id/signals", async (req, res) => {
-  await ownedProject(req.params.id, req.user!.sub);
+  await getOwnedProject(req.user!.sub, req.params.id);
   const rows = await AppDataSource.getRepository(Signal).find({
     where: { projectId: req.params.id },
     order: { occurredAt: "DESC" },

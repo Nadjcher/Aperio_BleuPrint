@@ -20,7 +20,9 @@ export function LoginPage() {
         ? login({ email, password })
         : register({ email, password, name });
     const result = await dispatch(action);
-    if (login.fulfilled.match(result) || register.fulfilled.match(result)) {
+    if (register.fulfilled.match(result)) {
+      navigate("/onboarding");
+    } else if (login.fulfilled.match(result)) {
       navigate("/dashboard");
     }
   };
@@ -37,29 +39,39 @@ export function LoginPage() {
               Aperio
             </span>
           </div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-400">
-            Plateforme IA autonome
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+            Le pilotage de projet, sous contrôle
           </p>
         </div>
 
-        <div className="pm-card pm-ticks relative p-7">
-          <div className="mb-6 flex rounded-lg border border-blue-400/15 bg-white/[0.03] p-1 text-sm">
+        <div className="pm-card relative p-7">
+          <div
+            className="mb-6 flex rounded-lg border border-line bg-surface p-1 text-sm"
+            role="tablist"
+            aria-label="Connexion ou inscription"
+          >
             <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "login"}
               onClick={() => setMode("login")}
               className={`flex-1 rounded-lg py-2 font-medium transition ${
                 mode === "login"
-                  ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-surface2 text-heading shadow-sm"
+                  : "text-muted hover:text-fg"
               }`}
             >
               Connexion
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "register"}
               onClick={() => setMode("register")}
               className={`flex-1 rounded-lg py-2 font-medium transition ${
                 mode === "register"
-                  ? "bg-white/10 text-white shadow-sm"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-surface2 text-heading shadow-sm"
+                  : "text-muted hover:text-fg"
               }`}
             >
               Inscription
@@ -69,8 +81,9 @@ export function LoginPage() {
           <form onSubmit={onSubmit} className="space-y-4">
             {mode === "register" && (
               <div>
-                <label className="pm-label">Nom</label>
+                <label htmlFor="auth-name" className="pm-label">Nom</label>
                 <input
+                  id="auth-name"
                   className="pm-input"
                   placeholder="Votre nom"
                   value={name}
@@ -80,8 +93,9 @@ export function LoginPage() {
               </div>
             )}
             <div>
-              <label className="pm-label">Email</label>
+              <label htmlFor="auth-email" className="pm-label">Email</label>
               <input
+                id="auth-email"
                 className="pm-input"
                 type="email"
                 placeholder="vous@exemple.com"
@@ -91,8 +105,9 @@ export function LoginPage() {
               />
             </div>
             <div>
-              <label className="pm-label">Mot de passe</label>
+              <label htmlFor="auth-password" className="pm-label">Mot de passe</label>
               <input
+                id="auth-password"
                 className="pm-input"
                 type="password"
                 placeholder={mode === "register" ? "12 caractères min. (lettres + chiffres)" : "Votre mot de passe"}
@@ -103,7 +118,7 @@ export function LoginPage() {
               />
             </div>
             {error && (
-              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-danger">
                 {error}
               </p>
             )}
@@ -117,7 +132,7 @@ export function LoginPage() {
             {mode === "login" && (
               <Link
                 to="/forgot-password"
-                className="block text-center text-xs text-slate-400 hover:text-slate-300"
+                className="block text-center text-xs text-muted hover:text-fg"
               >
                 Mot de passe oublié ?
               </Link>
@@ -125,8 +140,8 @@ export function LoginPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
-          Signaux en temps réel · Détection d'anomalies · 4 agents autonomes
+        <p className="mt-6 text-center text-xs text-muted">
+          Date de livraison prévue · Alerte avant le retard · Comptes rendus en 1 clic
         </p>
       </div>
     </div>

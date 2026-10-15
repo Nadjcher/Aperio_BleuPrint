@@ -2,8 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Thème clair (unique) ─────────────────────────────────────────────────── */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --c-app: 247 248 250; /* fond de page, gris très doux */
+  --c-surface: 255 255 255; /* cartes */
+  --c-surface2: 243 245 248; /* encarts / survols */
+  --c-line: 226 230 236; /* bordures */
+  --c-heading: 15 23 42; /* titres (slate-900) */
+  --c-fg: 51 65 85; /* texte courant (slate-700) */
+  --c-muted: 95 107 122; /* texte secondaire (slate-500 assombri → AA 4.5:1 sur fond clair) */
+  --c-faint: 102 112 126; /* texte tertiaire (assombri → AA 4.5:1 sur fond clair) */
+  --c-link: 37 99 235; /* liens / accent texte (blue-600) */
+  --c-success: 21 128 61; /* green-700 */
+  --c-warning: 180 83 9; /* amber-700 */
+  --c-danger: 185 28 28; /* red-700 */
+  --panel-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -16px rgba(15, 23, 42, 0.18);
+  --focus-ring: #2563eb;
 }
 
 html,
@@ -19,7 +34,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid #7dd3fc;
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -38,7 +53,7 @@ textarea:focus-visible,
 
 /* Lisibilité des pages légales. */
 .legal-prose code {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--c-surface2));
   padding: 0.1rem 0.35rem;
   border-radius: 0.3rem;
   font-size: 0.85em;
@@ -48,18 +63,8 @@ textarea:focus-visible,
 }
 
 body {
-  @apply bg-ink-950 text-slate-300 antialiased;
+  @apply bg-app text-fg antialiased;
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  /* Fond "blueprint" : halo bleu discret + grille schématique (majeure + mineure) */
-  background-color: #070b16;
-  background-image:
-    radial-gradient(48rem 36rem at 50% -12%, rgba(59, 130, 246, 0.14), transparent 60%),
-    linear-gradient(rgba(96, 165, 250, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(96, 165, 250, 0.05) 1px, transparent 1px),
-    linear-gradient(rgba(96, 165, 250, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(96, 165, 250, 0.025) 1px, transparent 1px);
-  background-size: 100% 100%, 160px 160px, 160px 160px, 32px 32px, 32px 32px;
-  background-attachment: fixed;
 }
 
 ::-webkit-scrollbar {
@@ -67,30 +72,26 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(96, 165, 250, 0.2);
+  background: rgb(var(--c-faint) / 0.5);
   border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(96, 165, 250, 0.32);
 }
 
 @layer components {
-  /* Panneau technique : coins moins arrondis, bordure bleutée, pas de blur excessif */
   .pm-card {
-    @apply rounded-xl border border-blue-400/15 bg-white/[0.02] shadow-panel;
+    @apply rounded-xl border border-line bg-surface;
+    box-shadow: var(--panel-shadow);
   }
 
   .pm-input {
-    @apply w-full rounded-lg border border-blue-400/15 bg-white/[0.03] px-3.5 py-2.5 text-sm
-      text-slate-100 placeholder:text-slate-400 outline-none transition
-      focus:border-brand/60 focus:bg-white/[0.05] focus:ring-2 focus:ring-brand/20;
+    @apply w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm
+      text-heading placeholder:text-faint outline-none transition
+      focus:border-link focus:ring-2 focus:ring-link/20;
   }
 
   .pm-label {
-    @apply mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400;
+    @apply mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-muted;
   }
 
-  /* CTA : bleu électrique, halo maîtrisé */
   .pm-btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r
       from-brand-500 to-accent-600 px-4 py-2.5 text-sm font-semibold text-white
@@ -99,62 +100,42 @@ body {
   }
 
   .pm-btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400/20
-      bg-white/[0.02] px-3.5 py-2 text-sm font-medium text-slate-300 transition
-      hover:border-blue-400/40 hover:bg-white/[0.05] disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line
+      bg-surface px-3.5 py-2 text-sm font-medium text-fg transition
+      hover:bg-surface2 disabled:opacity-50;
   }
 
   .pm-chip {
     @apply inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium;
   }
 
-  .pm-nav-link {
-    @apply rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition
-      hover:bg-white/5 hover:text-slate-100;
-  }
-  .pm-nav-link-active {
-    @apply bg-white/5 text-white ring-1 ring-inset ring-blue-400/20;
+  /* Lien textuel dans un bloc de texte : souligné par défaut pour être
+     distinguable autrement que par la couleur (WCAG 1.4.1). */
+  .pm-link {
+    @apply text-link underline underline-offset-2 hover:text-heading;
   }
 
-  /* Libellé "blueprint" : monospace, numéroté, avec un trait d'amorce */
+  .pm-nav-link {
+    @apply rounded-md px-3 py-1.5 text-sm font-medium text-muted transition
+      hover:bg-surface2 hover:text-heading;
+  }
+  .pm-nav-link-active {
+    @apply bg-surface2 text-heading ring-1 ring-inset ring-line;
+  }
+
   .pm-eyebrow {
-    @apply inline-flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.22em] text-brand-400;
+    @apply inline-flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.22em] text-link;
   }
   .pm-eyebrow::before {
     content: "";
-    @apply inline-block h-px w-7 bg-brand-400/60;
+    @apply inline-block h-px w-7 bg-link/60;
   }
 }
 
-/* Dégradé de texte bleu électrique */
+/* Dégradé de texte : bleu profond pour le contraste sur fond clair. */
 .pm-gradient-text {
-  background: linear-gradient(100deg, #7dd3fc 0%, #38bdf8 45%, #3b82f6 100%);
+  background: linear-gradient(100deg, #2563eb 0%, #3b82f6 55%, #1d4ed8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-/* Repères d'angle (crosshair / registration marks) sur un conteneur relatif */
-.pm-ticks::before,
-.pm-ticks::after {
-  content: "";
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-color: rgba(56, 189, 248, 0.55);
-  pointer-events: none;
-}
-.pm-ticks::before {
-  top: -1px;
-  left: -1px;
-  border-top: 1.5px solid;
-  border-left: 1.5px solid;
-  border-top-left-radius: 4px;
-}
-.pm-ticks::after {
-  bottom: -1px;
-  right: -1px;
-  border-bottom: 1.5px solid;
-  border-right: 1.5px solid;
-  border-bottom-right-radius: 4px;
 }

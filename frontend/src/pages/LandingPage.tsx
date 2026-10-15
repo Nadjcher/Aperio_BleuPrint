@@ -18,31 +18,31 @@ interface Card {
 }
 
 const previewCards: Card[] = [
-  { icon: "bolt", title: "Détecte", desc: "Signaux & anomalies, en continu" },
-  { icon: "bot", title: "Agit", desc: "4 agents qui décident" },
-  { icon: "report", title: "Synthétise", desc: "Rapports IA en 1 clic" },
+  { icon: "trending", title: "Anticipe", desc: "Les retards repérés avant l'échéance" },
+  { icon: "check", title: "Priorise", desc: "Ce qu'il faut traiter aujourd'hui" },
+  { icon: "report", title: "Rend compte", desc: "Comptes rendus prêts en 1 clic" },
   { icon: "shield", title: "Protège", desc: "Chiffré · RGPD natif" },
 ];
 
 const steps: Card[] = [
-  { icon: "branch", title: "Connectez votre dépôt", desc: "Reliez GitHub en un clic — aucune configuration lourde." },
-  { icon: "search", title: "Aperio analyse", desc: "Les signaux sont collectés et les anomalies détectées en continu." },
-  { icon: "rocket", title: "Les agents agissent", desc: "Diagnostic, plan d'action et rapport, prêts à valider." },
+  { icon: "branch", title: "Connectez vos outils", desc: "GitHub, GitLab, Jira, Confluence, Notion — ou importez vos documents (PDF, Word)." },
+  { icon: "search", title: "Aperio surveille", desc: "L'avancement est suivi en continu ; retards et risques sont détectés tôt." },
+  { icon: "rocket", title: "Vous gardez le contrôle", desc: "Briefing du jour, date de livraison prévue et comptes rendus, prêts à valider." },
 ];
 
 const features: Card[] = [
-  { icon: "bolt", title: "Signaux en temps réel", desc: "Commits, PRs et issues collectés en continu via vos connecteurs." },
-  { icon: "trending", title: "Détection d'anomalies", desc: "Un score statistique robuste repère les dérapages avant qu'ils ne coûtent." },
-  { icon: "bot", title: "4 agents autonomes", desc: "Monitor, Analyst, Planner et Reporter surveillent, diagnostiquent et agissent." },
-  { icon: "report", title: "Synthèses par IA", desc: "Rapports hebdo et mensuels générés et prêts à partager." },
-  { icon: "shield", title: "Sécurisé & RGPD", desc: "JWT, chiffrement au repos, export et effacement des données natifs." },
-  { icon: "check", title: "Simple à utiliser", desc: "Reliez un dépôt, cliquez sur Synchroniser : le reste est automatique." },
+  { icon: "trending", title: "Date de livraison prévue", desc: "Une estimation d'échéance avec niveau de confiance, mise à jour au fil du projet." },
+  { icon: "bolt", title: "Alerte avant le retard", desc: "Les jalons qui vont déraper sont signalés tôt — pas une fois le retard constaté." },
+  { icon: "check", title: "Briefing quotidien", desc: "Chaque matin, l'essentiel à traiter, priorisé, avec l'action directe." },
+  { icon: "report", title: "Comptes rendus & rapports", desc: "Suivi d'avancement et synthèses prêts à partager, en un clic." },
+  { icon: "bot", title: "Votre méthodologie", desc: "Kanban, Scrum, PRINCE2 ou SAFe : le vocabulaire s'adapte à votre cadre." },
+  { icon: "shield", title: "Sécurisé & RGPD", desc: "Chiffrement au repos, journal d'audit, export et effacement des données natifs." },
 ];
 
 const stats = [
-  { value: "4", label: "agents" },
-  { value: "90%+", label: "précision" },
-  { value: "< 5s", label: "décision" },
+  { value: "6", label: "sources" },
+  { value: "24/7", label: "surveillance" },
+  { value: "1 clic", label: "rapport" },
   { value: "€0–15", label: "/ mois" },
 ];
 
@@ -50,7 +50,7 @@ function IconBox({ icon, size = "md" }: { icon: IconName; size?: "sm" | "md" }) 
   const box = size === "sm" ? "h-9 w-9" : "h-11 w-11";
   const ic = size === "sm" ? "h-4 w-4" : "h-5 w-5";
   return (
-    <div className={`flex ${box} items-center justify-center rounded-lg bg-gradient-to-br ${BLUE} text-white shadow-glow`}>
+    <div className={`flex ${box} items-center justify-center rounded-lg bg-gradient-to-br ${BLUE} text-heading shadow-glow`}>
       <Icon name={icon} className={ic} />
     </div>
   );
@@ -60,10 +60,10 @@ function SectionHead({ num, eyebrow, title, grad, sub }: { num: string; eyebrow:
   return (
     <div className="mb-12 text-center">
       <span className="pm-eyebrow justify-center">{num} — {eyebrow}</span>
-      <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+      <h2 className="mt-4 text-3xl font-bold tracking-tight text-heading sm:text-4xl">
         {title} <span className="pm-gradient-text">{grad}</span>
       </h2>
-      <p className="mt-3 text-slate-400">{sub}</p>
+      <p className="mt-3 text-muted">{sub}</p>
     </div>
   );
 }
@@ -86,7 +86,7 @@ export function LandingPage() {
       </div>
 
       {/* Nav */}
-      <header className="sticky top-0 z-20 border-b border-blue-400/10 bg-ink-950/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-blue-400/10 bg-app/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-brand-500 to-accent-600 shadow-glow">
@@ -108,15 +108,15 @@ export function LandingPage() {
       {/* Hero */}
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-16 lg:grid-cols-2 lg:pt-24">
         <div>
-          <span className="pm-eyebrow mb-6">Plateforme IA autonome</span>
-          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl">
-            Vos projets,{" "}
-            <span className="pm-gradient-text">pilotés par l'IA.</span>
+          <span className="pm-eyebrow mb-6">Pour les chefs de projet</span>
+          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-heading sm:text-6xl">
+            Gardez vos projets sous contrôle.{" "}
+            <span className="pm-gradient-text">Soyez prévenu avant les retards.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-slate-400">
-            Aperio détecte les signaux faibles en continu et déploie des
-            agents autonomes qui diagnostiquent, planifient et rendent compte —
-            avant que le retard n'arrive.
+          <p className="mt-6 max-w-xl text-lg text-muted">
+            Aperio suit l'avancement de vos projets, repère les dérapages avant
+            l'échéance et prépare vos comptes rendus. Vous arrivez en réunion
+            avec une longueur d'avance.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to={primaryTo} className="pm-btn-primary px-6 py-3 text-base">
@@ -132,11 +132,11 @@ export function LandingPage() {
             </a>
           </div>
           {!authed && (
-            <p className="mt-3 font-mono text-xs text-slate-400">
+            <p className="mt-3 font-mono text-xs text-muted">
               Essai immédiat · 1 projet · sans e-mail — créez un compte ensuite pour continuer
             </p>
           )}
-          <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-slate-400">
+          <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-muted">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 animate-pulseGlow rounded-full bg-brand-400 shadow-[0_0_8px_2px_rgba(56,189,248,0.6)]" />
               Sans carte bancaire
@@ -146,24 +146,24 @@ export function LandingPage() {
         </div>
 
         {/* Aperçu produit — cadre blueprint avec repères d'angle */}
-        <div className="pm-card pm-ticks relative p-5">
+        <div className="pm-card relative p-5">
           <div className="mb-4 flex items-center justify-between border-b border-blue-400/10 pb-3">
             <div className="flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-gradient-to-br from-brand-500 to-accent-600">
                 <span className="h-1.5 w-1.5 rounded-[2px] bg-white/90" />
               </span>
-              <span className="text-sm font-semibold text-slate-200">Aperio</span>
+              <span className="text-sm font-semibold text-fg">Aperio</span>
             </div>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-slate-400">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
               live
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {previewCards.map((c) => (
-              <div key={c.title} className="rounded-lg border border-blue-400/10 bg-white/[0.02] p-4">
+              <div key={c.title} className="rounded-lg border border-blue-400/10 bg-surface p-4">
                 <IconBox icon={c.icon} size="sm" />
-                <div className="mt-3 text-sm font-semibold text-white">{c.title}</div>
-                <div className="mt-0.5 text-xs text-slate-400">{c.desc}</div>
+                <div className="mt-3 text-sm font-semibold text-heading">{c.title}</div>
+                <div className="mt-0.5 text-xs text-muted">{c.desc}</div>
               </div>
             ))}
           </div>
@@ -171,7 +171,7 @@ export function LandingPage() {
             {stats.map((s) => (
               <div key={s.label}>
                 <div className="pm-gradient-text font-mono text-base font-bold">{s.value}</div>
-                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-muted">
                   {s.label}
                 </div>
               </div>
@@ -185,7 +185,7 @@ export function LandingPage() {
         <SectionHead
           num="01"
           eyebrow="Fonctionnement"
-          title="Du dépôt au rapport,"
+          title="De vos outils au pilotage,"
           grad="en 3 étapes."
           sub="Sans friction, sans configuration lourde."
         />
@@ -195,12 +195,15 @@ export function LandingPage() {
             <div key={s.title} className="pm-card relative p-6">
               <div className="flex items-center justify-between">
                 <IconBox icon={s.icon} />
-                <span className="font-mono text-4xl font-bold text-white/[0.07]">
+                <span
+                  aria-hidden="true"
+                  className="font-mono text-4xl font-bold text-[#828997]"
+                >
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
-              <h3 className="mt-4 font-semibold text-white">{s.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{s.desc}</p>
+              <h3 className="mt-4 font-semibold text-heading">{s.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{s.desc}</p>
             </div>
           ))}
         </div>
@@ -211,9 +214,9 @@ export function LandingPage() {
         <SectionHead
           num="02"
           eyebrow="Capacités"
-          title="Tout ce qu'il faut,"
+          title="Tout pour piloter vos projets,"
           grad="au même endroit."
-          sub="Des fonctionnalités puissantes, réunies dans une interface claire."
+          sub="L'essentiel du pilotage, réuni dans une interface claire."
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
@@ -222,8 +225,8 @@ export function LandingPage() {
               className="pm-card group p-6 transition hover:border-blue-400/35 hover:shadow-glow"
             >
               <IconBox icon={f.icon} />
-              <h3 className="mt-4 font-semibold text-white">{f.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{f.desc}</p>
+              <h3 className="mt-4 font-semibold text-heading">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -231,13 +234,13 @@ export function LandingPage() {
 
       {/* Sécurité */}
       <section id="securite" className="mx-auto max-w-6xl px-5 pb-20">
-        <div className="pm-card pm-ticks relative flex flex-col items-center gap-6 p-10 text-center sm:flex-row sm:justify-between sm:text-left">
+        <div className="pm-card relative flex flex-col items-center gap-6 p-10 text-center sm:flex-row sm:justify-between sm:text-left">
           <div className="max-w-xl">
             <span className="pm-eyebrow mb-3">03 — Sécurité &amp; conformité</span>
-            <h2 className="mt-3 text-2xl font-bold text-white">
+            <h2 className="mt-3 text-2xl font-bold text-heading">
               Vos données restent protégées.
             </h2>
-            <p className="mt-2 text-slate-400">
+            <p className="mt-2 text-muted">
               Authentification JWT, chiffrement au repos, journal d'audit, et
               conformité RGPD native (accès, portabilité, effacement).
             </p>

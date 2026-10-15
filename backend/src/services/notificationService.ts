@@ -7,6 +7,21 @@ import { Decision } from "../entities/Decision.js";
 import { appBaseUrl, sendEmail } from "../email/index.js";
 import { anomalyAlertEmail, weeklyDigestEmail, type DigestProject } from "../email/templates.js";
 import { logger } from "../utils/logger.js";
+import { resolveSettings } from "./notificationSettingsService.js";
+
+/** Poste un message Slack via webhook. Ne lève jamais (best-effort). */
+async function postSlack(webhook: string, text: string): Promise<void> {
+  try {
+    await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch (err) {
+    logger.warn({ err }, "Notification Slack échouée");
+  }
+}
 
 /** Un e-mail n'est envoyé qu'à un vrai destinataire opté-in (pas les invités). */
 function canEmail(user: User | null): user is User {
@@ -18,11 +33,24 @@ export async function notifyAnomaly(
   project: Project,
   detection: DetectionResult,
 ): Promise<void> {
+  const settings = await resolveSettings(project.id);
+  if (!settings.onAnomaly) return;
+  const link = `${appBaseUrl()}/projects/${project.id}`;
+
+  // Slack (si configuré pour ce projet).
+  if (settings.slackWebhook) {
+    await postSlack(
+      settings.slackWebhook,
+      `:rotating_light: *${project.name}* — anomalie ${detection.severity} sur ${detection.metric} ` +
+        `(écart ${detection.zScore.toFixed(1)}σ). ${link}`,
+    );
+  }
+
+  // E-mail au propriétaire (si opté-in).
   const owner = await AppDataSource.getRepository(User).findOne({
     where: { id: project.ownerId },
   });
   if (!canEmail(owner)) return;
-  const link = `${appBaseUrl()}/projects/${project.id}`;
   await sendEmail(
     anomalyAlertEmail(owner.email, owner.name, {
       projectName: project.name,
@@ -34,6 +62,28 @@ export async function notifyAnomaly(
       link,
     }),
   );
+}
+
+/**
+ * Notifie les décisions en attente d'approbation (Slack + e-mail), avec lien
+ * direct. Best-effort : n'échoue jamais le pipeline.
+ */
+export async function notifyPendingDecisions(
+  project: Project,
+  pending: { id: string; title: string }[],
+): Promise<void> {
+  if (pending.length === 0) return;
+  const settings = await resolveSettings(project.id);
+  if (!settings.onPendingDecision) return;
+  const link = `${appBaseUrl()}/projects/${project.id}`;
+
+  if (settings.slackWebhook) {
+    const list = pending.slice(0, 5).map((d) => `• ${d.title}`).join("\n");
+    await postSlack(
+      settings.slackWebhook,
+      `:ballot_box_with_check: *${project.name}* — ${pending.length} décision(s) à approuver :\n${list}\n${link}`,
+    );
+  }
 }
 
 /**

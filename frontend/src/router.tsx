@@ -9,6 +9,12 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { TeamPage } from "./pages/TeamPage";
+import { GlossaryPage } from "./pages/GlossaryPage";
+import { OnboardingPage } from "./pages/OnboardingPage";
+import { PlanningPage } from "./pages/PlanningPage";
+import { RisksPage } from "./pages/RisksPage";
+import { MinutesPage } from "./pages/MinutesPage";
+import { IntegrationsPage } from "./pages/IntegrationsPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -30,7 +36,13 @@ export const router = createBrowserRouter([
           { path: "/dashboard", element: <DashboardPage /> },
           { path: "/projects", element: <ProjectsPage /> },
           { path: "/projects/:id", element: <ProjectDetailPage /> },
+          { path: "/projects/:id/planning", element: <PlanningPage /> },
+          { path: "/projects/:id/risks", element: <RisksPage /> },
+          { path: "/projects/:id/minutes", element: <MinutesPage /> },
+          { path: "/projects/:id/integrations", element: <IntegrationsPage /> },
           { path: "/team", element: <TeamPage /> },
+          { path: "/glossaire", element: <GlossaryPage /> },
+          { path: "/onboarding", element: <OnboardingPage /> },
         ],
       },
     ],

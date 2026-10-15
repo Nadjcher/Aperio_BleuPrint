@@ -36,43 +36,121 @@ invité**, sans e-mail ni mot de passe.
 1. Ouvrez l'application et cliquez sur **Créer mon compte**.
 2. Renseignez email, nom et un mot de passe (**12 caractères minimum**, avec au
    moins une lettre et un chiffre).
-3. Le **premier compte créé** sur une instance devient **administrateur**.
+3. Le **premier compte créé** sur une instance devient **administrateur** ; les
+   suivants sont **manager** (chacun gère ses propres projets).
 
 ### Rôles
 
 | Rôle | Peut… |
 | --- | --- |
 | `viewer` | consulter projets, signaux, décisions |
-| `manager` | + créer des projets, lancer des synchronisations, donner du feedback |
+| `manager` | + créer des projets, lancer des synchronisations, donner du feedback (rôle par défaut à l'inscription) |
 | `admin` | + administration (premier inscrit) |
 
-## 4. Premiers pas (onboarding)
+## 4. Premiers pas (onboarding guidé)
 
-Depuis la page **Projets**, suivez les trois étapes :
+Juste après l'inscription, un **assistant en 3 étapes** s'ouvre
+(`/onboarding`), avec un indicateur de progression :
 
-1. **Reliez un dépôt** — saisissez `owner/repo` (ex. `facebook/react`) et créez
-   le projet. Un bouton *Pré-remplir un exemple* est disponible au premier usage.
-2. **Lancez une synchronisation** — depuis la fiche projet, bouton
-   **Synchroniser**. Aperio collecte commits, pull requests et issues, puis
-   lance la détection et les agents. Le traitement est **asynchrone** : la
-   synchro part en arrière-plan et la fiche se met à jour quand c'est prêt.
-3. **Lisez les décisions** — anomalies détectées, plan correctif et rapports
-   apparaissent sur la fiche.
+1. **Décrire le projet** — donnez-lui un nom clair (ex. « Refonte du site »).
+2. **Connecter le dépôt** — saisissez `propriétaire/dépôt` (ex. `facebook/react`).
+   Étape facultative : vous pourrez relier un dépôt plus tard.
+3. **Lancer l'analyse** — Aperio collecte l'activité et fait travailler ses
+   agents. Le traitement est **asynchrone** (il part en arrière-plan).
 
-## 5. Comprendre le tableau de bord
+Vous pouvez quitter l'assistant à tout moment (**Plus tard**) et le relancer
+depuis l'état vide du tableau de bord (**Démarrer en 3 étapes**).
+
+## 5. Deux niveaux d'affichage : simple et expert
+
+Un sélecteur **Simple / Expert** est présent dans l'en-tête ; votre choix est
+enregistré sur votre compte.
+
+- **Mode simple** (par défaut, pensé pour les chefs de projet) : le tableau de
+  bord montre trois indicateurs — **Santé globale** (0–100), **Niveau de
+  risque**, **Activité (7 j)** — et une liste **« À traiter aujourd'hui »**
+  limitée à l'essentiel. Le vocabulaire est métier (« activité »,
+  « point d'attention », « recommandation »…).
+- **Mode expert** : affiche le briefing complet, les tendances détaillées, la
+  simulation de gravité et les métriques brutes, avec le vocabulaire technique.
+
+Le **moteur est le même** : seule la présentation change.
+
+> **Besoin d'une définition ?** Les termes sont expliqués au survol (infobulles)
+> et rassemblés dans le **Glossaire** (menu **Aide**, page `/glossaire`).
+
+## 6. Comprendre le tableau de bord (expert)
 
 - **Signaux** : séries temporelles brutes (commits/jour, PRs, issues).
 - **Anomalies** : écarts significatifs par rapport à la ligne de base (détection
   robuste médiane + MAD). Chaque anomalie porte une **sévérité**.
-- **Décisions** : ce que les agents recommandent. Vous pouvez **valider** 👍 ou
-  **rejeter** 👎 — ce feedback entraîne les agents.
+- **Décisions** : ce que les agents recommandent. Chaque décision explique **en
+  clair** ce qu'une approbation ou un rejet déclenche ; les actions sûres sont
+  signalées (**Action sûre**) et restent **réversibles 24 h**. Vous pouvez
+  **valider** 👍 ou **rejeter** 👎 — ce feedback entraîne les agents.
 
-## 6. Synchronisation : que se passe-t-il ?
+## 7. Planning & date de livraison
+
+Depuis une fiche projet, le bouton **Planning** ouvre la vue de planification.
+
+- **Jalons** : des étapes datées (échéance), éventuellement **dépendantes** les
+  unes des autres. On y rattache des **tâches** portant une **estimation
+  d'effort** (points) et un statut (à faire / en cours / terminé).
+- **Date de livraison prévue** : calculée à partir de l'**effort restant** et du
+  **rythme d'avancement** (la vélocité saisie dans l'onglet **Équipe**). Elle est
+  donnée sous forme de **fourchette** (optimiste → attendu → pessimiste) ;
+  l'incertitude **se resserre** à mesure que des tâches sont terminées.
+- **Retard probable** : un jalon dont la fin projetée dépasse son échéance est
+  marqué **« En retard probable »** et remonte dans **« À traiter aujourd'hui »**.
+- **Chemin critique** (mode expert) : la chaîne de jalons la plus lourde, qui
+  détermine la date de fin.
+
+> Sans vélocité (aucune affectation d'équipe), la date n'est pas calculée : un
+> message invite à renseigner l'équipe. Rien n'est inventé.
+
+## 8. Méthodologie & registre des risques
+
+Chaque projet a une **méthodologie** (sélecteur sur la fiche projet) :
+
+| Méthodologie | Vocabulaire | Rapport |
+| --- | --- | --- |
+| **Kanban** (défaut) | étapes, cartes | Rapport de flux |
+| **Scrum** | sprints, stories | Burndown / revue de sprint |
+| **PRINCE2** | étapes (stages), lots de travail | Highlight Report |
+| **SAFe** | PI, stories | Rapport de PI |
+
+Le **moteur est le même** : seuls le vocabulaire (dans le planning) et le
+format des rapports s'adaptent.
+
+**Registre des risques** (bouton **Risques** sur la fiche projet) : chaque
+risque porte une **probabilité (1–5)** et un **impact (1–5)** ; le **score**
+(probabilité × impact) et le **niveau** (faible / moyen / élevé) sont calculés
+automatiquement, et la liste est triée par gravité. On peut aussi **créer un
+risque depuis une anomalie ouverte** en un clic. Les risques majeurs ouverts
+apparaissent dans les rapports.
+
+## 9. Connecteurs (sources de données)
+
+Chaque projet peut se brancher sur une source via **Intégrations** (bouton sur
+la fiche projet) :
+
+| Connecteur | Collecte | Paramètres |
+| --- | --- | --- |
+| **GitHub** | commits, PR, issues | dépôt `owner/repo` |
+| **GitLab** | commits, merge requests, issues | hôte + `groupe/projet` |
+| **Jira** | tickets (issues) | hôte, e-mail, clé de projet |
+| **Linear** | tickets (issues) | ID d'équipe |
+
+Le **token** du connecteur est **chiffré au repos (AES-256-GCM)** et n'est jamais
+réaffiché. À défaut de connecteur configuré, Aperio utilise le dépôt GitHub
+renseigné sur le projet (rétro-compatibilité).
+
+## 10. Synchronisation : que se passe-t-il ?
 
 1. Vous cliquez sur **Synchroniser** → l'API répond immédiatement avec un
    identifiant de tâche (`jobId`).
-2. Un **worker** en arrière-plan collecte les données GitHub, détecte les
-   anomalies et exécute les agents.
+2. Un **worker** en arrière-plan collecte les données de la source configurée,
+   détecte les anomalies et exécute les agents.
 3. En cas d'échec transitoire (GitHub indisponible), la tâche est **réessayée
    automatiquement** avec un délai croissant, puis marquée en échec si elle
    n'aboutit pas.
@@ -81,22 +159,22 @@ Depuis la page **Projets**, suivez les trois étapes :
 > Un jeton GitHub en lecture seule (`GITHUB_TOKEN`) augmente les quotas d'API
 > et permet d'accéder aux dépôts privés. Côté hébergeur.
 
-## 7. Notifications par e-mail
+## 11. Notifications (e-mail & Slack)
 
-Si l'administrateur a configuré l'envoi d'e-mails (Resend), Aperio vous prévient :
+**E-mail** (si l'administrateur a configuré Resend) :
+- **Alerte d'anomalie** au propriétaire du projet, **digest hebdomadaire**,
+  liens **mot de passe oublié / vérification**.
+- Coupez-les via votre profil (`notifyByEmail`).
 
-- **Alerte d'anomalie** : un e-mail est envoyé au propriétaire du projet dès
-  qu'une anomalie est détectée lors d'une synchronisation.
-- **Résumé hebdomadaire** : un digest de l'activité de vos projets (anomalies,
-  décisions des 7 derniers jours).
-- **Réinitialisation / vérification** : liens « mot de passe oublié » et
-  confirmation d'adresse.
+**Slack** (par projet, dans **Intégrations**) : collez un **webhook Slack** pour
+recevoir les **anomalies critiques** et les **décisions en attente** (avec lien
+direct). Deux bascules permettent d'activer/désactiver chaque type **par
+projet**. Le webhook est **chiffré au repos**.
 
-Vous pouvez couper les notifications (`notifyByEmail`) via votre profil. Sans
-fournisseur d'e-mail configuré, aucun e-mail n'est envoyé — l'app reste
-pleinement utilisable.
+Sans fournisseur d'e-mail ni webhook, aucune notification n'est envoyée — l'app
+reste pleinement utilisable.
 
-## 8. Vos données & vos droits (RGPD)
+## 12. Vos données & vos droits (RGPD)
 
 Aperio applique la **minimisation** (pas d'email brut dans les signaux, IP
 tronquées dans l'audit) et la **conservation limitée**.
@@ -107,14 +185,16 @@ tronquées dans l'audit) et la **conservation limitée**.
 | **Rectification** | Modifiez votre profil : `PATCH /api/v1/auth/me` |
 | **Effacement** | Supprimez votre compte et vos données : `DELETE /api/v1/gdpr/me` |
 
-## 9. Questions fréquentes
+## 13. Questions fréquentes
 
 **Ma synchro reste « en cours » longtemps.**
 Le dépôt est peut-être volumineux, ou GitHub limite le débit. Elle se terminera
 ou basculera en échec après les tentatives automatiques.
 
 **Je ne peux pas créer de projet.**
-Votre rôle est `viewer`. Demandez à un administrateur de vous passer `manager`.
+Les comptes créés par inscription sont `manager` et peuvent créer des projets.
+Un compte `viewer` (créé par un administrateur pour de la consultation) ne le
+peut pas : demandez à passer `manager`.
 
 **Un agent se trompe.**
 Rejetez sa décision : son niveau de confiance baisse et ses prochaines

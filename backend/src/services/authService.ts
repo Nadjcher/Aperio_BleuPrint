@@ -1,25 +1,24 @@
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import type {
-  AccessTokenPayload,
-  AuthTokens,
-  Role,
-  UserPublic,
-} from "@projectmaster/shared";
+import type { AccessTokenPayload, AuthTokens, Role, UserPublic } from "@projectmaster/shared";
 import { AppDataSource } from "../db/data-source.js";
 import { User } from "../entities/User.js";
 import { RefreshToken } from "../entities/RefreshToken.js";
-import { OneTimeToken, type TokenPurpose } from "../entities/OneTimeToken.js";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.js";
-import { AppError } from "../middleware/errorHandler.js";
+import { AppError } from "../errors/index.js";
 import { appBaseUrl, sendEmail } from "../email/index.js";
 import { passwordResetEmail, verificationEmail } from "../email/templates.js";
+import {
+  consumeOneTimeToken,
+  issueOneTimeToken,
+  issueRefresh,
+  sha256,
+  signAccess,
+} from "./tokenService.js";
 
 const users = () => AppDataSource.getRepository(User);
 const refreshTokens = () => AppDataSource.getRepository(RefreshToken);
-const oneTimeTokens = () => AppDataSource.getRepository(OneTimeToken);
 
 const BCRYPT_ROUNDS = 12;
 
@@ -31,43 +30,9 @@ function toPublic(u: User): UserPublic {
     role: u.role,
     emailVerified: u.emailVerified,
     isGuest: u.isGuest,
+    uiMode: u.uiMode,
     createdAt: u.createdAt.toISOString(),
   };
-}
-
-/** Émet un jeton à usage unique, stocke son hash, renvoie le jeton en clair. */
-async function issueOneTimeToken(
-  userId: string,
-  purpose: TokenPurpose,
-  ttlMs: number,
-): Promise<string> {
-  const raw = crypto.randomBytes(32).toString("hex");
-  await oneTimeTokens().save(
-    oneTimeTokens().create({
-      userId,
-      purpose,
-      tokenHash: sha256(raw),
-      expiresAt: new Date(Date.now() + ttlMs),
-      usedAt: null,
-    }),
-  );
-  return raw;
-}
-
-/** Valide et consomme un jeton à usage unique. */
-async function consumeOneTimeToken(
-  rawToken: string,
-  purpose: TokenPurpose,
-): Promise<OneTimeToken> {
-  const stored = await oneTimeTokens().findOne({
-    where: { tokenHash: sha256(rawToken), purpose },
-  });
-  if (!stored || stored.usedAt || stored.expiresAt.getTime() < Date.now()) {
-    throw new AppError(400, "invalid_token", "Lien invalide ou expiré");
-  }
-  stored.usedAt = new Date();
-  await oneTimeTokens().save(stored);
-  return stored;
 }
 
 /** Envoie (ou journalise) l'e-mail de vérification d'adresse. */
@@ -75,27 +40,6 @@ async function sendVerificationEmail(user: User): Promise<void> {
   const raw = await issueOneTimeToken(user.id, "email_verify", 24 * 3600 * 1000);
   const link = `${appBaseUrl()}/verify-email?token=${raw}`;
   await sendEmail(verificationEmail(user.email, user.name, link));
-}
-
-function sha256(value: string): string {
-  return crypto.createHash("sha256").update(value).digest("hex");
-}
-
-function signAccess(payload: AccessTokenPayload): string {
-  return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_TTL,
-    issuer: env.JWT_ISSUER,
-    audience: env.JWT_AUDIENCE,
-  } as jwt.SignOptions);
-}
-
-async function issueRefresh(userId: string, ttlDays = 7): Promise<string> {
-  const raw = crypto.randomBytes(40).toString("hex");
-  const expiresAt = new Date(Date.now() + ttlDays * 24 * 3600 * 1000);
-  await refreshTokens().save(
-    refreshTokens().create({ userId, tokenHash: sha256(raw), expiresAt }),
-  );
-  return raw;
 }
 
 async function tokensFor(user: User): Promise<AuthTokens> {
@@ -123,8 +67,10 @@ export async function register(
     throw new AppError(409, "email_taken", "Cet email est déjà utilisé");
   }
   // Le premier utilisateur RÉEL (hors invités) devient admin (et auto-vérifié).
+  // Les suivants sont `manager` : dans Aperio chacun gère ses propres projets,
+  // un simple `viewer` ne pourrait ni créer ni synchroniser un projet.
   const count = await users().count({ where: { isGuest: false } });
-  const role: Role = count === 0 ? "admin" : "viewer";
+  const role: Role = count === 0 ? "admin" : "manager";
   const emailVerified = count === 0;
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const user = await users().save(
@@ -298,12 +244,13 @@ export async function resendVerification(userId: string): Promise<void> {
 /** Droit de rectification RGPD : met à jour le profil (nom). */
 export async function updateProfile(
   userId: string,
-  changes: { name?: string; notifyByEmail?: boolean },
+  changes: { name?: string; notifyByEmail?: boolean; uiMode?: UserPublic["uiMode"] },
 ): Promise<UserPublic> {
   const user = await users().findOne({ where: { id: userId } });
   if (!user) throw new AppError(404, "not_found", "Utilisateur introuvable");
   if (changes.name !== undefined) user.name = changes.name;
   if (changes.notifyByEmail !== undefined) user.notifyByEmail = changes.notifyByEmail;
+  if (changes.uiMode !== undefined) user.uiMode = changes.uiMode;
   const saved = await users().save(user);
   return toPublic(saved);
 }

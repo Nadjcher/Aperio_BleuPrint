@@ -2,6 +2,9 @@
 
 export type Role = "admin" | "manager" | "viewer";
 
+/** Niveau d'interface : « simple » (chef de projet) ou « expert » (détails). */
+export type UiMode = "simple" | "expert";
+
 export interface UserPublic {
   id: string;
   email: string;
@@ -10,6 +13,8 @@ export interface UserPublic {
   emailVerified: boolean;
   /** Compte d'essai sans inscription (limité, convertible en compte réel). */
   isGuest: boolean;
+  /** Préférence d'affichage : mode simple (défaut) ou expert. */
+  uiMode: UiMode;
   createdAt: string;
 }
 

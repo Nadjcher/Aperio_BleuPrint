@@ -38,7 +38,7 @@ export function applySecurity(app: Express): void {
     cors({
       origin: env.CORS_ORIGIN,
       credentials: true,
-      methods: ["GET", "POST", "PATCH", "DELETE"],
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     }),
   );
 }
@@ -54,7 +54,7 @@ export const globalRateLimiter = rateLimit({
 /** Limiteur strict pour l'authentification (anti brute-force). */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: env.AUTH_RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
 });

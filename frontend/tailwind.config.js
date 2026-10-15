@@ -27,6 +27,20 @@ export default {
           600: "#2563eb",
           700: "#1d4ed8",
         },
+        // ── Jetons sémantiques (pilotés par variables CSS, voir index.css).
+        // Les deux thèmes (clair par défaut, sombre) partagent le même markup.
+        app: "rgb(var(--c-app) / <alpha-value>)",
+        surface: "rgb(var(--c-surface) / <alpha-value>)",
+        surface2: "rgb(var(--c-surface2) / <alpha-value>)",
+        line: "rgb(var(--c-line) / <alpha-value>)",
+        heading: "rgb(var(--c-heading) / <alpha-value>)",
+        fg: "rgb(var(--c-fg) / <alpha-value>)",
+        muted: "rgb(var(--c-muted) / <alpha-value>)",
+        faint: "rgb(var(--c-faint) / <alpha-value>)",
+        link: "rgb(var(--c-link) / <alpha-value>)",
+        success: "rgb(var(--c-success) / <alpha-value>)",
+        warning: "rgb(var(--c-warning) / <alpha-value>)",
+        danger: "rgb(var(--c-danger) / <alpha-value>)",
       },
       boxShadow: {
         // Halo maîtrisé : fin anneau + ombre portée nette

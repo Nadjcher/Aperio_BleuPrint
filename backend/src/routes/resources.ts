@@ -1,12 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
-import { AppDataSource } from "../db/data-source.js";
-import { Project } from "../entities/Project.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/rbac.js";
 import { validateBody } from "../middleware/validate.js";
-import { AppError } from "../middleware/errorHandler.js";
 import { audit, anonymizeIp } from "../services/auditService.js";
+import { getOwnedProject } from "../services/projectService.js";
 import {
   createMember,
   deleteMember,
@@ -18,16 +16,8 @@ import {
 } from "../services/resourceService.js";
 
 export const resourcesRouter = Router();
-const projects = () => AppDataSource.getRepository(Project);
 
 resourcesRouter.use(requireAuth);
-
-/** Vérifie que le projet appartient à l'utilisateur et renvoie son nom. */
-async function ownedProject(ownerId: string, projectId: string): Promise<Project> {
-  const p = await projects().findOne({ where: { id: projectId, ownerId } });
-  if (!p) throw new AppError(404, "not_found", "Projet introuvable");
-  return p;
-}
 
 // ─── Membres d'équipe ────────────────────────────────────────────────────────
 
@@ -77,7 +67,7 @@ const assignSchema = z.object({
 });
 
 resourcesRouter.get("/projects/:id/resourcing", async (req, res) => {
-  await ownedProject(req.user!.sub, req.params.id);
+  await getOwnedProject(req.user!.sub, req.params.id);
   res.json(await projectResourcing(req.params.id));
 });
 
@@ -86,7 +76,7 @@ resourcesRouter.post(
   requireRole("manager"),
   validateBody(assignSchema),
   async (req, res) => {
-    await ownedProject(req.user!.sub, req.params.id);
+    await getOwnedProject(req.user!.sub, req.params.id);
     const saved = await upsertAssignment(req.user!.sub, req.params.id, req.body);
     res.status(201).json(saved);
   },
@@ -96,7 +86,7 @@ resourcesRouter.delete(
   "/projects/:id/assignments/:memberId",
   requireRole("manager"),
   async (req, res) => {
-    await ownedProject(req.user!.sub, req.params.id);
+    await getOwnedProject(req.user!.sub, req.params.id);
     await removeAssignment(req.user!.sub, req.params.id, req.params.memberId);
     res.status(204).end();
   },
@@ -114,10 +104,10 @@ resourcesRouter.post(
   validateBody(simulateSchema),
   async (req, res) => {
     const { id } = req.params as { id: string };
-    const from = await ownedProject(req.user!.sub, id);
+    const from = await getOwnedProject(req.user!.sub, id);
     let toName = "projet cible";
     if (req.body.toProjectId) {
-      const to = await ownedProject(req.user!.sub, req.body.toProjectId);
+      const to = await getOwnedProject(req.user!.sub, req.body.toProjectId);
       toName = to.name;
     }
     const analysis = await simulateMove(

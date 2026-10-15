@@ -17,6 +17,12 @@ import { OneTimeToken } from "../entities/OneTimeToken.js";
 import { McpCall } from "../entities/McpCall.js";
 import { Member } from "../entities/Member.js";
 import { Assignment } from "../entities/Assignment.js";
+import { Milestone } from "../entities/Milestone.js";
+import { Task } from "../entities/Task.js";
+import { Risk } from "../entities/Risk.js";
+import { ConnectorConfig } from "../entities/ConnectorConfig.js";
+import { NotificationSetting } from "../entities/NotificationSetting.js";
+import { Minutes } from "../entities/Minutes.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -49,6 +55,12 @@ export const AppDataSource = new DataSource({
     McpCall,
     Member,
     Assignment,
+    Milestone,
+    Task,
+    Risk,
+    ConnectorConfig,
+    NotificationSetting,
+    Minutes,
   ],
   // Chemin résolu depuis ce module (et non le cwd) : robuste quel que soit le
   // répertoire de lancement. En prod → dist/migrations/*.js, en dev → *.ts.

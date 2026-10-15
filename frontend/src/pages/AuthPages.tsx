@@ -13,8 +13,8 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
             Aperio
           </Link>
         </div>
-        <div className="pm-card pm-ticks relative p-7">
-          <h1 className="mb-5 text-lg font-semibold text-white">{title}</h1>
+        <div className="pm-card relative p-7">
+          <h1 className="mb-5 text-lg font-semibold text-heading">{title}</h1>
           {children}
         </div>
       </div>
@@ -40,24 +40,25 @@ export function ForgotPasswordPage() {
   return (
     <Shell title="Mot de passe oublié">
       {sent ? (
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-fg">
           Si un compte existe pour <span className="font-mono">{email}</span>, un
           e-mail avec un lien de réinitialisation vient d'être envoyé. Pensez à
           vérifier vos spams.
           <br />
-          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+          <Link to="/login" className="mt-4 inline-block pm-link">
             ← Retour à la connexion
           </Link>
         </p>
       ) : (
         <form onSubmit={onSubmit} className="space-y-4">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted">
             Entrez votre e-mail : nous vous enverrons un lien pour choisir un
             nouveau mot de passe.
           </p>
           <div>
-            <label className="pm-label">E-mail</label>
+            <label htmlFor="fp-email" className="pm-label">E-mail</label>
             <input
+              id="fp-email"
               className="pm-input"
               type="email"
               value={email}
@@ -66,7 +67,7 @@ export function ForgotPasswordPage() {
             />
           </div>
           <button className="pm-btn-primary w-full">Envoyer le lien</button>
-          <Link to="/login" className="block text-center text-sm text-slate-400 hover:text-white">
+          <Link to="/login" className="block text-center text-sm text-muted hover:text-heading">
             Retour à la connexion
           </Link>
         </form>
@@ -99,9 +100,9 @@ export function ResetPasswordPage() {
   if (!token) {
     return (
       <Shell title="Lien invalide">
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-fg">
           Ce lien de réinitialisation est incomplet.{" "}
-          <Link to="/forgot-password" className="text-brand hover:underline">
+          <Link to="/forgot-password" className="pm-link">
             Redemander un lien
           </Link>
         </p>
@@ -112,14 +113,15 @@ export function ResetPasswordPage() {
   return (
     <Shell title="Nouveau mot de passe">
       {done ? (
-        <p className="text-sm text-emerald-300">
+        <p className="text-sm text-success">
           Mot de passe mis à jour ✓ Redirection vers la connexion…
         </p>
       ) : (
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label className="pm-label">Nouveau mot de passe</label>
+            <label htmlFor="rp-password" className="pm-label">Nouveau mot de passe</label>
             <input
+              id="rp-password"
               className="pm-input"
               type="password"
               placeholder="12 caractères min. (lettres + chiffres)"
@@ -129,7 +131,7 @@ export function ResetPasswordPage() {
               required
             />
           </div>
-          {error && <p className="text-sm text-red-300">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
           <button className="pm-btn-primary w-full">Réinitialiser</button>
         </form>
       )}
@@ -154,22 +156,23 @@ export function UpgradePage() {
 
   return (
     <Shell title="Créez votre compte">
-      <p className="mb-5 text-sm text-slate-400">
+      <p className="mb-5 text-sm text-muted">
         Vous êtes en mode invité. Créez un compte pour <b>conserver votre projet</b>
         {" "}et continuer sans limite.
       </p>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="pm-label">Nom</label>
-          <input className="pm-input" value={name} onChange={(e) => setName(e.target.value)} required />
+          <label htmlFor="up-name" className="pm-label">Nom</label>
+          <input id="up-name" className="pm-input" value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
         <div>
-          <label className="pm-label">E-mail</label>
-          <input className="pm-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <label htmlFor="up-email" className="pm-label">E-mail</label>
+          <input id="up-email" className="pm-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div>
-          <label className="pm-label">Mot de passe</label>
+          <label htmlFor="up-password" className="pm-label">Mot de passe</label>
           <input
+            id="up-password"
             className="pm-input"
             type="password"
             placeholder="12 caractères min. (lettres + chiffres)"
@@ -179,7 +182,7 @@ export function UpgradePage() {
             required
           />
         </div>
-        {error && <p className="text-sm text-red-300">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
         <button className="pm-btn-primary w-full">Créer mon compte</button>
       </form>
     </Shell>
@@ -205,21 +208,21 @@ export function VerifyEmailPage() {
 
   return (
     <Shell title="Vérification de l'e-mail">
-      {state === "loading" && <p className="text-sm text-slate-400">Vérification en cours…</p>}
+      {state === "loading" && <p className="text-sm text-muted">Vérification en cours…</p>}
       {state === "ok" && (
-        <p className="text-sm text-emerald-300">
+        <p className="text-sm text-success">
           Votre adresse e-mail est confirmée ✓
           <br />
-          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+          <Link to="/login" className="mt-4 inline-block pm-link">
             Se connecter
           </Link>
         </p>
       )}
       {state === "error" && (
-        <p className="text-sm text-red-300">
+        <p className="text-sm text-danger">
           Lien invalide ou expiré.
           <br />
-          <Link to="/login" className="mt-4 inline-block text-brand hover:underline">
+          <Link to="/login" className="mt-4 inline-block pm-link">
             Retour à la connexion
           </Link>
         </p>

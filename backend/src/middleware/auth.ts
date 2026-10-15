@@ -1,8 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import type { AccessTokenPayload } from "@projectmaster/shared";
-import { env } from "../config/env.js";
 import { AppError } from "./errorHandler.js";
+import { verifyAccess } from "../services/tokenService.js";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -24,14 +23,6 @@ export function requireAuth(
     throw new AppError(401, "unauthorized", "Jeton d'accès manquant");
   }
   const token = header.slice("Bearer ".length);
-  try {
-    const payload = jwt.verify(token, env.JWT_ACCESS_SECRET, {
-      issuer: env.JWT_ISSUER,
-      audience: env.JWT_AUDIENCE,
-    }) as AccessTokenPayload;
-    req.user = payload;
-    next();
-  } catch {
-    throw new AppError(401, "unauthorized", "Jeton d'accès invalide ou expiré");
-  }
+  req.user = verifyAccess(token);
+  next();
 }

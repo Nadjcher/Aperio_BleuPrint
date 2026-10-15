@@ -2,6 +2,7 @@ import type { IngestSignal } from "../services/signalService.js";
 import { env } from "../config/env.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { logger } from "../utils/logger.js";
+import type { Connector, ConnectorContext } from "./types.js";
 
 /**
  * Connecteur GitHub (lecture seule) : transforme l'activité d'un dépôt en
@@ -122,3 +123,13 @@ export async function fetchRepoSignals(
 
   return signals;
 }
+
+/** Connecteur GitHub conforme à l'interface commune (settings.repo). */
+export const githubConnector: Connector = {
+  provider: "github",
+  async fetchSignals(ctx: ConnectorContext): Promise<IngestSignal[]> {
+    const repo = ctx.settings.repo;
+    if (!repo) throw new AppError(400, "invalid_config", "Dépôt GitHub (owner/repo) requis");
+    return fetchRepoSignals(ctx.projectId, repo);
+  },
+};

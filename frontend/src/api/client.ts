@@ -33,6 +33,13 @@ export class RequestError extends Error {
   }
 }
 
+/** Message lisible à partir d'une erreur inconnue (centralise le motif répété). */
+export function toErrorMessage(err: unknown, fallback = "Une erreur est survenue"): string {
+  if (err instanceof RequestError) return err.message;
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
+}
+
 async function raw<T>(
   path: string,
   options: RequestInit & { retry?: boolean } = {},
@@ -90,6 +97,8 @@ export const api = {
   get: <T>(path: string) => raw<T>(path),
   post: <T>(path: string, body?: unknown) =>
     raw<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined }),
+  put: <T>(path: string, body?: unknown) =>
+    raw<T>(path, { method: "PUT", body: body ? JSON.stringify(body) : undefined }),
   patch: <T>(path: string, body?: unknown) =>
     raw<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
   del: <T>(path: string) => raw<T>(path, { method: "DELETE" }),

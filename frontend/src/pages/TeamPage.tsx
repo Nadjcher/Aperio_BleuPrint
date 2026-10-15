@@ -1,43 +1,16 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type {
   Member,
-  Paginated,
-  Project,
   ProjectResourcing,
   ResourceMoveAnalysis,
 } from "@projectmaster/shared";
-import { api, RequestError } from "../api/client";
-
-/** Jauge de gravité 0..100 (vert → ambre → rouge). */
-function GravityGauge({ score }: { score: number }) {
-  const color =
-    score > 50 ? "bg-red-500" : score >= 25 ? "bg-amber-400" : "bg-emerald-400";
-  const label =
-    score > 50 ? "Critique" : score >= 25 ? "Sensible" : "Faible";
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <span className="pm-label">Score de gravité</span>
-        <span className="font-mono text-sm text-slate-200">
-          {score}/100 · {label}
-        </span>
-      </div>
-      <div
-        className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-white/10"
-        role="meter"
-        aria-valuenow={score}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`Score de gravité ${score} sur 100`}
-      >
-        <div className={`h-full ${color}`} style={{ width: `${score}%` }} />
-      </div>
-    </div>
-  );
-}
+import { api, toErrorMessage } from "../api/client";
+import { PageHeader, ErrorBanner } from "../components/ui";
+import { useProjects } from "../hooks/ProjectsContext";
+import { GravityResult } from "./team/GravityResult";
 
 export function TeamPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { projects } = useProjects();
   const [members, setMembers] = useState<Member[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,9 +37,6 @@ export function TeamPage() {
     api.get<{ items: Member[] }>("/members").then((r) => setMembers(r.items));
 
   useEffect(() => {
-    void api
-      .get<Paginated<Project>>("/projects")
-      .then((r) => setProjects(r.items));
     void loadMembers();
   }, []);
 
@@ -86,7 +56,7 @@ export function TeamPage() {
       setSkills("");
       await loadMembers();
     } catch (err) {
-      setError(err instanceof RequestError ? err.message : "Erreur");
+      setError(toErrorMessage(err));
     }
   };
 
@@ -121,7 +91,7 @@ export function TeamPage() {
       setAssignMember("");
       await loadResourcing(projectId);
     } catch (err) {
-      setError(err instanceof RequestError ? err.message : "Erreur");
+      setError(toErrorMessage(err));
     }
   };
 
@@ -154,39 +124,27 @@ export function TeamPage() {
       );
       setAnalysis(r);
     } catch (err) {
-      setSimError(err instanceof RequestError ? err.message : "Erreur");
+      setSimError(toErrorMessage(err));
     }
-  };
-
-  const impactColor: Record<ResourceMoveAnalysis["netImpact"], string> = {
-    positive: "text-emerald-300",
-    neutral: "text-slate-300",
-    negative: "text-red-300",
   };
 
   return (
     <div>
-      <div className="mb-8">
-        <div className="pm-eyebrow">Équipe & ressources</div>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">
-          Gravité des déplacements
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-400">
-          Déclarez votre équipe, affectez-la aux projets, puis simulez l'impact
-          d'un déplacement : perte de vélocité, allongement de durée et perte
-          d'expertise sont estimés pour éviter les décisions coûteuses.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Équipe & ressources"
+        title="Gravité des déplacements"
+        subtitle="Déclarez votre équipe, affectez-la aux projets, puis simulez l'impact d'un déplacement : perte de vélocité, allongement de durée et perte d'expertise sont estimés pour éviter les décisions coûteuses."
+      />
 
       {error && (
-        <p role="alert" className="mb-4 text-sm text-red-300">
-          {error}
-        </p>
+        <div className="mb-4">
+          <ErrorBanner message={error} />
+        </div>
       )}
 
       {/* Membres */}
       <section className="pm-card mb-6 p-5">
-        <h2 className="text-lg font-semibold text-white">Membres</h2>
+        <h2 className="text-lg font-semibold text-heading">Membres</h2>
         <form onSubmit={onCreateMember} className="mt-4 flex flex-wrap items-end gap-4">
           <label className="flex min-w-[10rem] flex-1 flex-col">
             <span className="pm-label">Nom</span>
@@ -211,7 +169,7 @@ export function TeamPage() {
         </form>
 
         {members.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-4 text-sm text-muted">
             Aucun membre pour l'instant — ajoutez votre équipe ci-dessus.
           </p>
         ) : (
@@ -219,13 +177,13 @@ export function TeamPage() {
             {members.map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3"
               >
                 <div>
-                  <div className="font-semibold text-slate-100">{m.name}</div>
+                  <div className="font-semibold text-heading">{m.name}</div>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {m.skills.length === 0 ? (
-                      <span className="text-xs text-slate-500">—</span>
+                      <span className="text-xs text-faint">—</span>
                     ) : (
                       m.skills.map((s) => (
                         <span key={s} className="pm-chip text-xs">
@@ -250,7 +208,7 @@ export function TeamPage() {
 
       {/* Affectations */}
       <section className="pm-card mb-6 p-5">
-        <h2 className="text-lg font-semibold text-white">Affectations par projet</h2>
+        <h2 className="text-lg font-semibold text-heading">Affectations par projet</h2>
         <label className="mt-4 flex max-w-sm flex-col">
           <span className="pm-label">Projet</span>
           <select
@@ -269,9 +227,9 @@ export function TeamPage() {
 
         {projectId && resourcing && (
           <>
-            <div className="mt-4 overflow-hidden rounded-xl border border-white/5">
+            <div className="mt-4 overflow-hidden rounded-xl border border-line">
               <table className="w-full text-sm">
-                <thead className="bg-white/[0.03] text-left text-xs uppercase tracking-wide text-slate-400">
+                <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted">
                   <tr>
                     <th className="px-4 py-2">Membre</th>
                     <th className="px-4 py-2">Allocation</th>
@@ -282,16 +240,16 @@ export function TeamPage() {
                 <tbody>
                   {resourcing.members.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-3 text-slate-400">
+                      <td colSpan={4} className="px-4 py-3 text-muted">
                         Aucun membre affecté.
                       </td>
                     </tr>
                   ) : (
                     resourcing.members.map((m) => (
-                      <tr key={m.memberId} className="border-t border-white/5">
-                        <td className="px-4 py-2 text-slate-100">{m.name}</td>
-                        <td className="px-4 py-2 text-slate-300">{m.allocationPct}%</td>
-                        <td className="px-4 py-2 text-slate-300">{m.velocity}</td>
+                      <tr key={m.memberId} className="border-t border-line">
+                        <td className="px-4 py-2 text-heading">{m.name}</td>
+                        <td className="px-4 py-2 text-fg">{m.allocationPct}%</td>
+                        <td className="px-4 py-2 text-fg">{m.velocity}</td>
                         <td className="px-4 py-2 text-right">
                           <button
                             onClick={() => onUnassign(m.memberId)}
@@ -305,7 +263,7 @@ export function TeamPage() {
                   )}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t border-white/10 text-slate-200">
+                  <tr className="border-t border-line text-fg">
                     <td className="px-4 py-2 font-semibold">Vélocité totale</td>
                     <td />
                     <td className="px-4 py-2 font-mono">{resourcing.totalVelocity}</td>
@@ -361,10 +319,10 @@ export function TeamPage() {
 
       {/* Simulation de gravité */}
       <section className="pm-card p-5">
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold text-heading">
           Simuler un déplacement
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-muted">
           Estimez l'impact de retirer un membre d'un projet (et, en option, de
           l'affecter à un autre).
         </p>
@@ -426,75 +384,15 @@ export function TeamPage() {
         </form>
 
         {simError && (
-          <p role="alert" className="mt-3 text-sm text-red-300">
-            {simError}
-          </p>
-        )}
-
-        {analysis && (
-          <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-5">
-            <GravityGauge score={analysis.gravityScore} />
-
-            <p className="mt-4 text-sm text-slate-200">
-              <span className="font-semibold">{analysis.member}</span> —{" "}
-              <span className={impactColor[analysis.netImpact]}>
-                impact net {analysis.netImpact === "positive" ? "positif" : analysis.netImpact === "negative" ? "négatif" : "neutre"}
-              </span>
-            </p>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-white/5 p-4">
-                <div className="pm-eyebrow">Projet source · {analysis.from.projectName}</div>
-                <ul className="mt-2 space-y-1 text-sm text-slate-300">
-                  <li>
-                    Vélocité : {analysis.from.velocityBefore} →{" "}
-                    <span className="text-red-300">{analysis.from.velocityAfter}</span>{" "}
-                    (−{analysis.from.velocityLossPct}%)
-                  </li>
-                  <li>Durée estimée : +{analysis.from.durationIncreasePct}%</li>
-                  {analysis.from.skillsGap.length > 0 && (
-                    <li>
-                      Expertise perdue :{" "}
-                      {analysis.from.skillsGap.map((s) => (
-                        <span key={s} className="pm-chip ml-1 text-xs">
-                          {s}
-                        </span>
-                      ))}
-                    </li>
-                  )}
-                </ul>
-              </div>
-
-              {analysis.to && (
-                <div className="rounded-lg border border-white/5 p-4">
-                  <div className="pm-eyebrow">Projet cible · {analysis.to.projectName}</div>
-                  <ul className="mt-2 space-y-1 text-sm text-slate-300">
-                    <li>
-                      Vélocité : {analysis.to.velocityBefore} →{" "}
-                      <span className="text-emerald-300">{analysis.to.velocityAfter}</span>{" "}
-                      (+{analysis.to.velocityGainPct}%)
-                    </li>
-                    <li>Pleinement effectif après ~{analysis.to.effectiveAfterWeeks} sem.</li>
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4 rounded-lg border border-brand/20 bg-brand/5 p-4">
-              <div className="pm-eyebrow">Recommandation</div>
-              <p className="mt-1 text-sm text-slate-100">{analysis.recommendation}</p>
-              <p className="mt-2 text-xs text-slate-500">
-                Confiance : {Math.round(analysis.confidence * 100)}% ·{" "}
-                {analysis.confidence < 0.5
-                  ? "données de vélocité insuffisantes, estimation indicative"
-                  : "basée sur les vélocités déclarées"}
-              </p>
-            </div>
+          <div className="mt-3">
+            <ErrorBanner message={simError} />
           </div>
         )}
 
+        {analysis && <GravityResult analysis={analysis} />}
+
         {projects.length === 0 && (
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-4 text-sm text-muted">
             Créez d'abord un projet dans l'onglet « Projets », puis affectez-y des
             membres pour lancer une simulation.
           </p>

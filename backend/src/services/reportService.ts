@@ -1,12 +1,16 @@
 import type {
+  Methodology,
   Report as ReportDTO,
   ReportPeriod,
 } from "@projectmaster/shared";
+import { vocabOf } from "@projectmaster/shared";
 import { Between } from "typeorm";
 import { AppDataSource } from "../db/data-source.js";
 import { Report } from "../entities/Report.js";
 import { Signal } from "../entities/Signal.js";
 import * as anomalyService from "./anomalyService.js";
+import { getPlan } from "./planService.js";
+import { listRisks } from "./riskService.js";
 import { complete, isLLMEnabled } from "../llm/index.js";
 import { reportPrompt } from "../llm/prompts.js";
 
@@ -36,15 +40,18 @@ export async function generate(
   projectId: string,
   projectName: string,
   period: ReportPeriod,
+  methodology: Methodology = "kanban",
 ): Promise<ReportDTO> {
   const periodEnd = new Date();
   const periodStart = new Date(periodEnd);
   periodStart.setUTCDate(periodStart.getUTCDate() - PERIOD_DAYS[period]);
 
-  const signalCount = await signals().count({
-    where: { projectId, occurredAt: Between(periodStart, periodEnd) },
-  });
-  const anomalies = await anomalyService.listOpen(projectId);
+  const [signalCount, anomalies, plan, risks] = await Promise.all([
+    signals().count({ where: { projectId, occurredAt: Between(periodStart, periodEnd) } }),
+    anomalyService.listOpen(projectId),
+    getPlan(projectId),
+    listRisks(projectId),
+  ]);
 
   let summary: string | null = null;
   let generatedBy: "llm" | "heuristic" = "heuristic";
@@ -63,7 +70,9 @@ export async function generate(
     if (summary) generatedBy = "llm";
   }
 
-  if (!summary) summary = heuristicSummary(projectName, signalCount, anomalies);
+  if (!summary) {
+    summary = heuristicSummary(projectName, methodology, signalCount, anomalies, plan, risks);
+  }
 
   const saved = await reports().save(
     reports().create({
@@ -78,31 +87,68 @@ export async function generate(
   return toDTO(saved);
 }
 
+function fmtDate(iso?: string): string {
+  if (!iso) return "—";
+  return new Date(iso).toISOString().slice(0, 10);
+}
+
 function heuristicSummary(
   projectName: string,
+  methodology: Methodology,
   signalCount: number,
   anomalies: Awaited<ReturnType<typeof anomalyService.listOpen>>,
+  plan: Awaited<ReturnType<typeof getPlan>>,
+  risks: Awaited<ReturnType<typeof listRisks>>,
 ): string {
+  const v = vocabOf(methodology);
   const critical = anomalies.filter((a) => a.severity === "critical");
   const warning = anomalies.filter((a) => a.severity === "warning");
+  const lateMs = plan.milestones.filter((m) => m.atRisk);
+  const topRisks = risks.filter((r) => r.status !== "closed").slice(0, 5);
 
-  const lines: string[] = [
-    `## Synthèse — ${projectName}`,
-    "",
-    `Sur la période, ${signalCount} signaux ont été collectés et ` +
-      `${anomalies.length} anomalie(s) restent ouvertes ` +
+  // En-tête normé selon la méthodologie (Highlight PRINCE2, burndown Scrum, …).
+  const lines: string[] = [`## ${v.report} — ${projectName}`, `*Méthodologie : ${v.label}*`, ""];
+
+  lines.push("**État**");
+  lines.push(
+    `- ${signalCount} signaux sur la période · ${anomalies.length} ${v.milestone === "étape" ? "point(s) d'attention" : "anomalie(s)"} ouverte(s) ` +
       `(${critical.length} critique(s), ${warning.length} à surveiller).`,
-    "",
-    "**Points d'attention**",
-  ];
-  if (anomalies.length === 0) {
-    lines.push("- Aucun — le projet est nominal.");
+  );
+
+  lines.push("", "**Date de livraison prévue**");
+  if (plan.delivery.weeks === null) {
+    lines.push(`- ${plan.delivery.note ?? "Non calculable (vélocité manquante)."}`);
+  } else if (plan.delivery.weeks === 0) {
+    lines.push(`- ${plan.delivery.note ?? "Terminé."}`);
   } else {
-    for (const a of anomalies.slice(0, 5)) lines.push(`- ${a.explanation}`);
+    lines.push(
+      `- ${fmtDate(plan.delivery.expected)} (entre ${fmtDate(plan.delivery.optimistic)} et ` +
+        `${fmtDate(plan.delivery.pessimistic)}) · confiance ${Math.round(plan.delivery.confidence * 100)}%.`,
+    );
   }
+  if (lateMs.length > 0) {
+    lines.push(
+      `- ⚠ ${lateMs.length} ${lateMs.length > 1 ? v.milestonePlural : v.milestone} en retard probable : ` +
+        lateMs.map((m) => m.name).join(", ") + ".",
+    );
+  }
+
+  lines.push("", "**Risques majeurs**");
+  if (topRisks.length === 0) {
+    lines.push("- Aucun risque ouvert au registre.");
+  } else {
+    for (const r of topRisks) {
+      lines.push(`- [${r.severity}] ${r.title} (score ${r.score}${r.owner ? `, ${r.owner}` : ""}).`);
+    }
+  }
+
+  lines.push("", "**Points d'attention**");
+  if (anomalies.length === 0) lines.push("- Aucun — le projet est nominal.");
+  else for (const a of anomalies.slice(0, 5)) lines.push(`- ${a.explanation}`);
+
   lines.push("", "**Recommandations**");
-  if (critical.length > 0) {
-    lines.push("- Traiter en priorité les anomalies critiques.");
+  if (critical.length > 0 || lateMs.length > 0) {
+    lines.push("- Traiter en priorité les points critiques et les retards probables.");
     lines.push("- Consulter les décisions des agents Analyst et Planner.");
   } else {
     lines.push("- Maintenir le rythme ; aucune action urgente.");

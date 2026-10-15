@@ -1,10 +1,13 @@
 import { AppDataSource } from "../db/data-source.js";
 import { Project } from "../entities/Project.js";
-import { fetchRepoSignals } from "../connectors/github.js";
+import { githubConnector } from "../connectors/github.js";
+import { getConnector } from "../connectors/index.js";
+import { resolveContext } from "./connectorConfigService.js";
 import * as signalService from "./signalService.js";
 import * as anomalyService from "./anomalyService.js";
 import { runAgents } from "../agents/orchestrator.js";
-import { notifyAnomaly } from "./notificationService.js";
+import { notifyAnomaly, notifyPendingDecisions } from "./notificationService.js";
+import type { IngestSignal } from "./signalService.js";
 import { AppError } from "../middleware/errorHandler.js";
 
 export interface SyncResult {
@@ -22,9 +25,21 @@ export async function syncProject(projectId: string): Promise<SyncResult> {
     where: { id: projectId },
   });
   if (!project) throw new AppError(404, "not_found", "Projet introuvable");
-  if (!project.repo) throw new AppError(400, "no_repo", "Aucun dépôt associé");
 
-  const signals = await fetchRepoSignals(project.id, project.repo);
+  // Dispatch : connecteur configuré pour le projet, sinon GitHub via `repo`
+  // (rétro-compatibilité). Aucune source → erreur explicite.
+  let signals: IngestSignal[];
+  const configured = await resolveContext(project.id);
+  if (configured) {
+    signals = await getConnector(configured.provider).fetchSignals(configured.ctx);
+  } else if (project.repo) {
+    signals = await githubConnector.fetchSignals({
+      projectId: project.id,
+      settings: { repo: project.repo },
+    });
+  } else {
+    throw new AppError(400, "no_source", "Aucune source de données (dépôt ou connecteur)");
+  }
   const ingested = await signalService.ingest(signals);
 
   const metrics = await signalService.dailyCounts(
@@ -43,6 +58,12 @@ export async function syncProject(projectId: string): Promise<SyncResult> {
   }
 
   const decisions = await runAgents(project.id);
+
+  // Notifie les décisions nécessitant une approbation (Slack, best-effort).
+  const pending = decisions
+    .filter((d) => d.status === "pending_approval")
+    .map((d) => ({ id: d.id, title: d.title }));
+  await notifyPendingDecisions(project, pending);
 
   return { ingested, anomalyDetected, decisions: decisions.length };
 }
