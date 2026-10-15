@@ -18,31 +18,31 @@ interface Card {
 }
 
 const previewCards: Card[] = [
-  { icon: "bolt", title: "Détecte", desc: "Signaux & anomalies, en continu" },
-  { icon: "bot", title: "Agit", desc: "4 agents qui décident" },
-  { icon: "report", title: "Synthétise", desc: "Rapports IA en 1 clic" },
+  { icon: "trending", title: "Anticipe", desc: "Les retards repérés avant l'échéance" },
+  { icon: "check", title: "Priorise", desc: "Ce qu'il faut traiter aujourd'hui" },
+  { icon: "report", title: "Rend compte", desc: "Comptes rendus prêts en 1 clic" },
   { icon: "shield", title: "Protège", desc: "Chiffré · RGPD natif" },
 ];
 
 const steps: Card[] = [
-  { icon: "branch", title: "Connectez votre dépôt", desc: "Reliez GitHub en un clic — aucune configuration lourde." },
-  { icon: "search", title: "Aperio analyse", desc: "Les signaux sont collectés et les anomalies détectées en continu." },
-  { icon: "rocket", title: "Les agents agissent", desc: "Diagnostic, plan d'action et rapport, prêts à valider." },
+  { icon: "branch", title: "Connectez vos outils", desc: "GitHub, GitLab, Jira, Confluence, Notion — ou importez vos documents (PDF, Word)." },
+  { icon: "search", title: "Aperio surveille", desc: "L'avancement est suivi en continu ; retards et risques sont détectés tôt." },
+  { icon: "rocket", title: "Vous gardez le contrôle", desc: "Briefing du jour, date de livraison prévue et comptes rendus, prêts à valider." },
 ];
 
 const features: Card[] = [
-  { icon: "bolt", title: "Signaux en temps réel", desc: "Commits, PRs et issues collectés en continu via vos connecteurs." },
-  { icon: "trending", title: "Détection d'anomalies", desc: "Un score statistique robuste repère les dérapages avant qu'ils ne coûtent." },
-  { icon: "bot", title: "4 agents autonomes", desc: "Monitor, Analyst, Planner et Reporter surveillent, diagnostiquent et agissent." },
-  { icon: "report", title: "Synthèses par IA", desc: "Rapports hebdo et mensuels générés et prêts à partager." },
-  { icon: "shield", title: "Sécurisé & RGPD", desc: "JWT, chiffrement au repos, export et effacement des données natifs." },
-  { icon: "check", title: "Simple à utiliser", desc: "Reliez un dépôt, cliquez sur Synchroniser : le reste est automatique." },
+  { icon: "trending", title: "Date de livraison prévue", desc: "Une estimation d'échéance avec niveau de confiance, mise à jour au fil du projet." },
+  { icon: "bolt", title: "Alerte avant le retard", desc: "Les jalons qui vont déraper sont signalés tôt — pas une fois le retard constaté." },
+  { icon: "check", title: "Briefing quotidien", desc: "Chaque matin, l'essentiel à traiter, priorisé, avec l'action directe." },
+  { icon: "report", title: "Comptes rendus & rapports", desc: "Suivi d'avancement et synthèses prêts à partager, en un clic." },
+  { icon: "bot", title: "Votre méthodologie", desc: "Kanban, Scrum, PRINCE2 ou SAFe : le vocabulaire s'adapte à votre cadre." },
+  { icon: "shield", title: "Sécurisé & RGPD", desc: "Chiffrement au repos, journal d'audit, export et effacement des données natifs." },
 ];
 
 const stats = [
-  { value: "4", label: "agents" },
-  { value: "90%+", label: "précision" },
-  { value: "< 5s", label: "décision" },
+  { value: "6", label: "sources" },
+  { value: "24/7", label: "surveillance" },
+  { value: "1 clic", label: "rapport" },
   { value: "€0–15", label: "/ mois" },
 ];
 
@@ -108,15 +108,15 @@ export function LandingPage() {
       {/* Hero */}
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-16 lg:grid-cols-2 lg:pt-24">
         <div>
-          <span className="pm-eyebrow mb-6">Plateforme IA autonome</span>
+          <span className="pm-eyebrow mb-6">Pour les chefs de projet</span>
           <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-heading sm:text-6xl">
-            Vos projets,{" "}
-            <span className="pm-gradient-text">pilotés par l'IA.</span>
+            Gardez vos projets sous contrôle.{" "}
+            <span className="pm-gradient-text">Soyez prévenu avant les retards.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted">
-            Aperio détecte les signaux faibles en continu et déploie des
-            agents autonomes qui diagnostiquent, planifient et rendent compte —
-            avant que le retard n'arrive.
+            Aperio suit l'avancement de vos projets, repère les dérapages avant
+            l'échéance et prépare vos comptes rendus. Vous arrivez en réunion
+            avec une longueur d'avance.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to={primaryTo} className="pm-btn-primary px-6 py-3 text-base">
@@ -185,7 +185,7 @@ export function LandingPage() {
         <SectionHead
           num="01"
           eyebrow="Fonctionnement"
-          title="Du dépôt au rapport,"
+          title="De vos outils au pilotage,"
           grad="en 3 étapes."
           sub="Sans friction, sans configuration lourde."
         />
@@ -214,9 +214,9 @@ export function LandingPage() {
         <SectionHead
           num="02"
           eyebrow="Capacités"
-          title="Tout ce qu'il faut,"
+          title="Tout pour piloter vos projets,"
           grad="au même endroit."
-          sub="Des fonctionnalités puissantes, réunies dans une interface claire."
+          sub="L'essentiel du pilotage, réuni dans une interface claire."
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (

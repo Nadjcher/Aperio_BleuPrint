@@ -11,9 +11,9 @@ export function ModeToggle() {
     if (m !== mode) void dispatch(setUiMode(m));
   };
 
-  const options: { value: UiMode; label: string }[] = [
-    { value: "simple", label: "Simple" },
-    { value: "expert", label: "Expert" },
+  const options: { value: UiMode; label: string; hint: string }[] = [
+    { value: "simple", label: "Simple", hint: "Libellés métier — l'essentiel (recommandé)" },
+    { value: "expert", label: "Expert", hint: "Termes techniques — tout le détail" },
   ];
 
   return (
@@ -30,6 +30,7 @@ export function ModeToggle() {
             type="button"
             onClick={() => choose(o.value)}
             aria-pressed={active}
+            title={o.hint}
             className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
               active
                 ? "bg-brand/20 text-heading ring-1 ring-inset ring-link/30"

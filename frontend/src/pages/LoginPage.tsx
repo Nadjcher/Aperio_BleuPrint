@@ -40,7 +40,7 @@ export function LoginPage() {
             </span>
           </div>
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
-            Plateforme IA autonome
+            Le pilotage de projet, sous contrôle
           </p>
         </div>
 
@@ -141,7 +141,7 @@ export function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted">
-          Signaux en temps réel · Détection d'anomalies · 4 agents autonomes
+          Date de livraison prévue · Alerte avant le retard · Comptes rendus en 1 clic
         </p>
       </div>
     </div>
