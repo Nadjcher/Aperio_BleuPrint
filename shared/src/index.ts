@@ -19,3 +19,4 @@ export * from "./risk.js";
 export * from "./connector.js";
 export * from "./notifications.js";
 export * from "./meeting.js";
+export * from "./portfolio.js";
