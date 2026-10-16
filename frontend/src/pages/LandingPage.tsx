@@ -18,12 +18,25 @@ interface Card {
   desc: string;
 }
 
-const previewCards: Card[] = [
-  { icon: "trending", title: "Anticipe", desc: "Les retards repérés avant l'échéance" },
-  { icon: "check", title: "Priorise", desc: "Ce qu'il faut traiter aujourd'hui" },
-  { icon: "report", title: "Rend compte", desc: "Comptes rendus prêts en 1 clic" },
-  { icon: "shield", title: "Protège", desc: "Chiffré · RGPD natif" },
+// Lignes du « briefing du matin » : ce qu'Aperio a détecté seul, sans qu'on
+// lui demande. Rend la surveillance proactive concrète dès le hero.
+interface BriefLine {
+  state: "rouge" | "orange" | "vert";
+  text: string;
+}
+
+const briefLines: BriefLine[] = [
+  { state: "rouge", text: "1 risque critique : chute d'activité détectée sur « Refonte e-commerce »" },
+  { state: "orange", text: "2 jalons vont glisser — Sprint 3 surchargé (33 pts restants)" },
+  { state: "rouge", text: "1 brique en retard en bloque 2 autres dans le portefeuille" },
+  { state: "vert", text: "Compte rendu du comité de pilotage prêt à valider" },
 ];
+
+const STATE_DOT: Record<BriefLine["state"], string> = {
+  rouge: "bg-rose-500",
+  orange: "bg-amber-500",
+  vert: "bg-emerald-500",
+};
 
 const steps: Card[] = [
   { icon: "branch", title: "Connectez vos outils", desc: "GitHub, GitLab, Jira, Confluence, Notion — ou importez vos documents (PDF, Word)." },
@@ -116,76 +129,105 @@ export function LandingPage() {
         <div>
           <span className="pm-eyebrow mb-6">Pour les chefs de projet</span>
           <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-heading sm:text-6xl">
-            Gardez vos projets sous contrôle.{" "}
-            <span className="pm-gradient-text">Soyez prévenu avant les retards.</span>
+            Chaque matin, Aperio vous dit{" "}
+            <span className="pm-gradient-text">ce qui va déraper — avant que ça arrive.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted">
-            Aperio suit l'avancement de vos projets, repère les dérapages avant
-            l'échéance et prépare vos comptes rendus. Vous arrivez en réunion
-            avec une longueur d'avance.
+            Aperio surveille vos projets en continu, repère les retards et les
+            risques avant l'échéance, et prépare vos comptes rendus. Vous
+            ouvrez votre tableau de bord : l'essentiel à traiter est déjà là.
           </p>
+
+          {/* Réponse directe à l'objection « un assistant IA fait déjà ça ». */}
+          <div className="mt-6 max-w-xl rounded-lg border border-blue-400/15 bg-surface/60 p-4">
+            <p className="text-sm text-fg">
+              <span className="font-semibold text-heading">Un assistant répond quand vous le sollicitez.</span>{" "}
+              Aperio travaille sans qu'on lui demande : il surveille 24/7, garde
+              l'historique de chaque projet et vous alerte de lui-même.
+            </p>
+          </div>
+
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to={primaryTo} className="pm-btn-primary px-6 py-3 text-base">
-              {primaryLabel} →
-            </Link>
-            {!authed && (
-              <button
-                onClick={onDemo}
-                disabled={demoLoading}
-                className="pm-btn-ghost px-6 py-3 text-base"
-              >
-                {demoLoading ? "Préparation de la démo…" : "▶ Voir une démo complète"}
-              </button>
+            {!authed ? (
+              <>
+                <button
+                  onClick={onDemo}
+                  disabled={demoLoading}
+                  className="pm-btn-primary px-6 py-3 text-base"
+                >
+                  {demoLoading ? "Préparation de la démo…" : "▶ Voir une démo complète"}
+                </button>
+                <Link to={primaryTo} className="pm-btn-ghost px-6 py-3 text-base">
+                  Commencer gratuitement →
+                </Link>
+              </>
+            ) : (
+              <Link to={primaryTo} className="pm-btn-primary px-6 py-3 text-base">
+                {primaryLabel} →
+              </Link>
             )}
-            <a href="#how" className="pm-btn-ghost px-6 py-3 text-base">
-              Comment ça marche
-            </a>
           </div>
           {!authed && (
             <p className="mt-3 font-mono text-xs text-muted">
-              Essai immédiat · 1 projet · sans e-mail — créez un compte ensuite pour continuer
+              Démo instantanée · compte pré-rempli · sans e-mail ni carte bancaire
             </p>
           )}
           <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-muted">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 animate-pulseGlow rounded-full bg-brand-400 shadow-[0_0_8px_2px_rgba(56,189,248,0.6)]" />
-              Sans carte bancaire
+              Surveillance 24/7
             </span>
             <span>Prêt en 2 min</span>
           </div>
         </div>
 
-        {/* Aperçu produit — cadre blueprint avec repères d'angle */}
+        {/* Aperçu produit — le « briefing du matin » tel qu'Aperio le présente,
+            pour montrer concrètement la détection proactive. */}
         <div className="pm-card relative p-5">
           <div className="mb-4 flex items-center justify-between border-b border-blue-400/10 pb-3">
             <div className="flex items-center gap-2">
               <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-gradient-to-br from-brand-500 to-accent-600">
                 <span className="h-1.5 w-1.5 rounded-[2px] bg-white/90" />
               </span>
-              <span className="text-sm font-semibold text-fg">Aperio</span>
+              <span className="text-sm font-semibold text-fg">Briefing du matin</span>
             </div>
             <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
               live
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {previewCards.map((c) => (
-              <div key={c.title} className="rounded-lg border border-blue-400/10 bg-surface p-4">
-                <IconBox icon={c.icon} size="sm" />
-                <div className="mt-3 text-sm font-semibold text-heading">{c.title}</div>
-                <div className="mt-0.5 text-xs text-muted">{c.desc}</div>
-              </div>
+
+          <p className="mb-3 text-sm text-fg">
+            Pendant votre absence, Aperio a détecté{" "}
+            <span className="font-semibold text-heading">3 points à traiter</span>.
+          </p>
+
+          <ul className="space-y-2">
+            {briefLines.map((l) => (
+              <li
+                key={l.text}
+                className="flex items-start gap-2.5 rounded-lg border border-blue-400/10 bg-surface p-3"
+              >
+                <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${STATE_DOT[l.state]}`} />
+                <span className="text-xs leading-relaxed text-fg">{l.text}</span>
+              </li>
             ))}
-          </div>
-          <div className="mt-3 grid grid-cols-4 gap-2 rounded-lg border border-blue-400/10 bg-white/[0.015] p-3 text-center">
-            {stats.map((s) => (
-              <div key={s.label}>
-                <div className="pm-gradient-text font-mono text-base font-bold">{s.value}</div>
-                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-muted">
-                  {s.label}
+          </ul>
+
+          <div className="mt-3 flex items-center justify-between rounded-lg border border-blue-400/10 bg-white/[0.015] p-3">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-wide text-muted">Santé du portefeuille</div>
+              <div className="pm-gradient-text font-mono text-xl font-bold">59 / 100</div>
+            </div>
+            <div className="flex gap-4 text-center">
+              {stats.slice(0, 3).map((s) => (
+                <div key={s.label}>
+                  <div className="font-mono text-sm font-bold text-heading">{s.value}</div>
+                  <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-muted">
+                    {s.label}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
