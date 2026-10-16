@@ -1,5 +1,7 @@
+import { Suspense, lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { Loading } from "./components/ui";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -15,6 +17,11 @@ import { PlanningPage } from "./pages/PlanningPage";
 import { RisksPage } from "./pages/RisksPage";
 import { MinutesPage } from "./pages/MinutesPage";
 import { IntegrationsPage } from "./pages/IntegrationsPage";
+
+// Carte du portefeuille : chargée à la demande (isole React Flow du bundle initial).
+const PortfolioMapPage = lazy(() =>
+  import("./pages/PortfolioMapPage").then((m) => ({ default: m.PortfolioMapPage })),
+);
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -35,6 +42,14 @@ export const router = createBrowserRouter([
         children: [
           { path: "/dashboard", element: <DashboardPage /> },
           { path: "/projects", element: <ProjectsPage /> },
+          {
+            path: "/portfolio",
+            element: (
+              <Suspense fallback={<Loading />}>
+                <PortfolioMapPage />
+              </Suspense>
+            ),
+          },
           { path: "/projects/:id", element: <ProjectDetailPage /> },
           { path: "/projects/:id/planning", element: <PlanningPage /> },
           { path: "/projects/:id/risks", element: <RisksPage /> },

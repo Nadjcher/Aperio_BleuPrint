@@ -44,6 +44,9 @@ export function Layout() {
               <NavLink to="/projects" className={linkClass}>
                 Projets
               </NavLink>
+              <NavLink to="/portfolio" className={linkClass}>
+                Portefeuille
+              </NavLink>
               <NavLink to="/team" className={linkClass}>
                 Équipe
               </NavLink>

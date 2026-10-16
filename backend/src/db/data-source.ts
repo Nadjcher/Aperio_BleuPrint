@@ -23,6 +23,8 @@ import { Risk } from "../entities/Risk.js";
 import { ConnectorConfig } from "../entities/ConnectorConfig.js";
 import { NotificationSetting } from "../entities/NotificationSetting.js";
 import { Minutes } from "../entities/Minutes.js";
+import { Block } from "../entities/Block.js";
+import { BlockLink } from "../entities/BlockLink.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -61,6 +63,8 @@ export const AppDataSource = new DataSource({
     ConnectorConfig,
     NotificationSetting,
     Minutes,
+    Block,
+    BlockLink,
   ],
   // Chemin résolu depuis ce module (et non le cwd) : robuste quel que soit le
   // répertoire de lancement. En prod → dist/migrations/*.js, en dev → *.ts.

@@ -26,6 +26,7 @@ import { risksRouter } from "./routes/risks.js";
 import { connectorsRouter } from "./routes/connectors.js";
 import { documentsRouter } from "./routes/documents.js";
 import { minutesRouter } from "./routes/minutes.js";
+import { portfolioRouter } from "./routes/portfolio.js";
 
 export function createApp(): Express {
   const app = express();
@@ -67,6 +68,7 @@ export function createApp(): Express {
   api.use(risksRouter);
   api.use(connectorsRouter);
   api.use(minutesRouter);
+  api.use(portfolioRouter);
   app.use("/api/v1", api);
 
   app.use(notFound);
