@@ -40,6 +40,10 @@ export class Block {
   @Column({ type: "varchar", length: 300, nullable: true })
   sourceRef!: string | null;
 
+  /** URL externe « Ouvrir dans … » construite à l'import. */
+  @Column({ type: "varchar", length: 500, nullable: true })
+  sourceUrl!: string | null;
+
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

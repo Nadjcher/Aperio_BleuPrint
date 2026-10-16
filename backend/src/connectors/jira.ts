@@ -10,6 +10,7 @@ export interface JiraIssue {
     status?: { name: string } | null;
     created: string;
     creator?: { displayName: string } | null;
+    duedate?: string | null;
   };
 }
 export interface JiraSearchResponse {
@@ -24,7 +25,12 @@ export function mapJira(projectId: string, issues: JiraIssue[]): IngestSignal[] 
     type: "issue" as const,
     occurredAt: new Date(i.fields.created),
     actor: i.fields.creator?.displayName ?? null,
-    payload: { key: i.key, title: i.fields.summary, state: i.fields.status?.name ?? "unknown" },
+    payload: {
+      key: i.key,
+      title: i.fields.summary,
+      state: i.fields.status?.name ?? "unknown",
+      due: i.fields.duedate ?? null,
+    },
   }));
 }
 
@@ -40,7 +46,7 @@ export const jiraConnector: Connector = {
     // Jira Cloud : authentification Basic email:token.
     const auth = Buffer.from(`${email}:${ctx.token}`).toString("base64");
     const jql = encodeURIComponent(`project="${projectKey}" ORDER BY created DESC`);
-    const url = `${host}/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,status,created,creator`;
+    const url = `${host}/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,status,created,creator,duedate`;
     const data = await httpJson<JiraSearchResponse>(
       url,
       { headers: { Authorization: `Basic ${auth}`, Accept: "application/json" } },

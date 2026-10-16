@@ -1,7 +1,7 @@
 /** Carte du portefeuille : briques, dépendances et états calculés. */
 
 export type BlockState = "vert" | "orange" | "rouge";
-export type BlockSource = "jira" | "github" | "manuel";
+export type BlockSource = "jira" | "github" | "gitlab" | "linear" | "manuel";
 export type LinkType = "depends_on" | "touches";
 
 /** Une brique du portefeuille (API, application, lot…). */
@@ -18,6 +18,8 @@ export interface Block {
   lastActivityAt: string | null;
   source: BlockSource;
   sourceRef: string | null;
+  /** URL externe « Ouvrir dans … » (construite à l'import), nullable. */
+  sourceUrl: string | null;
 }
 
 /** Lien typé entre deux briques (fromId dépend de toId pour DEPENDS_ON). */
