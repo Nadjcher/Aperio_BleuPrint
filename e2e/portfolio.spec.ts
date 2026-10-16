@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import { API, authenticate, registerUser } from "./helpers";
 
 /** Crée une brique via l'API et renvoie son id. */
@@ -84,6 +85,13 @@ test.describe("Carte du portefeuille", () => {
     await page.waitForSelector(".react-flow__node", { timeout: 8000 });
     const nodes = await page.locator(".react-flow__node").count();
     expect(nodes).toBeGreaterThanOrEqual(2);
+
+    // Accessibilité (axe) : la carte réelle ne doit pas comporter de violation grave.
+    const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+    const blocking = axe.violations.filter(
+      (v) => v.impact === "serious" || v.impact === "critical",
+    );
+    expect(blocking, blocking.map((b) => b.id).join(", ")).toEqual([]);
 
     // Clic sur la brique -> panneau latéral avec la raison (texte propre au panneau).
     await page.locator(".react-flow__node", { hasText: "Référentiel client" }).first().click();
