@@ -15,6 +15,7 @@ function block(id: string, over: Partial<Block> = {}): Block {
     lastActivityAt: null,
     source: "manuel",
     sourceRef: null,
+    sourceUrl: null,
     ...over,
   };
 }

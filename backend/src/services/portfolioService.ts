@@ -14,6 +14,7 @@ import { AppError } from "../errors/index.js";
 import { getOwnedProject, listProjects } from "./projectService.js";
 import { resolveContext } from "./connectorConfigService.js";
 import { getConnector } from "../connectors/index.js";
+import { isImportableProvider, mapImportedBlock, providerToSource } from "./portfolioImport.js";
 
 const blocks = () => AppDataSource.getRepository(Block);
 const links = () => AppDataSource.getRepository(BlockLink);
@@ -29,6 +30,7 @@ function toBlockDTO(b: Block): BlockDTO {
     lastActivityAt: b.lastActivityAt ? b.lastActivityAt.toISOString() : null,
     source: b.source,
     sourceRef: b.sourceRef,
+    sourceUrl: b.sourceUrl,
   };
 }
 function toLinkDTO(l: BlockLink): BlockLinkDTO {
@@ -196,11 +198,14 @@ export async function importFromConnector(
   if (!configured) {
     throw new AppError(400, "no_connector", "Aucun connecteur configuré pour ce projet");
   }
-  const src = configured.provider;
-  if (src !== "jira" && src !== "github") {
-    throw new AppError(400, "unsupported_source", "Import de briques : seuls Jira et GitHub sont pris en charge");
+  if (!isImportableProvider(configured.provider)) {
+    throw new AppError(
+      400,
+      "unsupported_source",
+      "Import de briques : seuls GitHub, GitLab, Jira et Linear sont pris en charge",
+    );
   }
-  const source: BlockSource = src;
+  const source: BlockSource = providerToSource(configured.provider);
 
   const signals = await getConnector(configured.provider).fetchSignals(configured.ctx);
   const candidates = signals
@@ -210,27 +215,31 @@ export async function importFromConnector(
   let imported = 0;
   let updated = 0;
   for (const s of candidates) {
-    const payload = (s.payload ?? {}) as { key?: string; title?: string };
-    const sourceRef = payload.key ? String(payload.key) : null;
-    if (!sourceRef) continue;
-    const name = (payload.title ?? sourceRef).slice(0, 200);
-    const existing = await blocks().findOne({ where: { projectId, source, sourceRef } });
+    const fields = mapImportedBlock(configured.provider, configured.ctx.settings, s);
+    if (!fields) continue;
+    const existing = await blocks().findOne({
+      where: { projectId, source, sourceRef: fields.sourceRef },
+    });
     if (existing) {
-      existing.name = name;
+      existing.name = fields.name;
       existing.lastActivityAt = s.occurredAt;
+      existing.sourceUrl = fields.sourceUrl;
+      // On ne remplace une échéance que si l'import en fournit une.
+      if (fields.targetDate) existing.targetDate = fields.targetDate;
       await blocks().save(existing);
       updated++;
     } else {
       await blocks().save(
         blocks().create({
           projectId,
-          name,
-          type: s.type === "pull_request" ? "PR" : "issue",
+          name: fields.name,
+          type: fields.type,
           ownerId: null,
-          targetDate: null,
+          targetDate: fields.targetDate,
           lastActivityAt: s.occurredAt,
           source,
-          sourceRef,
+          sourceRef: fields.sourceRef,
+          sourceUrl: fields.sourceUrl,
         }),
       );
       imported++;

@@ -7,17 +7,18 @@ const STATE_TEXT: Record<BlockState, string> = {
   rouge: "text-danger",
 };
 
-/** Construit l'URL « Ouvrir dans … » à partir de la source et de la référence. */
+const SOURCE_LABEL: Record<string, string> = {
+  github: "GitHub",
+  gitlab: "GitLab",
+  jira: "Jira",
+  linear: "Linear",
+};
+
+/** Lien « Ouvrir dans … » : l'URL est construite à l'import (block.sourceUrl). */
 function externalLink(b: BlockWithState): { label: string; href: string } | null {
-  if (!b.sourceRef) return null;
-  if (b.source === "github") {
-    return { label: "Ouvrir dans GitHub", href: `https://github.com/${b.sourceRef}` };
-  }
-  if (b.source === "jira") {
-    // La référence est une clé Jira (ex. ABC-123) ; lien de recherche générique.
-    return { label: "Ouvrir dans Jira", href: `https://www.google.com/search?q=Jira+${encodeURIComponent(b.sourceRef)}` };
-  }
-  return null;
+  if (!b.sourceUrl) return null;
+  const label = SOURCE_LABEL[b.source] ?? "la source";
+  return { label: `Ouvrir dans ${label}`, href: b.sourceUrl };
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
