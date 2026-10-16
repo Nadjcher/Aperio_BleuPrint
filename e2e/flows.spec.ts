@@ -220,6 +220,24 @@ test.describe("Parcours principaux", () => {
     expect(m.summary.length).toBeGreaterThan(0);
   });
 
+  test("démo : compte pré-rempli (dashboard et portefeuille peuplés)", async ({ request }) => {
+    const res = await request.post(`${API}/api/v1/demo`);
+    expect(res.status()).toBe(201);
+    const { tokens } = await res.json();
+    const h = { authorization: `Bearer ${tokens.accessToken}` };
+
+    // Le briefing contient de vrais éléments (anomalie critique + jalons en retard).
+    const briefing = await (await request.get(`${API}/api/v1/briefing`, { headers: h })).json();
+    expect(briefing.items.length).toBeGreaterThan(0);
+    expect(briefing.counts.critical).toBeGreaterThanOrEqual(1);
+
+    // La carte du portefeuille est peuplée avec du rouge qui en bloque d'autres.
+    const map = await (await request.get(`${API}/api/v1/portfolio/map`, { headers: h })).json();
+    expect(map.blocks.length).toBeGreaterThanOrEqual(5);
+    expect(map.blockers.length).toBeGreaterThanOrEqual(1);
+    expect(map.headline).toContain("bloque");
+  });
+
   test("RGPD : export des données de l'utilisateur", async ({ page }) => {
     const user = await registerUser(page);
     const res = await page.request.get(`${API}/api/v1/gdpr/export`, {

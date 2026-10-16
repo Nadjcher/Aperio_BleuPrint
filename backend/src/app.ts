@@ -27,6 +27,7 @@ import { connectorsRouter } from "./routes/connectors.js";
 import { documentsRouter } from "./routes/documents.js";
 import { minutesRouter } from "./routes/minutes.js";
 import { portfolioRouter } from "./routes/portfolio.js";
+import { demoRouter } from "./routes/demo.js";
 
 export function createApp(): Express {
   const app = express();
@@ -51,6 +52,9 @@ export function createApp(): Express {
   // API versionnée et limitée en débit.
   const api = express.Router();
   api.use(globalRateLimiter);
+  // Routes publiques d'abord : les routeurs suivants appliquent requireAuth en
+  // amont (router.use) et bloqueraient sinon /demo (401).
+  api.use(demoRouter);
   api.use(authRouter);
   api.use(projectsRouter);
   api.use(signalsRouter);

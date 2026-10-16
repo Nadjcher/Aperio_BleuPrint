@@ -46,6 +46,13 @@ export const guest = createAsyncThunk("auth/guest", async () => {
   return res.user;
 });
 
+/** Compte de démonstration pré-rempli (voir la valeur en 10 s, sans config). */
+export const demo = createAsyncThunk("auth/demo", async () => {
+  const res = await api.post<AuthResponse>("/demo");
+  tokenStore.set(res.tokens);
+  return res.user;
+});
+
 export const upgrade = createAsyncThunk(
   "auth/upgrade",
   async (body: RegisterRequest) => {
@@ -97,6 +104,11 @@ const authSlice = createSlice({
       .addCase(register.rejected, (s, a) => {
         s.status = "error";
         s.error = a.error.message ?? "Échec d'inscription";
+      })
+      .addCase(demo.fulfilled, (s, a) => {
+        s.status = "authenticated";
+        s.user = a.payload;
+        s.error = null;
       })
       .addCase(guest.fulfilled, (s, a) => {
         s.status = "authenticated";
