@@ -25,6 +25,7 @@ import { NotificationSetting } from "../entities/NotificationSetting.js";
 import { Minutes } from "../entities/Minutes.js";
 import { Block } from "../entities/Block.js";
 import { BlockLink } from "../entities/BlockLink.js";
+import { UserDigestPreference } from "../entities/UserDigestPreference.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -65,6 +66,7 @@ export const AppDataSource = new DataSource({
     Minutes,
     Block,
     BlockLink,
+    UserDigestPreference,
   ],
   // Chemin résolu depuis ce module (et non le cwd) : robuste quel que soit le
   // répertoire de lancement. En prod → dist/migrations/*.js, en dev → *.ts.

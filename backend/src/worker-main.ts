@@ -6,6 +6,7 @@ import { logger } from "./utils/logger.js";
 import { registry } from "./observability/metrics.js";
 import { startWorker, stopWorker } from "./workers/worker.js";
 import { startMaintenance, stopMaintenance } from "./services/maintenanceService.js";
+import { startDigestScheduler, stopDigestScheduler } from "./services/digestScheduler.js";
 
 /**
  * Petit serveur HTTP dédié aux sondes : le worker n'a pas d'API, mais Prometheus
@@ -75,11 +76,13 @@ async function main(): Promise<void> {
   await waitForSchema();
   startWorker();
   startMaintenance();
+  startDigestScheduler();
 
   const shutdown = (signal: string): void => {
     logger.info({ signal }, "Arrêt du worker en cours");
     stopWorker();
     stopMaintenance();
+    stopDigestScheduler();
     metricsServer?.close();
     void AppDataSource.destroy().then(() => process.exit(0));
   };

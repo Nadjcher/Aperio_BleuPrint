@@ -238,6 +238,39 @@ test.describe("Parcours principaux", () => {
     expect(map.headline).toContain("bloque");
   });
 
+  test("briefing : configuration des canaux et envoi (secrets non exposés)", async ({ page }) => {
+    const user = await registerUser(page);
+    const h = { authorization: `Bearer ${user.access}` };
+
+    // Config : e-mail + Slack, quotidien à 7h UTC.
+    const put = await page.request.put(`${API}/api/v1/digest`, {
+      headers: h,
+      data: {
+        channels: ["email", "slack"],
+        frequency: "daily",
+        hour: 7,
+        slackWebhook: "https://hooks.slack.com/services/T000/B000/secretvalue",
+      },
+    });
+    expect(put.status()).toBe(200);
+
+    // Relecture : le webhook n'est jamais renvoyé, seul le booléen de présence.
+    const getRes = await page.request.get(`${API}/api/v1/digest`, { headers: h });
+    const pref = await getRes.json();
+    expect(pref.channels).toContain("slack");
+    expect(pref.channels).toContain("email");
+    expect(pref.frequency).toBe("daily");
+    expect(pref.hour).toBe(7);
+    expect(pref.hasSlackWebhook).toBe(true);
+    expect(JSON.stringify(pref)).not.toContain("secretvalue");
+
+    // Envoi immédiat : un résultat par canal actif (succès réel non garanti en test).
+    const send = await page.request.post(`${API}/api/v1/digest/send`, { headers: h, data: {} });
+    expect(send.status()).toBe(200);
+    const { results } = await send.json();
+    expect(results.map((r: { channel: string }) => r.channel).sort()).toEqual(["email", "slack"]);
+  });
+
   test("RGPD : export des données de l'utilisateur", async ({ page }) => {
     const user = await registerUser(page);
     const res = await page.request.get(`${API}/api/v1/gdpr/export`, {

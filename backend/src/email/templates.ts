@@ -1,3 +1,4 @@
+import type { Briefing, BriefingPriority } from "@projectmaster/shared";
 import type { EmailMessage } from "./index.js";
 
 const BRAND = "#2563eb";
@@ -92,6 +93,70 @@ export function weeklyDigestEmail(to: string, name: string, projects: DigestProj
       `Résumé hebdomadaire Aperio\n\n` +
       projects.map((p) => `- ${p.name} : ${p.anomalies} anomalie(s), ${p.decisions} décision(s)`).join("\n") +
       `\n\n${link}`,
+  };
+}
+
+/** Libellé et couleur par priorité de briefing (cohérent avec l'app). */
+const PRIORITY_META: Record<BriefingPriority, { label: string; color: string }> = {
+  critical: { label: "Critique", color: "#ef4444" },
+  important: { label: "Important", color: "#f59e0b" },
+  fyi: { label: "À surveiller", color: "#38bdf8" },
+  win: { label: "Sur les rails", color: "#22c55e" },
+};
+
+/**
+ * Briefing du matin par e-mail : la même synthèse priorisée que le tableau de
+ * bord, poussée dans la boîte de réception. `baseUrl` sert à rendre cliquables
+ * les actions du briefing (routes front relatives).
+ */
+export function briefingDigestEmail(
+  to: string,
+  name: string,
+  briefing: Briefing,
+  baseUrl: string,
+): EmailMessage {
+  const base = baseUrl.replace(/\/$/, "");
+  const dash = `${base}/dashboard`;
+
+  const rows = briefing.items
+    .slice(0, 12)
+    .map((it) => {
+      const meta = PRIORITY_META[it.priority];
+      const action = it.actions[0];
+      const link = action ? `${base}${action.to}` : dash;
+      return (
+        `<div style="margin:12px 0;padding:12px 14px;border-left:3px solid ${meta.color};background:#0b1120;border-radius:8px">` +
+        `<b style="color:${meta.color};text-transform:uppercase;font-size:11px">${meta.label}</b><br>` +
+        `<span style="color:#e2e8f0;font-weight:600">${it.title}</span><br>` +
+        `<span style="color:#94a3b8;font-size:13px">${it.detail}</span>` +
+        (action ? `<br><a href="${link}" style="color:#60a5fa;font-size:13px">${action.label} →</a>` : "") +
+        `</div>`
+      );
+    })
+    .join("");
+
+  const body = briefing.items.length
+    ? `Bonjour ${name},<br><br>${briefing.greeting}` +
+      `<div style="margin:12px 0;color:#94a3b8;font-size:13px">Santé du portefeuille : <b style="color:#e2e8f0">${briefing.health.score}/100</b> · risque ${briefing.health.risk}</div>` +
+      rows +
+      button(dash, "Ouvrir le tableau de bord")
+    : `Bonjour ${name},<br><br>${briefing.greeting}<br><br>Rien ne requiert votre attention aujourd'hui.` +
+      button(dash, "Ouvrir le tableau de bord");
+
+  const text =
+    `Briefing Aperio\n\n${briefing.greeting}\n` +
+    `Santé : ${briefing.health.score}/100 (risque ${briefing.health.risk})\n\n` +
+    briefing.items
+      .slice(0, 12)
+      .map((it) => `- [${PRIORITY_META[it.priority].label}] ${it.title} — ${it.detail}`)
+      .join("\n") +
+    `\n\n${dash}`;
+
+  return {
+    to,
+    subject: `Votre briefing — ${briefing.counts.critical} critique(s), ${briefing.counts.important} à traiter`,
+    html: shell("Votre briefing du jour", body),
+    text,
   };
 }
 

@@ -124,6 +124,11 @@ const schema = z.object({
   AUDIT_RETENTION_DAYS: z.coerce.number().int().positive().default(365),
   MAINTENANCE_INTERVAL_MS: z.coerce.number().int().positive().default(86_400_000),
 
+  // Planificateur de livraison du briefing (Slack/Teams/e-mail). Fréquence du
+  // tick : l'envoi réel est borné par l'heure choisie et le garde « déjà envoyé
+  // aujourd'hui », donc un tick court suffit à livrer à l'heure voulue.
+  DIGEST_TICK_MS: z.coerce.number().int().positive().default(900_000),
+
   // Jouer les migrations au boot (prod). À désactiver sur les process qui ne
   // doivent PAS migrer (ex. worker dédié) pour éviter toute course concurrente :
   // un seul process (l'API) applique les migrations, les autres attendent le schéma.

@@ -17,6 +17,7 @@ import { PlanningPage } from "./pages/PlanningPage";
 import { RisksPage } from "./pages/RisksPage";
 import { MinutesPage } from "./pages/MinutesPage";
 import { IntegrationsPage } from "./pages/IntegrationsPage";
+import { DigestPage } from "./pages/DigestPage";
 
 // Carte du portefeuille : chargée à la demande (isole React Flow du bundle initial).
 const PortfolioMapPage = lazy(() =>
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
           { path: "/projects/:id/risks", element: <RisksPage /> },
           { path: "/projects/:id/minutes", element: <MinutesPage /> },
           { path: "/projects/:id/integrations", element: <IntegrationsPage /> },
+          { path: "/digest", element: <DigestPage /> },
           { path: "/team", element: <TeamPage /> },
           { path: "/glossaire", element: <GlossaryPage /> },
           { path: "/onboarding", element: <OnboardingPage /> },

@@ -8,20 +8,7 @@ import { appBaseUrl, sendEmail } from "../email/index.js";
 import { anomalyAlertEmail, weeklyDigestEmail, type DigestProject } from "../email/templates.js";
 import { logger } from "../utils/logger.js";
 import { resolveSettings } from "./notificationSettingsService.js";
-
-/** Poste un message Slack via webhook. Ne lève jamais (best-effort). */
-async function postSlack(webhook: string, text: string): Promise<void> {
-  try {
-    await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-      signal: AbortSignal.timeout(10_000),
-    });
-  } catch (err) {
-    logger.warn({ err }, "Notification Slack échouée");
-  }
-}
+import { postSlack } from "./channels.js";
 
 /** Un e-mail n'est envoyé qu'à un vrai destinataire opté-in (pas les invités). */
 function canEmail(user: User | null): user is User {
