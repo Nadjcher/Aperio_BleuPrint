@@ -47,6 +47,9 @@ export function Layout() {
               <NavLink to="/portfolio" className={linkClass}>
                 Portefeuille
               </NavLink>
+              <NavLink to="/digest" className={linkClass}>
+                Alertes
+              </NavLink>
               <NavLink to="/team" className={linkClass}>
                 Équipe
               </NavLink>
