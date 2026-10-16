@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { tokenStore } from "../api/client";
 import { Icon, type IconName } from "../components/Icon";
-import { guest } from "../store/authSlice";
+import { demo } from "../store/authSlice";
 import { useAppDispatch } from "../store";
 import { SiteFooter } from "../components/SiteFooter";
 
@@ -72,9 +73,14 @@ export function LandingPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const onTryGuest = async () => {
-    const res = await dispatch(guest());
-    if (guest.fulfilled.match(res)) navigate("/projects");
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  // Démo : compte pré-rempli → on voit la valeur tout de suite sur le dashboard.
+  const onDemo = async () => {
+    setDemoLoading(true);
+    const res = await dispatch(demo());
+    setDemoLoading(false);
+    if (demo.fulfilled.match(res)) navigate("/dashboard");
   };
 
   return (
@@ -123,8 +129,12 @@ export function LandingPage() {
               {primaryLabel} →
             </Link>
             {!authed && (
-              <button onClick={onTryGuest} className="pm-btn-ghost px-6 py-3 text-base">
-                Essayer sans compte
+              <button
+                onClick={onDemo}
+                disabled={demoLoading}
+                className="pm-btn-ghost px-6 py-3 text-base"
+              >
+                {demoLoading ? "Préparation de la démo…" : "▶ Voir une démo complète"}
               </button>
             )}
             <a href="#how" className="pm-btn-ghost px-6 py-3 text-base">

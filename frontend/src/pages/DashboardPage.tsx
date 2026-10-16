@@ -39,11 +39,54 @@ export function DashboardPage() {
 
       {loading || !briefing ? (
         <Loading />
-      ) : mode === "simple" ? (
-        <SimpleView briefing={briefing} projectCount={projects.length} />
       ) : (
-        <ExpertView briefing={briefing} projects={projects} />
+        <>
+          <ProactiveBanner briefing={briefing} />
+          {mode === "simple" ? (
+            <SimpleView briefing={briefing} projectCount={projects.length} />
+          ) : (
+            <ExpertView briefing={briefing} projects={projects} />
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+// ─── Bandeau proactif : « ce qu'Aperio a détecté pendant votre absence » ─────
+function ProactiveBanner({ briefing }: { briefing: Briefing }) {
+  const crit = briefing.counts.critical;
+  const imp = briefing.counts.important;
+  const todo = crit + imp;
+
+  if (todo === 0) {
+    return (
+      <div className="mb-6 flex items-start gap-3 rounded-xl border border-l-4 border-line border-l-emerald-500/70 bg-surface p-4">
+        <span aria-hidden="true" className="text-success">✓</span>
+        <p className="text-sm text-fg">
+          <span className="font-semibold text-heading">Pendant votre absence, Aperio a surveillé vos projets.</span>{" "}
+          Rien d'urgent — tout est sous contrôle.
+        </p>
+      </div>
+    );
+  }
+
+  const parts: string[] = [];
+  if (crit > 0) parts.push(`${crit} alerte${crit > 1 ? "s" : ""} critique${crit > 1 ? "s" : ""}`);
+  if (imp > 0) parts.push(`${imp} point${imp > 1 ? "s" : ""} à approuver / jalon${imp > 1 ? "s" : ""} en retard`);
+  const border = crit > 0 ? "border-l-red-500/70" : "border-l-amber-500/70";
+  const icon = crit > 0 ? "■" : "▲";
+  const iconTone = crit > 0 ? "text-danger" : "text-warning";
+
+  return (
+    <div className={`mb-6 flex items-start gap-3 rounded-xl border border-l-4 border-line ${border} bg-surface p-4`}>
+      <span aria-hidden="true" className={iconTone}>{icon}</span>
+      <p className="text-sm text-fg">
+        <span className="font-semibold text-heading">
+          Pendant votre absence, Aperio a détecté {todo} point{todo > 1 ? "s" : ""} à traiter :
+        </span>{" "}
+        {parts.join(" · ")}. Détail ci-dessous.
+      </p>
     </div>
   );
 }
