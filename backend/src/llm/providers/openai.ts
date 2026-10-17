@@ -8,8 +8,9 @@ import type { CompleteOptions } from "../index.js";
  *   - Groq    (gratuit, rapide) : LLM_BASE_URL=https://api.groq.com/openai/v1
  *   - OpenRouter, Together, etc.
  *
- * Modèle par défaut : Llama 3.3 70B (LLM_MODEL). Clé optionnelle (Ollama n'en
- * demande pas).
+ * Modèle par défaut : openai/gpt-oss-120b sur Groq (LLM_MODEL). Les modèles
+ * Llama de Groq sont passés en offre entreprise (août 2026) ; gpt-oss-120b est
+ * le modèle de production à usage général. Clé optionnelle (Ollama n'en demande pas).
  */
 
 interface ChatResponse {
@@ -37,6 +38,10 @@ export async function completeOpenAICompatible(
       temperature: 0.3,
       stream: false,
     }),
+    // Borne le temps d'attente : un endpoint lent (Groq surchargé, Ollama
+    // local qui rame) ne doit pas bloquer la génération — on retombe sur
+    // l'heuristique via le null renvoyé plus haut.
+    signal: AbortSignal.timeout(30_000),
   });
 
   if (!res.ok) {

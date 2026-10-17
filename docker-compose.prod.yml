@@ -37,7 +37,7 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-none}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
       # Le worker tourne dans un service dédié (voir « worker » ci-dessous).
       WORKER_ENABLED: "false"
       METRICS_TOKEN: ${METRICS_TOKEN:-}
@@ -70,7 +70,7 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-none}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
       # L'API applique les migrations ; le worker attend le schéma (pas de course).
       RUN_MIGRATIONS: "false"
       WORKER_ENABLED: "true"
