@@ -45,7 +45,7 @@ const schema = z.object({
   // Ollama local : http://localhost:11434/v1   | Groq : https://api.groq.com/openai/v1
   LLM_BASE_URL: z.string().default(""),
   LLM_API_KEY: z.string().default(""),
-  LLM_MODEL: z.string().default("llama-3.3-70b-versatile"),
+  LLM_MODEL: z.string().default("openai/gpt-oss-120b"),
 
   // Provider Anthropic (optionnel)
   ANTHROPIC_API_KEY: z.string().default(""),
