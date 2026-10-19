@@ -90,6 +90,62 @@ export async function completePlanner(opts: CompleteOptions): Promise<string | n
   return complete(opts);
 }
 
+/** État de configuration du LLM (sans secret) pour le diagnostic. */
+export interface LLMStatus {
+  provider: Provider;
+  enabled: boolean;
+  model: string;
+  baseUrlSet: boolean;
+  apiKeySet: boolean;
+}
+
+export function llmStatus(): LLMStatus {
+  const provider = resolveProvider();
+  return {
+    provider,
+    enabled: provider !== "none",
+    model: provider === "anthropic" ? env.ANTHROPIC_MODEL : env.LLM_MODEL,
+    baseUrlSet: Boolean(env.LLM_BASE_URL),
+    apiKeySet: Boolean(provider === "anthropic" ? env.ANTHROPIC_API_KEY : env.LLM_API_KEY),
+  };
+}
+
+/**
+ * Teste réellement le LLM avec une requête minimale et remonte l'erreur exacte
+ * (modèle décommissionné, clé invalide…) — contrairement à `complete` qui
+ * retombe silencieusement sur l'heuristique. Pour le diagnostic uniquement.
+ */
+export async function pingLLM(): Promise<{ ok: boolean; status?: number; error?: string }> {
+  const provider = resolveProvider();
+  if (provider === "none") return { ok: false, error: "Aucun provider configuré (LLM_PROVIDER / clé / base URL)" };
+  try {
+    if (provider === "openai") {
+      const base = env.LLM_BASE_URL.replace(/\/+$/, "");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (env.LLM_API_KEY) headers.Authorization = `Bearer ${env.LLM_API_KEY}`;
+      const res = await fetch(`${base}/chat/completions`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: env.LLM_MODEL,
+          messages: [{ role: "user", content: "ping" }],
+          max_tokens: 1,
+          stream: false,
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.ok) return { ok: true, status: res.status };
+      const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+      return { ok: false, status: res.status, error: (body?.error?.message ?? `HTTP ${res.status}`).slice(0, 300) };
+    }
+    // anthropic
+    const text = await completeAnthropic({ system: "ping", user: "ping", maxTokens: 1 });
+    return { ok: text !== null, error: text === null ? "Réponse vide ou refus" : undefined };
+  } catch (err) {
+    return { ok: false, error: (err instanceof Error ? err.message : String(err)).slice(0, 300) };
+  }
+}
+
 /** Appel texte unique. Renvoie null si le LLM est désactivé ou en cas d'échec. */
 export async function complete(opts: CompleteOptions): Promise<string | null> {
   const provider = resolveProvider();

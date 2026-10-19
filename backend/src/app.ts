@@ -29,6 +29,7 @@ import { minutesRouter } from "./routes/minutes.js";
 import { portfolioRouter } from "./routes/portfolio.js";
 import { demoRouter } from "./routes/demo.js";
 import { digestRouter } from "./routes/digest.js";
+import { llmRouter } from "./routes/llm.js";
 
 export function createApp(): Express {
   const app = express();
@@ -75,6 +76,7 @@ export function createApp(): Express {
   api.use(minutesRouter);
   api.use(portfolioRouter);
   api.use(digestRouter);
+  api.use(llmRouter);
   app.use("/api/v1", api);
 
   app.use(notFound);
