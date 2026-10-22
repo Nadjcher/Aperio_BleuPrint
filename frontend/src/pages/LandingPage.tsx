@@ -8,87 +8,145 @@ import { SiteFooter } from "../components/SiteFooter";
 
 const authed = Boolean(tokenStore.access);
 const primaryTo = authed ? "/dashboard" : "/login";
-const primaryLabel = authed ? "Ouvrir l'app" : "Commencer gratuitement";
 
-const BLUE = "from-brand-500 to-accent-600";
-
-interface Card {
-  icon: IconName;
-  title: string;
-  desc: string;
+/** Logo : carré signal + mot-marque en display. */
+function Wordmark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`flex items-center gap-2.5 ${className}`}>
+      <span className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-signal">
+        <span className="h-2.5 w-2.5 rounded-[2px] bg-white" />
+      </span>
+      <span className="font-display text-xl font-extrabold tracking-tight text-ink">Aperio</span>
+    </span>
+  );
 }
 
-// Lignes du « briefing du matin » : ce qu'Aperio a détecté seul, sans qu'on
-// lui demande. Rend la surveillance proactive concrète dès le hero.
-interface BriefLine {
-  state: "rouge" | "orange" | "vert";
-  text: string;
-}
-
-const briefLines: BriefLine[] = [
-  { state: "rouge", text: "1 risque critique : chute d'activité détectée sur « Refonte e-commerce »" },
-  { state: "orange", text: "2 jalons vont glisser — Sprint 3 surchargé (33 pts restants)" },
-  { state: "rouge", text: "1 brique en retard en bloque 2 autres dans le portefeuille" },
-  { state: "vert", text: "Compte rendu du comité de pilotage prêt à valider" },
-];
-
-const STATE_DOT: Record<BriefLine["state"], string> = {
-  rouge: "bg-rose-500",
-  orange: "bg-amber-500",
-  vert: "bg-emerald-500",
+// ── Héros : le briefing du matin, mis en scène comme preuve produit ──────────
+type State = "rouge" | "orange" | "vert";
+const DOT: Record<State, string> = {
+  rouge: "bg-danger",
+  orange: "bg-warning",
+  vert: "bg-success",
 };
-
-const steps: Card[] = [
-  { icon: "branch", title: "Connectez vos outils", desc: "GitHub, GitLab, Jira, Confluence, Notion — ou importez vos documents (PDF, Word)." },
-  { icon: "search", title: "Aperio surveille", desc: "L'avancement est suivi en continu ; retards et risques sont détectés tôt." },
-  { icon: "rocket", title: "Vous gardez le contrôle", desc: "Briefing du jour, date de livraison prévue et comptes rendus, prêts à valider." },
+const briefLines: { state: State; text: string }[] = [
+  { state: "rouge", text: "Activité en chute sur « Refonte e-commerce »" },
+  { state: "orange", text: "Sprint 3 surchargé — 2 jalons menacés" },
+  { state: "rouge", text: "1 brique en retard en bloque 2 autres" },
+  { state: "vert", text: "Compte rendu du comité prêt à valider" },
 ];
 
-const features: Card[] = [
-  { icon: "trending", title: "Date de livraison prévue", desc: "Une estimation d'échéance avec niveau de confiance, mise à jour au fil du projet." },
-  { icon: "bolt", title: "Alerte avant le retard", desc: "Les jalons qui vont déraper sont signalés tôt — pas une fois le retard constaté." },
-  { icon: "check", title: "Briefing quotidien", desc: "Chaque matin, l'essentiel à traiter, priorisé, avec l'action directe." },
-  { icon: "report", title: "Comptes rendus & rapports", desc: "Suivi d'avancement et synthèses prêts à partager, en un clic." },
-  { icon: "bot", title: "Votre méthodologie", desc: "Kanban, Scrum, PRINCE2 ou SAFe : le vocabulaire s'adapte à votre cadre." },
-  { icon: "shield", title: "Sécurisé & RGPD", desc: "Chiffrement au repos, journal d'audit, export et effacement des données natifs." },
-];
-
-const stats = [
-  { value: "6", label: "sources" },
-  { value: "24/7", label: "surveillance" },
-  { value: "1 clic", label: "rapport" },
-  { value: "€0–15", label: "/ mois" },
-];
-
-function IconBox({ icon, size = "md" }: { icon: IconName; size?: "sm" | "md" }) {
-  const box = size === "sm" ? "h-9 w-9" : "h-11 w-11";
-  const ic = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+function BriefingArtifact() {
   return (
-    <div className={`flex ${box} items-center justify-center rounded-lg bg-gradient-to-br ${BLUE} text-heading shadow-glow`}>
-      <Icon name={icon} className={ic} />
+    <div className="relative">
+      {/* Halo signal discret derrière la carte */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-signal/10 blur-2xl"
+      />
+      <div className="overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-[0_30px_80px_-40px_rgba(18,21,27,0.45)]">
+        <div className="flex items-center justify-between border-b border-ink/10 bg-paper/60 px-5 py-3.5">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 animate-pulseGlow rounded-full bg-signal" />
+            <span className="text-sm font-semibold text-ink">Briefing du matin</span>
+          </div>
+          <span className="font-mono text-xs tabular-nums text-graphite">08:12</span>
+        </div>
+
+        <div className="px-5 py-4">
+          <p className="text-sm text-graphite">
+            Pendant la nuit, Aperio a repéré{" "}
+            <span className="font-semibold text-ink">3 points à traiter</span>.
+          </p>
+
+          <ul className="mt-3 space-y-2">
+            {briefLines.map((l, i) => (
+              <li
+                key={l.text}
+                className="flex items-start gap-3 rounded-xl border border-ink/10 bg-paper/50 px-3.5 py-2.5 motion-safe:animate-riseIn"
+                style={{ animationDelay: `${0.15 + i * 0.12}s` }}
+              >
+                <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-sm ${DOT[l.state]}`} />
+                <span className="text-sm leading-snug text-ink/90">{l.text}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div
+            className="mt-4 flex items-end justify-between rounded-xl bg-ink px-4 py-3.5 motion-safe:animate-riseIn"
+            style={{ animationDelay: "0.7s" }}
+          >
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-wider text-white/60">
+                Santé du portefeuille
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums text-white">59</div>
+            </div>
+            {/* Mini-jauge */}
+            <div className="flex items-end gap-1" aria-hidden="true">
+              {[40, 62, 48, 35, 30, 59].map((h, i) => (
+                <span
+                  key={i}
+                  className="w-2 rounded-sm bg-signal/70"
+                  style={{ height: `${Math.max(10, h * 0.5)}px` }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-function SectionHead({ num, eyebrow, title, grad, sub }: { num: string; eyebrow: string; title: string; grad: string; sub: string }) {
-  return (
-    <div className="mb-12 text-center">
-      <span className="pm-eyebrow justify-center">{num} — {eyebrow}</span>
-      <h2 className="mt-4 text-3xl font-bold tracking-tight text-heading sm:text-4xl">
-        {title} <span className="pm-gradient-text">{grad}</span>
-      </h2>
-      <p className="mt-3 text-muted">{sub}</p>
-    </div>
-  );
-}
+// ── Sections ─────────────────────────────────────────────────────────────────
+const steps = [
+  {
+    title: "Connectez vos outils",
+    body: "GitHub, GitLab, Jira, Confluence, Notion — ou importez vos documents (PDF, Word). Deux minutes, pas de configuration lourde.",
+  },
+  {
+    title: "Aperio surveille en continu",
+    body: "L'avancement est suivi 24/7. Les retards et les risques sont détectés tôt, pas une fois constatés.",
+  },
+  {
+    title: "Vous gardez le contrôle",
+    body: "Briefing du jour, date de livraison prévue et comptes rendus — prêts à valider, pas à rédiger.",
+  },
+];
+
+const capabilities: { icon: IconName; title: string; body: string }[] = [
+  {
+    icon: "trending",
+    title: "Date de livraison prévue",
+    body: "Une estimation d'échéance avec niveau de confiance, recalculée au fil du projet.",
+  },
+  {
+    icon: "check",
+    title: "Briefing quotidien",
+    body: "Chaque matin, l'essentiel à traiter, priorisé, avec l'action directe.",
+  },
+  {
+    icon: "report",
+    title: "Comptes rendus & rapports",
+    body: "Synthèses de réunion et suivis d'avancement prêts à partager, en un geste.",
+  },
+  {
+    icon: "branch",
+    title: "Votre méthodologie",
+    body: "Kanban, Scrum, PRINCE2 ou SAFe : le vocabulaire s'adapte à votre cadre.",
+  },
+  {
+    icon: "shield",
+    title: "Sécurisé & RGPD",
+    body: "Chiffrement au repos, journal d'audit, export et effacement des données natifs.",
+  },
+];
 
 export function LandingPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
   const [demoLoading, setDemoLoading] = useState(false);
 
-  // Démo : compte pré-rempli → on voit la valeur tout de suite sur le dashboard.
   const onDemo = async () => {
     setDemoLoading(true);
     const res = await dispatch(demo());
@@ -97,209 +155,189 @@ export function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Halos bleus discrets */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -left-40 top-0 h-96 w-96 rounded-full bg-accent-600/15 blur-[130px]" />
-        <div className="absolute right-0 top-10 h-[26rem] w-[26rem] rounded-full bg-brand-500/15 blur-[130px]" />
-      </div>
-
+    <div className="min-h-screen bg-paper text-graphite">
       {/* Nav */}
-      <header className="sticky top-0 z-20 border-b border-blue-400/10 bg-app/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-brand-500 to-accent-600 shadow-glow">
-              <span className="h-2.5 w-2.5 rounded-[3px] bg-white/90" />
-            </span>
-            <span className="pm-gradient-text text-lg font-extrabold tracking-tight">Aperio</span>
-          </div>
-          <nav className="hidden items-center gap-1 md:flex">
-            <a href="#how" className="pm-nav-link">Fonctionnement</a>
-            <a href="#features" className="pm-nav-link">Capacités</a>
-            <a href="#securite" className="pm-nav-link">Sécurité</a>
+      <header className="sticky top-0 z-20 border-b border-ink/10 bg-paper/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+          <Wordmark />
+          <nav className="hidden items-center gap-7 md:flex">
+            <a href="#how" className="text-sm font-medium text-graphite transition hover:text-ink">Fonctionnement</a>
+            <a href="#capacites" className="text-sm font-medium text-graphite transition hover:text-ink">Capacités</a>
+            <a href="#securite" className="text-sm font-medium text-graphite transition hover:text-ink">Sécurité</a>
           </nav>
-          <Link to={primaryTo} className="pm-btn-primary py-2">
-            {authed ? "Ouvrir l'app" : "Commencer →"}
+          <Link
+            to={primaryTo}
+            className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-ink-soft"
+          >
+            {authed ? "Ouvrir l'app" : "Commencer"}
           </Link>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-16 lg:grid-cols-2 lg:pt-24">
+      {/* Héros */}
+      <section className="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:pt-24">
         <div>
-          <span className="pm-eyebrow mb-6">Pour les chefs de projet</span>
-          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-heading sm:text-6xl">
-            Chaque matin, Aperio vous dit{" "}
-            <span className="pm-gradient-text">ce qui va déraper — avant que ça arrive.</span>
+          <p className="mb-5 text-sm font-semibold text-signal">Pilotage de projet prédictif</p>
+          <h1 className="font-display text-[2.7rem] font-extrabold leading-[0.98] tracking-[-0.02em] text-ink sm:text-6xl">
+            Ce qui va déraper, vous le voyez venir.
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted">
-            Aperio surveille vos projets en continu, repère les retards et les
-            risques avant l'échéance, et prépare vos comptes rendus. Vous
-            ouvrez votre tableau de bord : l'essentiel à traiter est déjà là.
+          <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-graphite">
+            Aperio surveille vos projets en continu, repère les retards et les risques
+            avant l'échéance, et prépare vos comptes rendus. Vous ouvrez le tableau de
+            bord : l'essentiel est déjà trié.
           </p>
 
-          {/* Réponse directe à l'objection « un assistant IA fait déjà ça ». */}
-          <div className="mt-6 max-w-xl rounded-lg border border-blue-400/15 bg-surface/60 p-4">
-            <p className="text-sm text-fg">
-              <span className="font-semibold text-heading">Un assistant répond quand vous le sollicitez.</span>{" "}
-              Aperio travaille sans qu'on lui demande : il surveille 24/7, garde
-              l'historique de chaque projet et vous alerte de lui-même.
-            </p>
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-4">
             {!authed ? (
               <>
                 <button
                   onClick={onDemo}
                   disabled={demoLoading}
-                  className="pm-btn-primary px-6 py-3 text-base"
+                  className="rounded-xl bg-signal px-6 py-3.5 text-base font-semibold text-white shadow-[0_12px_30px_-12px_rgba(109,74,255,0.8)] transition hover:bg-signal-deep disabled:opacity-60"
                 >
-                  {demoLoading ? "Préparation de la démo…" : "▶ Voir une démo complète"}
+                  {demoLoading ? "Préparation…" : "Voir une démo complète"}
                 </button>
-                <Link to={primaryTo} className="pm-btn-ghost px-6 py-3 text-base">
-                  Commencer gratuitement →
+                <Link
+                  to={primaryTo}
+                  className="text-base font-semibold text-ink underline decoration-ink/25 underline-offset-[6px] transition hover:decoration-ink"
+                >
+                  Commencer gratuitement
                 </Link>
               </>
             ) : (
-              <Link to={primaryTo} className="pm-btn-primary px-6 py-3 text-base">
-                {primaryLabel} →
+              <Link
+                to={primaryTo}
+                className="rounded-xl bg-signal px-6 py-3.5 text-base font-semibold text-white transition hover:bg-signal-deep"
+              >
+                Ouvrir l'application
               </Link>
             )}
           </div>
+
           {!authed && (
-            <p className="mt-3 font-mono text-xs text-muted">
+            <p className="mt-5 text-sm text-graphite/80">
               Démo instantanée · compte pré-rempli · sans e-mail ni carte bancaire
             </p>
           )}
-          <div className="mt-8 flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-muted">
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 animate-pulseGlow rounded-full bg-brand-400 shadow-[0_0_8px_2px_rgba(56,189,248,0.6)]" />
-              Surveillance 24/7
-            </span>
-            <span>Prêt en 2 min</span>
-          </div>
         </div>
 
-        {/* Aperçu produit — le « briefing du matin » tel qu'Aperio le présente,
-            pour montrer concrètement la détection proactive. */}
-        <div className="pm-card relative p-5">
-          <div className="mb-4 flex items-center justify-between border-b border-blue-400/10 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="flex h-5 w-5 items-center justify-center rounded-[5px] bg-gradient-to-br from-brand-500 to-accent-600">
-                <span className="h-1.5 w-1.5 rounded-[2px] bg-white/90" />
-              </span>
-              <span className="text-sm font-semibold text-fg">Briefing du matin</span>
-            </div>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
-              live
+        <BriefingArtifact />
+      </section>
+
+      {/* Différenciateur — réponse à « un assistant IA fait déjà ça » */}
+      <section className="border-y border-ink/10 bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-16">
+          <p className="max-w-4xl font-display text-2xl font-semibold leading-snug tracking-[-0.01em] text-ink sm:text-[2rem]">
+            Un assistant répond quand vous le sollicitez.{" "}
+            <span className="text-graphite">
+              Aperio travaille sans qu'on lui demande : il surveille jour et nuit, garde
+              l'historique de chaque projet et vous alerte de lui-même.
             </span>
-          </div>
-
-          <p className="mb-3 text-sm text-fg">
-            Pendant votre absence, Aperio a détecté{" "}
-            <span className="font-semibold text-heading">3 points à traiter</span>.
           </p>
-
-          <ul className="space-y-2">
-            {briefLines.map((l) => (
-              <li
-                key={l.text}
-                className="flex items-start gap-2.5 rounded-lg border border-blue-400/10 bg-surface p-3"
-              >
-                <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${STATE_DOT[l.state]}`} />
-                <span className="text-xs leading-relaxed text-fg">{l.text}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-3 flex items-center justify-between rounded-lg border border-blue-400/10 bg-white/[0.015] p-3">
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-wide text-muted">Santé du portefeuille</div>
-              <div className="pm-gradient-text font-mono text-xl font-bold">59 / 100</div>
-            </div>
-            <div className="flex gap-4 text-center">
-              {stats.slice(0, 3).map((s) => (
-                <div key={s.label}>
-                  <div className="font-mono text-sm font-bold text-heading">{s.value}</div>
-                  <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-muted">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Fonctionnement */}
-      <section id="how" className="mx-auto max-w-6xl px-5 py-16">
-        <SectionHead
-          num="01"
-          eyebrow="Fonctionnement"
-          title="De vos outils au pilotage,"
-          grad="en 3 étapes."
-          sub="Sans friction, sans configuration lourde."
-        />
-        <div className="relative grid gap-4 md:grid-cols-3">
-          <div className="pointer-events-none absolute left-0 right-0 top-16 hidden h-px bg-gradient-to-r from-transparent via-blue-400/20 to-transparent md:block" />
+      {/* Fonctionnement — vraie séquence, donc numérotée */}
+      <section id="how" className="mx-auto max-w-6xl px-5 py-20">
+        <h2 className="max-w-2xl font-display text-3xl font-bold tracking-[-0.01em] text-ink sm:text-4xl">
+          De vos outils au pilotage, en trois temps.
+        </h2>
+        <div className="mt-12 grid gap-10 md:grid-cols-3">
           {steps.map((s, i) => (
-            <div key={s.title} className="pm-card relative p-6">
-              <div className="flex items-center justify-between">
-                <IconBox icon={s.icon} />
-                <span
-                  aria-hidden="true"
-                  className="font-mono text-4xl font-bold text-[#828997]"
-                >
-                  {String(i + 1).padStart(2, "0")}
+            <div key={s.title}>
+              <div className="font-display text-5xl font-extrabold text-signal/90">
+                {i + 1}
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-ink">{s.title}</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-graphite">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Capacités — hiérarchisées : une capacité phare, puis les autres */}
+      <section id="capacites" className="border-t border-ink/10 bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-20">
+          <h2 className="max-w-2xl font-display text-3xl font-bold tracking-[-0.01em] text-ink sm:text-4xl">
+            Tout pour piloter, au même endroit.
+          </h2>
+
+          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            {/* Carte phare */}
+            <article className="flex flex-col justify-between rounded-2xl bg-ink p-7 text-white lg:row-span-2">
+              <div>
+                <Icon name="bolt" className="h-7 w-7 text-signal" />
+                <h3 className="mt-5 font-display text-2xl font-bold leading-tight">
+                  Alerté avant le retard.
+                </h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-white/70">
+                  Les jalons qui vont déraper sont signalés tôt — au rythme réel de
+                  l'équipe, pas une fois l'échéance ratée. C'est le cœur d'Aperio :
+                  vous prévenir pendant qu'il est encore temps d'agir.
+                </p>
+              </div>
+              <div className="mt-8 flex items-center gap-3 border-t border-white/10 pt-5">
+                <span className="h-2.5 w-2.5 rounded-sm bg-danger" />
+                <span className="text-sm text-white/80">
+                  « Sprint 3 : 33 pts restants pour 14 pts / semaine. »
                 </span>
               </div>
-              <h3 className="mt-4 font-semibold text-heading">{s.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+            </article>
 
-      {/* Capacités */}
-      <section id="features" className="mx-auto max-w-6xl px-5 py-16">
-        <SectionHead
-          num="02"
-          eyebrow="Capacités"
-          title="Tout pour piloter vos projets,"
-          grad="au même endroit."
-          sub="L'essentiel du pilotage, réuni dans une interface claire."
-        />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="pm-card group p-6 transition hover:border-blue-400/35 hover:shadow-glow"
-            >
-              <IconBox icon={f.icon} />
-              <h3 className="mt-4 font-semibold text-heading">{f.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.desc}</p>
-            </div>
-          ))}
+            {/* Capacités de soutien */}
+            {capabilities.map((c) => (
+              <article
+                key={c.title}
+                className="rounded-2xl border border-ink/10 bg-paper/40 p-6 transition hover:border-signal/40"
+              >
+                <Icon name={c.icon} className="h-6 w-6 text-ink" />
+                <h3 className="mt-4 font-semibold text-ink">{c.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-graphite">{c.body}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Sécurité */}
-      <section id="securite" className="mx-auto max-w-6xl px-5 pb-20">
-        <div className="pm-card relative flex flex-col items-center gap-6 p-10 text-center sm:flex-row sm:justify-between sm:text-left">
+      <section id="securite" className="mx-auto max-w-6xl px-5 py-20">
+        <div className="flex flex-col items-start gap-8 rounded-2xl border border-ink/10 bg-white p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
           <div className="max-w-xl">
-            <span className="pm-eyebrow mb-3">03 — Sécurité &amp; conformité</span>
-            <h2 className="mt-3 text-2xl font-bold text-heading">
+            <h2 className="font-display text-2xl font-bold text-ink">
               Vos données restent protégées.
             </h2>
-            <p className="mt-2 text-muted">
-              Authentification JWT, chiffrement au repos, journal d'audit, et
-              conformité RGPD native (accès, portabilité, effacement).
+            <p className="mt-3 leading-relaxed text-graphite">
+              Authentification JWT, chiffrement au repos, journal d'audit et conformité
+              RGPD native : accès, portabilité et effacement de vos données.
             </p>
           </div>
-          <Link to={primaryTo} className="pm-btn-primary shrink-0 px-6 py-3 text-base">
-            {primaryLabel} →
+          <Link
+            to={primaryTo}
+            className="shrink-0 rounded-xl bg-signal px-6 py-3.5 text-base font-semibold text-white transition hover:bg-signal-deep"
+          >
+            {authed ? "Ouvrir l'app" : "Commencer gratuitement"}
           </Link>
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="border-t border-ink/10 bg-ink">
+        <div className="mx-auto max-w-6xl px-5 py-20 text-center">
+          <h2 className="mx-auto max-w-3xl font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.02em] text-white sm:text-5xl">
+            Arrivez en réunion avec une longueur d'avance.
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">
+            Essayez la démo complète en dix secondes — rien à installer, rien à saisir.
+          </p>
+          {!authed && (
+            <button
+              onClick={onDemo}
+              disabled={demoLoading}
+              className="mt-8 rounded-xl bg-signal px-7 py-4 text-base font-semibold text-white shadow-[0_16px_40px_-16px_rgba(109,74,255,0.9)] transition hover:bg-signal-deep disabled:opacity-60"
+            >
+              {demoLoading ? "Préparation…" : "Voir une démo complète"}
+            </button>
+          )}
         </div>
       </section>
 
