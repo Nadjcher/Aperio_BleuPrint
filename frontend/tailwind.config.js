@@ -6,13 +6,26 @@ export default {
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        // Display éditoriale-technique pour les titres de la landing.
+        display: ["Bricolage Grotesque", "Inter", "ui-sans-serif", "sans-serif"],
       },
       colors: {
+        // ── Identité « poste de pilotage » (landing) ───────────────────────
+        paper: "#F6F6F4", // fond stone très clair
         ink: {
+          DEFAULT: "#12151B", // encre navy (titres / texte fort)
+          soft: "#2A2F3A",
+          900: "#0a1020", // (hérité, ancien thème sombre)
           950: "#070b16",
-          900: "#0a1020",
           850: "#0d1426",
           800: "#111a30",
+        },
+        graphite: "#4A4F5A", // corps de texte éditorial
+        signal: {
+          DEFAULT: "#6D4AFF", // accent unique (violet électrique)
+          deep: "#4A2FE0", // survol / contraste
+          soft: "#EEEAFF", // fond teinté très léger
+          ring: "#C9BCFF",
         },
         // Bleu électrique « blueprint »
         brand: {
@@ -55,9 +68,15 @@ export default {
           "0%, 100%": { opacity: "0.6" },
           "50%": { opacity: "1" },
         },
+        // Révélation orchestrée du briefing (une seule fois, au chargement).
+        riseIn: {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         pulseGlow: "pulseGlow 2.4s ease-in-out infinite",
+        riseIn: "riseIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },
