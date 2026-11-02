@@ -66,6 +66,12 @@ const schema = z.object({
   // Mode invité : durée de vie avant purge automatique des comptes d'essai.
   GUEST_TTL_HOURS: z.coerce.number().int().positive().default(48),
 
+  // Administrateurs désignés : liste d'e-mails (séparés par des virgules) qui
+  // obtiennent le rôle `admin` à l'inscription, et sont promus à la connexion
+  // s'ils ne le sont pas déjà. Permet de se donner un compte admin sans accès
+  // direct à la base. Vide par défaut.
+  ADMIN_EMAILS: z.string().default(""),
+
   // Autonomie des agents :
   //   - "propose" (défaut, sûr) : toute action nécessite une approbation humaine.
   //   - "auto" : les actions à faible impact (auto-approuvées) s'exécutent seules.

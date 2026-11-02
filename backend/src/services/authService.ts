@@ -22,6 +22,18 @@ const refreshTokens = () => AppDataSource.getRepository(RefreshToken);
 
 const BCRYPT_ROUNDS = 12;
 
+/** Ensemble des e-mails administrateurs désignés (ADMIN_EMAILS), normalisés. */
+const ADMIN_EMAILS = new Set(
+  env.ADMIN_EMAILS.split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
+);
+
+/** Un e-mail explicitement désigné comme administrateur via la configuration. */
+function isConfiguredAdmin(email: string): boolean {
+  return ADMIN_EMAILS.has(email.trim().toLowerCase());
+}
+
 function toPublic(u: User): UserPublic {
   return {
     id: u.id,
@@ -69,9 +81,11 @@ export async function register(
   // Le premier utilisateur RÉEL (hors invités) devient admin (et auto-vérifié).
   // Les suivants sont `manager` : dans Aperio chacun gère ses propres projets,
   // un simple `viewer` ne pourrait ni créer ni synchroniser un projet.
+  // Admin si : premier compte réel, OU e-mail explicitement désigné (ADMIN_EMAILS).
   const count = await users().count({ where: { isGuest: false } });
-  const role: Role = count === 0 ? "admin" : "manager";
-  const emailVerified = count === 0;
+  const forcedAdmin = isConfiguredAdmin(normalized);
+  const role: Role = count === 0 || forcedAdmin ? "admin" : "manager";
+  const emailVerified = count === 0 || forcedAdmin;
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const user = await users().save(
     users().create({ email: normalized, name, passwordHash, role, emailVerified }),
@@ -158,6 +172,13 @@ export async function login(
   }
   if (env.REQUIRE_EMAIL_VERIFICATION && !user.emailVerified) {
     throw new AppError(403, "email_not_verified", "Veuillez confirmer votre e-mail");
+  }
+  // Promotion d'un compte existant désigné admin (ADMIN_EMAILS) : prend effet
+  // à la connexion, sans toucher à la base manuellement.
+  if (user.role !== "admin" && isConfiguredAdmin(user.email)) {
+    user.role = "admin";
+    await users().save(user);
+    logger.info({ email: user.email }, "Compte promu administrateur (ADMIN_EMAILS)");
   }
   return { user: toPublic(user), tokens: await tokensFor(user) };
 }
