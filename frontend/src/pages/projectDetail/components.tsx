@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type {
   Anomaly,
   AgentKind,
@@ -6,8 +6,10 @@ import type {
   Forecast,
   ForecastRisk,
   Report,
+  ReportRag,
   TrendMetric,
 } from "@projectmaster/shared";
+import { REPORT_RAG_META } from "@projectmaster/shared";
 
 // ─── Styles par statut (centralisés ici) ────────────────────────────────────
 const severityChip: Record<Anomaly["severity"], string> = {
@@ -256,30 +258,62 @@ export function DecisionCard({ d, h }: { d: Decision; h: DecisionHandlers }) {
 }
 
 // ─── Rapports ────────────────────────────────────────────────────────────────
+const ragChip: Record<ReportRag, string> = {
+  vert: "border-emerald-500/40 bg-emerald-500/10 text-success",
+  orange: "border-amber-500/40 bg-amber-500/10 text-warning",
+  rouge: "border-red-500/40 bg-red-500/10 text-danger",
+};
+
+function ReportCard({ r }: { r: Report }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(r.summary);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* presse-papiers indisponible : on ignore */
+    }
+  };
+  const meta = REPORT_RAG_META[r.rag];
+  return (
+    <li className="pm-card p-5">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <span className={`pm-chip ${ragChip[r.rag]}`}>
+          {meta.icon} Statut {meta.label}
+        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`pm-chip ${
+              r.generatedBy === "llm"
+                ? "border-accent/30 bg-accent/10 text-link"
+                : "border-line bg-slate-500/10 text-muted"
+            }`}
+          >
+            {r.generatedBy === "llm" ? "rédigé par IA" : "modèle"}
+          </span>
+          <button onClick={copy} className="pm-btn-ghost py-1 text-xs">
+            {copied ? "Copié ✓" : "Copier"}
+          </button>
+        </div>
+      </div>
+      {r.headline && <p className="mb-3 text-sm font-medium text-heading">{r.headline}</p>}
+      <div className="mb-3 font-mono text-xs text-muted">
+        {r.period} · {r.periodStart.slice(0, 10)} → {r.periodEnd.slice(0, 10)}
+      </div>
+      <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-fg">
+        {r.summary}
+      </pre>
+    </li>
+  );
+}
+
 export function ReportList({ reports }: { reports: Report[] }) {
   if (reports.length === 0) return <Empty>Aucun rapport — générez-en un ci-dessus.</Empty>;
   return (
     <ul className="space-y-3">
       {reports.map((r) => (
-        <li key={r.id} className="pm-card p-5">
-          <div className="mb-3 flex items-center justify-between font-mono text-xs text-muted">
-            <span>
-              {r.period} · {r.periodStart.slice(0, 10)} → {r.periodEnd.slice(0, 10)}
-            </span>
-            <span
-              className={`pm-chip ${
-                r.generatedBy === "llm"
-                  ? "border-accent/30 bg-accent/10 text-link"
-                  : "border-line bg-slate-500/10 text-muted"
-              }`}
-            >
-              {r.generatedBy === "llm" ? "généré par IA" : "heuristique"}
-            </span>
-          </div>
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-fg">
-            {r.summary}
-          </pre>
-        </li>
+        <ReportCard key={r.id} r={r} />
       ))}
     </ul>
   );
